@@ -94,3 +94,4 @@ $(function (){
   });
 });
 </script>
+{% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}

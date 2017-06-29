@@ -46,3 +46,4 @@ $(function () {
   {% include "widgets/refreshbutton.js" %}
 });
 </script>
+{% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}

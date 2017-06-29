@@ -13,4 +13,4 @@ $(function(){
   refresh();
 });
 </script>
-{% include "pages/refresh.js" %}
+{% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
