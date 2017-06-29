@@ -1,0 +1,62 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined Storage</h3>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="storagelist" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "storage/defined.legend.html" %}
+        </thead>
+        <tbody>
+        {% for st in StorageDefined %}
+          <tr>
+            <td class="vertical-align"><a href="{% url 'storageinfo' st.Name %}">{{ st.Name }}</a></td>
+            <td class="vertical-align">{{ st.Address }}</td>
+            <td class="vertical-align">{{ st.Descr }}</td>
+            <td class="vertical-align text-center storage-media-type"><span class="badge {{ st.MediaType|mediacolor }}">
+              <i class="fa {{ st.MediaType|mediaicon }}"></i></span>{{ st.MediaType }}</td>
+            <td class="vertical-align">{{ st.StorageDirDevice }}</td>
+            <td class="vertical-align text-center"><span class="label {{ st.Status|statusbgcolor }}">{{ st.Status|statustext }}</span></td>
+            <td class="vertical-align text-center">
+              <div class="btn-group">
+                <button class="btn btn-sm btn-default" type="button" onclick="location.href='{% url 'storageinfo' st.Name %}';">
+                  <i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>
+                <button class="btn btn-sm btn-default" type="button" onclick="location.href='{% url 'storageedit' st.Name %}';">
+                  <i class="fa fa-wrench" data-toggle="tooltip" data-original-title="Edit"></i></button>
+                {% if st.InternalStorage != 'Yes' %}
+                <button class="btn btn-sm btn-default disabled" type="button" data-toggle="modal" data-target="#deleteconfirm" data-name="{{ st.Name }}">
+                  <i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        {% include "storage/defined.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-sm-12 center-block">
+        <a class="btn btn-app" href="{% url 'storageadddisk' %}"><i class="fa fa-plus"></i>New Storage</a>
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "storage/defined.js" %}
+{% endblock %}

@@ -1,0 +1,19 @@
+<!-- VM menu -->
+          <li class="treeview {% if apppath.0 == 'Virtual' %}active{% endif %}">
+            <a href="#"><i class="fa fa-building"></i> <span>Virtual machines</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+            <ul class="treeview-menu">
+              {% if vmguestsnr %}
+                <li{% if apppath.1 == 'Add' %} class="active"{% endif %}>
+                <a href="/vms/add"><i class="fa fa-plus"></i> <span>New VM Guest</span></a></li>
+                <li{% if apppath.1 == '' %} class="active"{% endif %}>
+                  <a href="/vms"><i class="fa fa-th-list"></i> <span>List</span><span class="pull-right-container">
+                    <small class="label pull-right bg-teal">{{ vmguestsnr }}</small></span>
+                  </a></li>
+                {% if clientstatusdisplay %}
+                  {% include "clients/client.html" %}
+                {% endif %}
+              {% endif %}
+              <li{% if apppath.1 == 'AddVM' %} class="active"{% endif %}>
+              <a href="/clients/add"><i class="fa fa-plus"></i> <span>New VM Host</span></a></li>
+            </ul>
+          </li>

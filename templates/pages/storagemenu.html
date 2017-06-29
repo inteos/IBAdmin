@@ -1,0 +1,41 @@
+{% load ibadtexts %}
+<!-- Storage menu -->
+<li class="treeview {% if apppath.0 == 'Storage' %}active{% endif %}">
+  <a href="#"><i class="fa fa-database"></i> <span>Storage</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    <li {% if apppath.1 == 'Add' %} class="active"{% endif %}>
+      <a href="#"><i class="fa fa-plus"></i>New Storage<span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i></span></a>
+      <ul class="treeview-menu">
+        <li{% if apppath.2 == 'Disk storage' %} class="active"{% endif %}>
+          <a href="{% url 'storageadddisk' %}"><i class="fa fa-database"></i><span>Disk Storage</span></a></li>
+        {% if storagedetectdedup %}
+        <li{% if apppath.2 == 'Dedup storage' %} class="active"{% endif %}>
+          <a href="{% url 'storageadddedup' %}"><i class="fa fa-cubes"></i><span>Deduplication</span></a></li>
+        {% endif %}
+<!--        <li{% if apppath.2 == 'xxx2' %} class="active"{% endif %}>
+          <a href="{% url 'clientsaddservice' %}"><i class="fa fa-simplybuilt"></i><span>Tape Library</span></a></li>-->
+      </ul>
+    </li>
+    {% if storagenr %}
+    <li{% if apppath.1 == 'Defined' %} class="active"{% endif %}>
+      <a href="{% url 'storagedefined' %}"><i class="fa fa-th-list"></i><span>List</span><span class="pull-right-container">
+        <small class="label pull-right bg-teal">{{ storagenr }}</small></span></a></li>
+    {% endif %}
+    {% if storagestatusdisplay %}
+      {% include "pages/storageinfomenu.html" %}
+    {% endif %}
+    {% if storagevolumesnr %}
+    <li {% if apppath.1 == 'Volumes' %} class="active"{% endif %}>
+      <a href="{% url 'storagevolumes' %}"><i class="fa fa-database"></i><span>Volumes</span><span class="pull-right-container">
+        <small class="label pull-right bg-primary">{{ storagevolumesnr }}</small></span></a></li>
+      {% if apppath.1 == 'Volume' and apppath.2 == 'Info' %}
+      <li class="active">
+        <a href="{% url 'storagevolumeinfo' Volume.volumename %}"><i class="fa fa-info-circle"></i><span>{{ Volume.volumename }}</span>
+          <!--<span class="pull-right-container"><small class="label pull-right bg-green"><i class="fa {{ Volume.mediatype|mediaicon }}"></i></small></span>-->
+        </a>
+      </li>
+      {% endif %}
+    {% endif %}
+  </ul>
+</li>

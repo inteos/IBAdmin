@@ -1,0 +1,93 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/osstatus.html" with osstatusvis=0 %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-laptop"></i>
+    <h4 class="box-title">Client Status</h4>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Client Name</th>
+          <th>Agent name</th>
+          <th>Agent version</th>
+          <th>Started</th>
+          <th class="text-center">Run Jobs</th>
+          <th class="text-center">Jobs running</th>
+          <th>Plugins</th>
+          <th class="text-center">Status</th>
+        </tr>
+        </thead>
+        <tbody id="statusheader">
+          <tr>
+            <td>{{ Client.Name }}</td>
+          {% for td in '123456' %}
+            <td>&nbsp;</td>
+          {% endfor %}
+            <td class="text-center" style="width: 100px"><span class="label {{ Client.Status|statusbgcolor }}">{{ Client.Status|statustext }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-sm-10 center-block">
+        <a class="btn btn-app" href="{% url 'clientsinfo' Client.Name %}"><i class="fa fa-info-circle"></i>Info</a>
+        <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
+        <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
+        {% if not Client.InternalClient %}
+        <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-edit"></i>Edit</a>
+        <a class="btn btn-app" data-toggle="modal" data-target="#deleteclientconfirm" data-name="{{ Client.Name }}" data-url="{% url 'clientsdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
+        {% endif %}
+        <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+      </div>
+    </div>
+    <div class="box-group" id="statusrunningbox">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-info">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-server"></i>
+            <a data-toggle="collapse" data-parent="#statusrunningbox" href="#One">
+              Client Running Jobs
+            </a>
+          </h2>
+        </div>
+        <div id="One" class="panel-collapse collapse in">
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="statusrunning" class="table table-bordered table-striped table-hover">
+                <thead>
+                {% include "clients/status.legend.html" %}
+                </thead>
+                <tfoot>
+                {% include "clients/status.legend.html" %}
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- panel -->
+    </div>
+  </div><!-- /.box-body -->
+  <div id="clientstatusloading" class="overlay">
+    <i class="fa fa-refresh fa-spin"></i>
+  </div>
+</div><!-- /.box -->
+{% include "widgets/deleteclientconfirm.html" %}
+{% include "widgets/cancelconfirm.html" %}
+{% include "widgets/stopconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "clients/status.js" %}
+{% endblock %}

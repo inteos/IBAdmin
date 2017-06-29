@@ -1,0 +1,21 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% for task in tasksinfo %}
+  <li><!-- Task item -->
+    <a href="{% url 'tasksstatus' task.taskid %}">
+      <!-- Task title and progress text -->
+      <h3>
+        {% if task.status == 'E' %}Failed:{% endif %}
+        {{ task.name }}
+        <small class="pull-right">{{ task.progress }}%</small>
+      </h3>
+      <!-- The progress bar -->
+      <div class="progress xs">
+        <!-- Change the css width attribute to simulate progress -->
+        <div class="progress-bar {{ task.status|tasksprogresscolor }}" style="width: {{ task.progress }}%" role="progressbar" aria-valuenow="{{ task.progress }}" aria-valuemin="0" aria-valuemax="100">
+          <span class="sr-only">{{ task.progress }}% Complete</span>
+        </div>
+      </div>
+    </a>
+  </li><!-- end task item -->
+{% endfor %}

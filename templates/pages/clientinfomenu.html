@@ -1,0 +1,11 @@
+<li class="active">
+  <a href="#"><i class="fa fa-laptop"></i> <span>{{ Client.Name }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    <li{% if apppath.1 == 'Info' %} class="active"{% endif %}>
+      <a href="{% url 'clientsinfo' Client.Name %}"><i class="fa fa-info-circle"></i> <span>Info</span></a></li>
+    <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
+      <a href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-wrench"></i> <span>Edit</span></a></li>
+    <li{% if apppath.1 == 'Status' %} class="active"{% endif %}>
+      <a href="{% url 'clientsstatus' Client.Name %}"><i class="fa fa-external-link"></i> <span>Status</span></a></li>
+  </ul>
+</li>

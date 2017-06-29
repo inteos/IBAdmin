@@ -1,0 +1,66 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-info">
+  <div class="box-header">
+    <i class="fa fa-flag"></i>
+    <h4 class="box-title">Background Task Status</h4>
+    {% if Task.status in 'RN' %}
+    {% include "widgets/refreshbutton.html" with box=0 %}
+    {% endif %}
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="row">
+      <div class="col-lg-6">
+        <dl class="dl-horizontal">
+          <dt>TaskId</dt>
+            <dd>{{ Task.taskid }}</dd>
+          <dt>Task Name</dt>
+            <dd>{{ Task.name }}</dd>
+          <dt>Task starts on</dt>
+            <dd>{{ Task.starttime|date:'Y-m-d H:i:s' }}</dd>
+          <dt>Task finished on</dt>
+            <dd id="taskendtime">{{ EndTime }}</dd>
+          <dt>Task procedure</dt>
+            <dd>{{ Procedure }}</dd>
+          {% if Task.status == 'R' or Task.status == 'N' %}
+          <div id="taskdivprogress">
+            <dt>Task Progress</dt>
+              <dd>
+                <div class="progress">
+                  <div id="taskprogress" class="progress-bar progress-bar-primary" style="width: {{ Task.progress }}%" role="progressbar" aria-valuenow="{{ Task.progress }}" aria-valuemin="0" aria-valuemax="100">
+                    <span>{{ Task.progress }}% Complete</span>
+                  </div>
+                </div>
+              </dd>
+            </div>
+          {% endif %}
+          <dt>Task Status</dt>
+            <dd id="taskstatus"><span class="label {{ Task.status|tasksbgcolor }}">{{ Task.status|taskstatustext }}</span></dd>
+        </dl>
+      </div>
+      <div class="col-lg-6">
+        <div class="box box-solid bg-teal">
+          <div class="box-header">
+            <i class="fa fa-bars"></i>
+            <h4 class="box-title">Log</h4>
+          </div><!-- /.box-header -->
+          <div id="tasklog" class="box-body">
+            {% autoescape off %}{{ Log }}{% endautoescape %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /.box-body -->
+  <div id="taskdeletebutton" class="box-footer"{% if Task.status == 'N' or Task.status == 'R' %} style="display: none"{% endif %}>
+      <a class="btn btn-app" onclick='location.href="{% url 'tasksdelete' Task.taskid %}";'><i class="fa fa-trash"></i>Delete</a>
+  </div>
+</div><!-- /.box -->
+
+{% endblock %}
+
+{% block pagejs %}
+  {% include "tasks/status.js" %}
+{% endblock %}

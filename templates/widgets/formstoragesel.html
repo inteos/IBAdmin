@@ -1,0 +1,10 @@
+<div id="storage-group" class="form-group">
+  <label for="inputStorage" class="col-sm-2 control-label">Backup Storage</label>
+  <div class="col-sm-10">
+    <select class="form-control select2" style="width: 100%;" name="storage" required>
+      {% for st in storagedefined %}
+      <option value="{{ st.Name }}"{% if Name == st.Name %} selected="selected"{% endif %}>{{ st.Name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div><!-- /.form-group -->

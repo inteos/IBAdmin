@@ -1,0 +1,10 @@
+<div id="client-group" class="form-group">
+  <label for="inputClient" class="col-sm-2 control-label">Backup Client</label>
+  <div class="col-sm-10">
+    <select class="form-control select2" style="width: 100%;" name="client" required>
+      {% for cl in clientsdefined %}
+      <option value="{{ cl.Name }}"{% if Name == cl.Name %} selected="selected"{% endif %}>[% cl.Name %]</option><!--  selected="selected" -->
+      {% endfor %}
+    </select>
+  </div>
+</div><!-- /.form-group -->

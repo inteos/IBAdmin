@@ -1,0 +1,134 @@
+{% extends "pages/base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-3 col-md-6">
+    {% include 'widgets/dirstatus.html' %}
+  </div>
+  <div class="col-lg-3 col-md-6">
+    {% include 'widgets/sdstatus.html' %}
+  </div>
+  <div class="col-lg-3 col-md-6">
+    {% include 'widgets/fdstatus.html' %}
+  </div>
+  <div class="col-lg-3 col-md-6">
+    {% include 'widgets/statdstatus.html' %}
+  </div>
+</div>
+<div class="row">
+ <div class="col-xs-12">
+  <div id="restartinfo" class="alert alert-success alert-dismissible" style="display: none;">
+    <button type="button" class="close" data-hide="alert" aria-hidden="true">&times;</button>
+    <h4><i class="icon fa fa-check"></i>Restart completed!</h4>
+  </div>
+ </div>
+</div>
+<div class="row">
+  <div class="col-lg-7 col-md-8 col-sm-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-sellsy"></i>
+        <h3 class="box-title">Inteos Backup Daemons</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+        </div>
+      </div><!-- /.box-header -->
+      <div class="box-body no-padding">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>Daemon</th>
+            <th class="text-center" style="max-width: 300px;">Manage</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td class="vertical-align"><a id="masterbuttonlog" class="btn btn-lg btn-success" data-url="{% url 'daemonmasterlog' %}"> Master Daemon </a></td>
+            <td class="text-right">
+              <a id="masterbuttonstart" class="btn btn-app{% if DIRStatus %} disabled{% endif %}" data-url="{% url 'daemonmasterstart' %}"><i class="fa fa-play"></i>Start</a>
+              <a id="masterbuttonstop" class="btn btn-app{% if not DIRStatus %} disabled{% endif %}" data-oper="stop" data-url="{% url 'daemonmasterstop' %}" data-daemon="Master"><i class="fa fa-stop"></i>Stop</a>
+              <a id="masterbuttonrestart" class="btn btn-app{% if not DIRStatus %} disabled{% endif %}" data-oper="restart" data-url="{% url 'daemonmasterrestart' %}" data-daemon="Master"><i class="fa fa-refresh"></i>Restart</a>
+            </td>
+          </tr>
+          <tr></tr>
+          <tr>
+            <td class="vertical-align"><a id="sdbuttonlog" class="btn btn-lg bg-purple" data-url="{% url 'daemonsdlog' %}"> Storage Daemon </a></td>
+            <td class="text-right">
+              <a id="sdbuttonstart" class="btn btn-app{% if SDStatus %} disabled{% endif %}" data-url="{% url 'daemonstoragestart' %}"><i class="fa fa-play"></i>Start</a>
+              <a id="sdbuttonstop" class="btn btn-app{% if not SDStatus %} disabled{% endif %}" data-oper="stop" data-url="{% url 'daemonstoragestop' %}" data-daemon="Storage"><i class="fa fa-stop"></i>Stop</a>
+              <a id="sdbuttonrestart" class="btn btn-app{% if not SDStatus %} disabled{% endif %}" data-oper="restart" data-url="{% url 'daemonstoragerestart' %}" data-daemon="Storage"><i class="fa fa-refresh"></i>Restart</a>
+            </td>
+          </tr>
+          <tr>
+            <td class="vertical-align"><a id="fdbuttonlog" class="btn btn-lg bg-maroon" data-url="{% url 'daemonfdlog' %}"> File Daemon </a></td>
+            <td class="text-right">
+              <a id="fdbuttonstart" class="btn btn-app{% if FDStatus %} disabled{% endif %}" data-url="{% url 'daemonfdstart' %}"><i class="fa fa-play"></i>Start</a>
+              <a id="fdbuttonstop" class="btn btn-app{% if not FDStatus %} disabled{% endif %}" data-url="{% url 'daemonfdstop' %}"><i class="fa fa-stop"></i>Stop</a>
+              <a id="fdbuttonrestart" class="btn btn-app{% if not FDStatus %} disabled{% endif %}" data-oper="restart" data-url="{% url 'daemonfdrestart' %}"><i class="fa fa-refresh"></i>Restart</a>
+            </td>
+          </tr>
+          <tr>
+            <td class="vertical-align"><a id="ibadbuttonlog" class="btn btn-lg btn-info" data-url="{% url 'daemonibadlog' %}"> Collector Daemon </a></td>
+            <td class="text-right">
+              <a id="ibadbuttonstart" class="btn btn-app{% if IBADStatus %} disabled{% endif %}" data-url="{% url 'daemonibadstart' %}"><i class="fa fa-play"></i>Start</a>
+              <a id="ibadbuttonstop" class="btn btn-app{% if not IBADStatus %} disabled{% endif %}" data-url="{% url 'daemonibadstop' %}"><i class="fa fa-stop"></i>Stop</a>
+              <a id="ibadbuttonrestart" class="btn btn-app{% if not IBADStatus %} disabled{% endif %}" data-oper="restart" data-url="{% url 'daemonibadrestart' %}"><i class="fa fa-refresh"></i>Restart</a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box-footer">
+        <div class="row">
+          <div class="col-lg-4 col-sm-6">
+            <a class="btn btn-app" href="{% url 'systemconfig' %}"><i class="fa fa-cogs"></i>System config</a>
+            <a class="btn btn-app" href="{% url 'systemmessages' %}"><i class="fa fa-envelope"></i>Messages</a>
+          </div>
+          <div class="col-lg-8 col-sm-6">
+            <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+            <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+            <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.box -->
+  </div>
+  <div class="col-lg-5 col-md-4 col-sm-12">
+    <div class="box box-info">
+      <div class="box-header">
+        <i class="fa fa-bars"></i>
+        <h3 class="box-title">Daemon logs</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+        </div>
+      </div><!-- /.box-header -->
+      <div class="box-body">
+        <small id="daemonlogsinfo">Select daemon button to view logs.</small>
+        <div class="daemonlogs" id="daemonlogs"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /.row -->
+<div id="demonconfirm" class="modal modal-info fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Stopping Daemon</h4>
+      </div>
+      <div class="modal-body">
+        <p>You request to <u id="daemonoperation"></u> the <b id="daemonname"></b> while a system runs Jobs. Stopping the most important daemon in the system will
+          disrupt all currently running jobs making it cancelled. In most cases this is not what you, as a clever administrator, want to do.</p>
+        <p>You can confirm that this is exactly what you want to do with the daemon now or you can wait until all running jobs finishes.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" data-dismiss="modal" class="btn btn-success pull-left">No! I want to wait.</button>
+        <button id="confirmbutton" type="button" class="btn btn-danger">Yes, use the force to Stop this beast!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "system/daemons.js" %}
+{% endblock %}

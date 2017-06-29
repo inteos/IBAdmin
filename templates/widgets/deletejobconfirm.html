@@ -1,0 +1,48 @@
+<div id="deletejobconfirm" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Delete backup "<i></i>"</h4>
+      </div>
+      <div class="modal-body">Are you absolutely sure that you want to delete a backup "<u></u>" including all its backup jobs? <b>Operation cannot be undone!</b></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">No! Back!</button>
+        <button id="deletejobconfirmbutton" type="button" class="btn btn-danger confirm" data-loading-text="Deleting...">Yes, I'm sure. Delete!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div id="deletejobconfirmrunning" class="modal modal-info fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Job still running</h4>
+      </div>
+      <div class="modal-body">The Job you want to delete is still running, so I cannot delete the Job at this time. You need to wait until job finishes or cancel the job manually.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-dismiss="modal">OK. No problem.</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div id="deletejobconfirmprogress" class="modal fade" data-backdrop="static" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Please Wait ...</h4>
+      </div>
+      <div class="modal-body">
+        <p>Deleting Configuration and History. You can wait here until a task will finish or verify a task opertions at Tasks menu.</p>
+        <div class="progress active">
+          <div id="taskprogress" class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" data-dismiss="modal">OK. Thanks.</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

@@ -1,0 +1,21 @@
+{% extends "pages/base.html" %}
+
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+  <section class="col-lg-7 col-md-6 col-sm-12">
+  {% include "pages/cpuutilwidget.html" with id='cpuutilwidget' title='System Utilization' height='189px' %}
+  {% include "pages/backupsizewidget.html" with id='backupsizewidget' title='Total Backup Size' height='189px' %}
+  {% include "pages/servicestatus.html" with id='servicestatus' title='Service status' %}
+  </section><!-- /.col -->
+
+  <section class="col-lg-5 col-md-6 col-sm-12">
+  {% include "pages/lastjobs.html" with id='lastjobswidget' title='Latest Jobs' %}
+
+  </section><!-- /.col -->
+</div><!-- /.row -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "pages/index.js" %}
+{% endblock %}

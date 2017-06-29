@@ -1,0 +1,31 @@
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      {% if Job.Type == 'R' and RestoreFiles %}
+      <div class="panel box box-info">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-folder-open"></i>
+            <a data-toggle="collapse" data-parent="#jobinfo" href="#OneR">Restore Files</a>
+          </h2>
+        </div>
+        <div id="OneR" class="panel-collapse collapse">
+          <div class="box-body no-padding">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                <tr>
+                  <th class="text-center">Perm</th>
+                  <th class="text-center">Owner</th>
+                  <th class="text-center">Group</th>
+                  <th>Size</th>
+                  <th class="text-center">Date/Time</th>
+                  <th>File</th>
+                </tr>
+                </thead>
+                <tbody id="{{ id|default:'joblogwidgetrestore' }}">
+                {% include 'widgets/jobfilesrestorewidget.html' %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}

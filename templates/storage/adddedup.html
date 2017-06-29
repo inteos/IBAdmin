@@ -1,0 +1,50 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-plus"></i>
+        <h3 class="box-title">Add New Deduplication Storage</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+        </div>
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="addform" method="post" action="{% url 'storageadddedup' %}">
+        {% csrf_token %}
+        <div class="box-body">
+          {{ form.name }}
+          {{ form.descr }}
+          {{ form.address }}
+          <div id="clusterlist-group" class="form-group">
+            <label for="{{ form.storagelist.id_for_label }}" class="col-sm-2 control-label">{{ form.storagelist.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.storagelist }}
+                <span class="input-group-addon"><i id="{{ form.storagelist.id_for_label }}icon" class="fa fa-database"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          {{ form.dedupidxdir }}
+          {{ form.dedupdir }}
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="add"><i class="glyphicon glyphicon-plus"></i>Add</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+{% block pagejs %}
+  {% include "storage/adddedup.js" %}
+{% endblock %}

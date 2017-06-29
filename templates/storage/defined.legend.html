@@ -1,0 +1,13 @@
+          <tr>
+            <th>Storage name</th>
+            <th>Storage address</th>
+            <th>Description</th>
+            <th class="text-center">Media Type</th>
+            {% if Storage.MediaType == 'Tape' %}
+            <th>Device</th>
+            {% else %}
+            <th>Directory</th>
+            {% endif %}
+            <th class="text-center">Status</th>
+            <th class="text-center">Manage</th>
+          </tr>

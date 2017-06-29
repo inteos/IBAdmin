@@ -1,0 +1,8 @@
+      <div class="info-box">
+        <span class="info-box-icon bg-purple"><i class="fa fa-database"></i></span>
+        <div class="info-box-content">
+          <span class="info-box-number">Storage Daemon</span>
+          <span id="SDStatussuccess" class="info-box-text label label-success" {% if not SDStatus %}style="display: none;"{% endif %}>Running</span>
+          <span id="SDStatusfailed" class="info-box-text label label-danger" {% if SDStatus %}style="display: none;"{% endif %}><a href="#" class="text-white">Offline</a></span>
+        </div><!-- /.info-box-content -->
+      </div><!-- /.info-box -->

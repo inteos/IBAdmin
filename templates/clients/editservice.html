@@ -1,0 +1,48 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/osstatus.html" with osstatusvis=1 %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-primary">
+      <div class="box-header">
+        <i class="fa fa-edit"></i>
+        <h4 class="box-title">Edit Cluster Service Backup Client</h4>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+        </div>
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="editform" method="post" action="{% url 'clientseditservice' form.name.value %}">
+        {% csrf_token %}
+        <div class="box-body">
+          {{ form.name }}
+          {{ form.descr }}
+          <div id="cluster-group" class="form-group">
+            <label for="{{ form.cluster.id_for_label }}" class="col-sm-2 control-label">{{ form.cluster.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.cluster }}
+                <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          {{ form.address }}
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="save"><i class="glyphicon glyphicon-floppy-disk"></i>Save</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+{% block pagejs %}
+  {% include "clients/editservice.js" %}
+{% endblock %}

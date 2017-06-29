@@ -1,0 +1,67 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+        <div id="Three" class="panel-collapse collapse in">
+          <div class="box-body">
+{% if Jobids != 'unavl' %}
+            <div class="col-xs-12">
+              <div class="well well-sm">
+                <div class="treecontainer">
+                  <div id="jstreediv"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xs-12">
+              <div id="jobidslist">
+                <dl class="dl-horizontal">
+                  <dt>JobIds involved:</dt>
+                  <dd>
+                    {% for j in Jobidsparams %}
+                    <span class="label {{ j.level|joblevelbgcolor:'B' }}">{{ j.jobid }}</span>
+                    {% endfor %}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+            <div class="col-xs-12">
+              <form class="form-horizontal" id="restoreform" method="post" action="{% url 'clientsaddnode' %}" style="margin-top: 12px;">
+                {% csrf_token %}
+                {{ form.rselected }}
+                {{ form.client }}
+                {{ form.where }}
+                <div id="restoreclient-group" class="form-group">
+                  <label for="{{ form.restoreclient.id_for_label }}" class="col-sm-2 control-label">{{ form.restoreclient.label }}</label>
+                  <div class="col-sm-10">
+                    <div class="input-group">
+                    {{ form.restoreclient }}
+                      <span class="input-group-addon"><i class="fa fa-laptop"></i></span>
+                    </div>
+                  </div>
+                </div><!-- /.form-group -->
+                <div id="replace-group" class="form-group">
+                  <label for="{{ form.replace.id_for_label }}" class="col-sm-2 control-label">{{ form.replace.label }}</label>
+                  <div class="col-sm-10">
+                    <div class="input-group">
+                    {{ form.replace }}
+                      <span class="input-group-addon"><i class="fa fa-edit"></i></span>
+                    </div>
+                  </div>
+                </div><!-- /.form-group -->
+                {{ form.comment }}
+              </form>
+              <div class="row">
+                <div class="col-sm-offset-2 col-sm-10">
+                  <a id="restorebutton" class="btn bti-info btn-app disabled"><i class="fa fa-cloud-upload"></i>Restore</a>
+                </div>
+              </div>
+            </div>
+{% else %}
+            <div class="col-xs-12">
+              <div class="well well-sm">
+                <p><i class="fa fa-calendar-times-o"></i> No data available.</p>
+                It means that the Job: {{ Job.Name }} does not backup any data up to this JobId: {{ Job.JobId }}.
+                Select different Job or JobId, please.
+              </div>
+            </div>
+{% endif %}
+          </div>
+        </div>

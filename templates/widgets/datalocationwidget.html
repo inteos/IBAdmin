@@ -1,0 +1,22 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+            {% for v in Volumelist %}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+              <div class="info-box {{ v.Status|volstatusbgcolor }}">
+                <span class="info-box-icon">
+                  <a href="{% url 'storagevolumeinfo' v.Name %}" class="text-white"><i class="fa {{ v.MediaType|mediaicon }}"></i></a></span>
+                <div class="info-box-content">
+                  <span class="info-box-text">{{ v.Name }}</span>
+                  <span class="info-box-text info-box-number">{{ v.Bytes|bytestext }}</span><!-- info-box-number -->
+                  <div class="progress">
+                    <div class="progress-bar" style="width: [% v.Percent %]%"></div>
+                  </div>
+                  <span class="progress-description">
+                    <b>Status:</b> {{ v.Status }}
+                  </span>
+                </div><!-- /.info-box-content -->
+              </div><!-- /.info-box -->
+            </div><!-- /.col -->
+            {% empty %}
+            <p>No volumes available.</p>
+            {% endfor %}

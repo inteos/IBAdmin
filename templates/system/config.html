@@ -1,0 +1,93 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+ <div class="col-xs-12">
+  <div id="saveinfo" class="alert alert-success alert-dismissible" style="display: none;">
+    <button type="button" class="close" data-hide="alert" aria-hidden="true">&times;</button>
+    <h4><i class="icon fa fa-check"></i>System configuration saved!</h4>
+    <p id="restartsrvinfo">You have to <a href="{% url 'daemonindex' %}">restart the services</a> for IP changes to take effect. You can't run next successful job without it.</p>
+  </div>
+ </div>
+</div>
+<div class="box box-warning">
+  <div class="box-header">
+    <i class="fa fa-gears"></i>
+    <h3 class="box-title">System config</h3>
+    <div class="box-tools pull-right">
+      <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="col-lg-8">
+      <!-- form start -->
+      <form class="form-horizontal" id="editform" method="post" action="{% url 'clientseditalias' form.name.value %}">
+        {% csrf_token %}
+        {{ form.name }}
+        {{ form.descr }}
+        {{ form.email }}
+        {{ form.license }}
+        <div id="{{ form.defstorage.id_for_label }}-group" class="form-group">
+          <label for="{{ form.defstorage.id_for_label }}" class="col-sm-2 control-label">{{ form.defstorage.label }}</label>
+          <div class="col-sm-10">
+            <div class="input-group">
+            {{ form.defstorage }}
+              <span class="input-group-addon"><i class="fa fa-database"></i></span>
+            </div>
+          </div>
+        </div><!-- /.form-group -->
+        <div id="{{ form.storageip.id_for_label }}-group" class="form-group">
+          <label for="{{ form.storageip.id_for_label }}" class="col-sm-2 control-label">{{ form.storageip.label }}</label>
+          <div class="col-sm-10">
+            <div class="input-group">
+            {{ form.storageip }}
+              <span class="input-group-addon"><i class="fa fa-database"></i></span>
+            </div>
+          </div>
+        </div><!-- /.form-group -->
+        <div id="{{ form.clientip.id_for_label }}-group" class="form-group">
+          <label for="{{ form.clientip.id_for_label }}" class="col-sm-2 control-label">{{ form.clientip.label }}</label>
+          <div class="col-sm-10">
+            <div class="input-group">
+            {{ form.clientip }}
+              <span class="input-group-addon"><i class="fa fa-desktop"></i></span>
+            </div>
+          </div>
+        </div><!-- /.form-group -->
+      </form>
+    </div>
+    <div class="col-lg-4">
+      <p class="h4"><i class="glyphicon glyphicon-info-sign"></i> System Information</p>
+      <dl class="dl-horizontal">
+        <dt>IBAdmin version</dt><dd>{{ ibadminver }}</dd>
+        <dt>Backup software version</dt><dd>{{ backupver }}</dd>
+        <dt>System version</dt><dd>{{ osver }}</dd>
+        <dt>Machine platform</dt><dd>{{ platform }}</dd>
+        <dt>Software update</dt><dd><span class="label label-success">Up-to-date.</span></dd>
+      </dl>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-lg-2 col-sm-3">
+        <a id="savebutton" class="btn btn-app"><i class="glyphicon glyphicon-floppy-disk"></i>Save</a>
+        <!-- TODO dorobić restore defaults po ogranięciu gdzie zapisać te defaults
+        <a id="defaultsbutton" class="btn btn-app"><i class="fa fa-life-ring"></i>Restore defaults</a> -->
+      </div>
+      <div class="col-lg-3 col-sm-4">
+        <a class="btn btn-app" href="{% url 'daemonindex' %}"><i class="fa fa-sellsy"></i>Daemons</a>
+        <a class="btn btn-app" href="{% url 'systemmessages' %}"><i class="fa fa-envelope"></i>Messages</a>
+      </div>
+      <div class="col-lg-7 col-sm-5">
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "system/config.js" %}
+{% endblock %}

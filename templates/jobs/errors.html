@@ -1,0 +1,32 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-danger">
+  <div class="box-header">
+    <i class="fa fa-minus-circle"></i>
+    <h4 class="box-title">Error Backup Jobs</h4>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="jobserrors" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "jobs/errors.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "jobs/errors.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/deletejobidconfirm.html" %}
+{% include "widgets/restartfailedconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "jobs/errors.js" %}
+{% endblock %}

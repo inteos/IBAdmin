@@ -1,0 +1,74 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+<!-- TODO: Zrobić coś z ustawianiem class dla boxa '#statusheaderbox'
+<div id="statusheaderboxdata" value="box {{ Job.Status|jobstatusboxcolor:Job.Errors }}"></div>-->
+<table class="table">
+  <thead>
+  <tr>
+    <th class="text-center" style="width: 60px">JobId</th>
+    <th>Job Name</th>
+    <th class="text-center" style="width: 60px">Type</th>
+    <th>Start</th>
+    <th>Client</th>
+    {% if Job.Type != 'D' %}
+    <th class="text-center">Level</th>
+    <th>Job Bytes</th>
+    {% if JobClient.FilesExamined %}
+    <th>Speed</th>
+    {% endif %} {% endif %}
+    <th class="text-center">Errors</th>
+    <th class="text-center">Status</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td class="vertical-align text-center">{{ Job.JobId }}</td>
+    <td class="vertical-align"><a href="{% url 'jobsinfo' Job.Name %}">{{ Job.Name }}</a></td>
+    <td class="vertical-align text-center"><span class="badge {{ Job.Type|jobtypebgcolor }}">{{ Job.Type|jobtypetext }}</span></td>
+    <td class="vertical-align">{{ Job.Start|date:'Y-m-d H:i:s' }}</td>
+    <td class="vertical-align"><a href="{% url 'clientsinfo' Job.Client %}">{{ Job.Client }}</a></td>
+    {% if Job.Type != 'D' %}
+    <td class="vertical-align text-center"><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext }}</span></td>
+    <td class="vertical-align">{{ JobClient.JobBytes|bytestext }}</td>
+    {% if JobClient.FilesExamined %}
+    <td class="vertical-align">{{ JobClient.Bytessec|bytestext }}/s</td>
+    {% endif %} {% endif %}
+    <td class="vertical-align text-center">
+      <span class="badge {{ JobClient.Errors|jobstatus_error_bgcolor }}">{{ JobClient.Errors|default:0 }}</span>
+    </td>
+    <td class="text-center vertical-align" style="width: 50px"><span id="statusheaderboxdata" class="label {{ Job.Status|jobstatusbgcolor:Job.Errors }}">{{ Job.Status|jobstatustext:Job.Errors }}</span></td>
+  </tr>
+  </tbody>
+</table>
+{% if Job.Type != 'D' and JobClient.JobBytes %}
+<table class="table">
+  <thead>
+  <tr>
+    <th>Processing</th>
+    <th class="text-center">Progress</th>
+    <th>Files examined</th>
+    <th>Files backup</th>
+    {% if JobClient.ReadBytes %}<th>Read Bytes</th>{% endif %}
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td class="vertical-align" style="width: 45%">{{ JobClient.Processingfile|trimfilename:65 }}</td>
+    <td class="vertical-align text-center" style="width: 25%">
+      <div class="progress active">
+        {% if JobProgress > -1 %}
+        <div class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="{{ JobProgress }}" aria-valuemin="0" aria-valuemax="100"
+              style="width: {{ JobProgress }}%">{{ JobProgress }}%</div>
+        {% else %}
+        <div class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+              style="width: 100%">Unknown</div>
+        {% endif %}
+      </div>
+    </td>
+    <td class="vertical-align">{{ JobClient.FilesExamined }}</td>
+    <td class="vertical-align">{{ JobClient.JobFiles }}</td>
+    {% if JobClient.ReadBytes %}<td class="vertical-align">{{ JobClient.ReadBytes|bytestext }}</td>{% endif %}
+  </tr>
+  </tbody>
+</table>
+{% endif %}

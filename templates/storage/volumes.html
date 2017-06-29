@@ -1,0 +1,31 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-database"></i>
+    <h3 class="box-title">Volumes List</h3>
+    {% include "widgets/refreshbutton.html" %}
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="volumeslist" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "storage/volumes.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "storage/volumes.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include 'widgets/volusedconfirm.html' %}
+{% include "widgets/volopenconfirm.html" %}
+{% include 'widgets/volpurgeconfirm.html' %}
+{% include 'widgets/voldeleteconfirm.html' %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "storage/volumes.js" %}
+{% endblock %}

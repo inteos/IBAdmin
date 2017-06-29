@@ -1,0 +1,25 @@
+<li class="active">
+  <a href="#"><i class="fa fa-cubes"></i> <span>{{ Job.Name }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    <li{% if apppath.2 == 'Info' %} class="active"{% endif %}>
+      <a href="{% url 'jobsinfo' Job.Name %}"><i class="fa fa-info-circle"></i> <span>Info</span></a></li>
+    {% if Job.InternalJob != 'Yes' and Job.InternalJob != 1 %}
+    <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
+      <a href="{% url 'jobsedit' Job.Name %}"><i class="fa fa-edit"></i> <span>Edit</span></a></li>
+    {% endif %}
+    {% if Job.JobId %}
+    {% if apppath.2 == 'Log' %}
+    <li class="active">
+      <a href="{% url 'jobslog' Job.JobId %}"><i class="fa fa-history"></i> <span>JobID: {{ Job.JobId }}</span></a></li>
+    {% endif %}
+    {% if apppath.2 == 'Status' %}
+    <li class="active">
+      <a href="{% url 'jobsstatus' Job.JobId %}"><i class="fa fa-history"></i> <span>JobID: {{ Job.JobId }}</span></a></li>
+    {% endif %}
+    {% endif %}
+    {% if apppath.1 == 'Advanced' %}
+    <li class="active">
+      <a href="{% url 'jobsadvanced' Job.Name %}"><i class="fa fa-cogs"></i> <span>Advanced</span></a></li>
+    {% endif %}
+  </ul>
+</li>

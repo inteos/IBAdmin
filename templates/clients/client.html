@@ -1,0 +1,117 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/osstatus.html" with osstatusvis=0 %}
+<div class="box box-info">
+  <div class="box-header">
+    <i class="fa fa-laptop"></i>
+    <h4 class="box-title">Client Info</h4>
+      {% include "widgets/helpbutton.html" with box=0 %}
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Client Name</th>
+          <th>{% if Client.Alias %}Client Alias{% else %}Client Address{% endif %}</th>
+          <th>Description</th>
+          <th class="text-center">OS</th>
+          <th>Version</th>
+          {% if Client.ClusterName or Client.ClusterService %}<th class="text-center">Cluster Name</th>{% endif %}
+          <th class="text-center">Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>{{ Client.Name }}</td>
+          <td>{% if Client.Alias %}<i class="fa fa-external-link-square"></i> <a href="{% url 'clientsinfo' Client.Alias %}">{{ Client.Alias }}</a>{% else %}{{ Client.Address }}{% endif %}</td>
+          <td>{{ Client.Descr }}</td>
+          <td class="text-center"><span class="badge {{ Client.OS|OSbgcolor }}"><i class="fa {{ Client.OS|OSicon }}"></i> {{ Client.OS|OStext }} </span></td>
+          <td>{% autoescape off %}{{ Client.Uname }}{% endautoescape %}</td>
+          {% if Client.ClusterName %}<td class="text-center"><i class="fa fa-cubes" data-toggle="tooltip" data-original-title="Cluster Node"></i> {{ Client.ClusterName }}</td>
+          {% elif Client.ClusterService %}<td class="text-center"><i class="fa fa-cube" data-toggle="tooltip" data-original-title="Cluster Service"></i> {{ Client.ClusterService }}</td>{% endif %}
+          <td class="text-center" style="width: 100px"><span class="label {{ Client.Status|statusbgcolor }}">{{ Client.Status|statustext }}</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-sm-12 center-block">
+        <a class="btn btn-app" href="{% url 'clientsstatus' Client.Name %}"><i class="fa fa-external-link"></i>Status</a>
+        <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
+        <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
+        <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-wrench"></i>Edit</a>
+        {% if not Client.InternalClient %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#deleteclientconfirm" data-name="{{ Client.Name }}" data-url="{% url 'clientsdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
+        {% endif %}
+        <!-- <a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
+        {% if not Client.Alias and not Client.ClusterService and not Client.InternalClient %}<a href="{% url 'confclientconfig' Client.Name %}" class="btn btn-app"><i class="glyphicon glyphicon-save-file"></i>Config file</a>{% endif %}
+        <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+      </div>
+    </div>
+    <div class="box-group" id="clientinfo">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-server"></i>
+            <a data-toggle="collapse" data-parent="#clientinfo" href="#One"> Client Defined Jobs</a>
+          </h4>
+          {% include "widgets/refreshbutton.html" %}
+        </div>
+        <div id="One" class="panel-collapse collapse in">
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="jobsdefined" class="table table-bordered table-striped table-hover">
+                <thead>
+                {% include "clients/client.legend1.html" %}
+                </thead>
+                <tfoot>
+                {% include "clients/client.legend1.html" %}
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- panel -->
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-history"></i>
+            <a data-toggle="collapse" data-parent="#clientinfo" href="#Two"> Jobs History</a>
+          </h4>
+          {% include "widgets/refreshbutton.html" with id='jobhistoryrefresh' %}
+        </div>
+        <div id="Two" class="panel-collapse collapse"><!-- in -->
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="jobshistory" class="table table-bordered table-striped table-hover">
+                <thead>
+                {% include "clients/client.legend2.html" %}
+                </thead>
+                <tfoot>
+                {% include "clients/client.legend2.html" %}
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- panel -->
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/deleteclientconfirm.html" %}
+{% include "widgets/runconfirm.html" %}
+{% include "widgets/deletejobconfirm.html" %}
+{% include "widgets/cancelconfirm.html" %}
+{% include "widgets/stopconfirm.html" %}
+{% include "widgets/restartfailedconfirm.html" %}
+{% include "widgets/deletejobidconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "clients/client.js" %}
+{% endblock %}

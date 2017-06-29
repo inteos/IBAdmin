@@ -1,0 +1,143 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-cubes"></i>
+    <h4 class="box-title">Job Info</h4>
+    {% include "widgets/helpbutton.html" with box=0 %}
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <table class="table">
+        <tr>
+          <th>Job Name</th>
+          <th class="text-center">Type</th>
+          <th>Client</th>
+          <!-- <th>Application</th> -->
+          {% if Job.Type == 'Backup' %}<th>Retention</th>{% endif %}
+          {% if Job.Storage %}<th>Storage</th>{% endif %}
+          <th>Schedule</th>
+          {% if Job.Type == 'Backup' %}<th>Level</th>{% endif %}
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>{{ Job.Name }}</td>
+          <td class="text-center" style="width: 50px"><span class="badge {{ Job.Type|jobtypebgcolor }}">{{ Job.Type }}</span></td>
+          <td>{% if Job.Client %}<a href="{% url 'clientsinfo' Job.Client %}">{{ Job.Client }}</a>{% else %}<i>Internal</i>{% endif %}</td>
+          {% if Job.Type == 'Backup' %}<td>{{ Job.Pool|retentiontext }}</td>{% endif %}
+          {% if Job.Storage %}<td><a href="{% url 'storageinfo' Job.Storage %}">{{ Job.Storage }}</a></td>{% endif %}
+          <td>{% if Job.Enabled == 'No' %}<span class="label bg-red">Disabled by user</span>
+            {% elif Job.Scheduleparam %}{{ Job.Scheduleparam|scheduletext }} at {{ Job.Scheduletime }}
+            {% else %}<i>Disabled</i>{% endif %}</td>
+          {% if Job.Type == 'Backup' %}<td><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext }}</span></td>{% endif %}
+          <td>{{ Job.Descr }}</td>
+        </tr>
+      </table>
+    </div>
+{% if FSData.Include or FSData.FS %}
+  </div>
+  <div class="box-body">
+    <div class="row">
+      <div class="col-lg-4 col-md-5 col-xs-12">
+        {% if FSData.Include %}
+        <p><span class="label label-success">Include</span></p>
+        <ul class="row">
+        {% for i in FSData.Include %}
+          {% if FSData.Include|length > 5 %}
+        <li class="col-xs-6">{{ i.value }}</li>
+          {% else %}
+        <li class="col-xs-12">{{ i.value }}</li>
+          {% endif %}
+        {% endfor %}
+        </ul>
+        {% endif %}
+        {% if FSData.FS %}
+        <p><span class="label label-success">Data to backup</span></p>
+        <ul class="row">
+        {% for d in FSData.FS %}
+          <li class="col-xs-12"><i class="{{ d.icon }}"></i> {{ d.text }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% if FSData.Exclude %}
+      <div class="col-lg-8 col-md-6 col-xs-12">
+        <p><span class="label label-warning">Exclude</span></p>
+        <ul class="row">
+          {% for e in FSData.Exclude %}
+            {% if FSData.Exclude|length > 5 %}
+          <li class="col-xs-6">{{ e.value }}</li>
+            {% else %}
+          <li class="col-xs-12">{{ e.value }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if FSData.Options %}
+      {% for o in FSData.Options %}
+      {% if o.name == 'Dedup' %}
+      <div class="col-xs-3">
+        <p><span class="label bg-maroon"><i class="fa fa-cubes"></i> Client deduplication</span></p>
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="box-body no-padding">
+{% endif %}
+    <hr>
+    <div class="row">
+      <div class="col-sm-12 center-block">
+        {% if Job.Type != 'Restore' %}<a class="btn btn-app" data-toggle="modal" data-target="#runjobconfirm" data-name="{{ Job.Name }}" data-url="{% url 'jobsrun_rel' %}"><i class="fa fa-play"></i>Run</a>{% endif %}
+        {% if Job.Type == 'Backup' %}<a class="btn btn-app" href="{% url 'restorejob' Job.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>{% endif %}
+        {% if not Job.InternalJob %}
+        <a href="{% url 'jobsedit' Job.Name %}" class="btn btn-app"><i class="fa fa-wrench"></i>Edit</a>
+        <a class="btn btn-app" data-toggle="modal" data-target="#deletejobconfirm" data-name="{{ Job.Name }}" data-url="{% url 'jobsdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
+        {% endif %}
+        {% if Job.Type != 'Admin' %}<a href="{% url 'statsjob' Job.Name %}" class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>{% endif %}
+        {% if Job.Type != 'Restore' %}<a href="{% url 'jobsadvanced' Job.Name %}" class="btn btn-app"><i class="fa fa-cogs"></i>Advanced</a>{% endif %}
+      </div>
+    </div>
+    <div class="box-group" id="jobhistory">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-history"></i>
+            <a data-toggle="collapse" data-parent="#jobhistory" href="#One">Job History</a>
+          </h2>
+          {% include "widgets/refreshbutton.html" %}
+        </div>
+        <div id="One" class="panel-collapse collapse in">
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="jobshistory" class="table table-bordered table-striped table-hover">
+                <thead>
+                {% include "jobs/job.legend.html" %}
+                </thead>
+                <tfoot>
+                {% include "jobs/job.legend.html" %}
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/runconfirm.html" %}
+{% include "widgets/deletejobidconfirm.html" %}
+{% include "widgets/cancelconfirm.html" %}
+{% include "widgets/stopconfirm.html" %}
+{% include "widgets/deletejobconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "jobs/job.js" %}
+{% endblock %}

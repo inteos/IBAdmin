@@ -1,0 +1,16 @@
+{% load ibadtexts %}
+<li class="active">
+  <a href="#"><i class="fa {{ Storage.MediaType|mediaicon }}"></i><span>{{ Storage.Name }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    <li{% if apppath.1 == 'Info' %} class="active"{% endif %}>
+      <a href="{% url 'storageinfo' Storage.Name %}"><i class="fa fa-info-circle"></i><span>Info</span></a></li>
+    <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
+      <a href="{% url 'storageedit' Storage.Name %}"><i class="fa fa-wrench"></i><span>Edit</span></a></li>
+    <li{% if apppath.1 == 'Status' %} class="active"{% endif %}>
+      <a href="{% url 'storagestatus' Storage.Name %}"><i class="fa fa-history"></i><span>Status</span></a></li>
+    {% if Storage.MType == 'Dedu' %}
+    <li{% if apppath.1 == 'Dedup Engine' %} class="active"{% endif %}>
+      <a href="{% url 'storagededup' Storage.Name %}"><i class="fa fa-cubes"></i><span>Dedup Engine</span></a></li>
+     {% endif %}
+  </ul>
+</li>

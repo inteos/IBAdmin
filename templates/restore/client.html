@@ -1,0 +1,71 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<style>
+.transition-width {
+  transition: width 1s ease-out;
+  webkit-transition: width 1s ease-out;
+}
+</style>
+<div class="box box-success">
+{% include 'restore/clientselected.html' with Name=Client.Name %}
+  <div class="box-body no-padding">
+    <div class="box-group" id="clientjobs">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-info">
+        <div class="box-header">
+          <i class="fa fa-cubes"></i>
+          <h4 class="box-title"> Defined Jobs</h4>
+        </div>
+        <div id="One" class="panel-collapse collapse in">
+          <div class="box-body no-padding">
+            <div id="jdefinedtab" class="col-lg-12 col-md-12">
+              <div class="table-responsive">
+                <table id="jobsdefined" class="table table-bordered table-striped table-hover">
+                  <thead>
+                  {% include "restore/client.legend1.html" %}
+                  </thead>
+                  <tbody>
+                  {% for j in ClientJobsdefined %}{% if not j.Disabledfordelete %}
+                    <tr>
+                      <td class="vertical-align text-center">
+                        <button class="btn btn-sm btn-default jobselect" type="button" data-jobname="{{ j.Name }}">
+                          <i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Select"></i></button>
+                      </td>
+                      <td class="vertical-align"><a href="{% url 'jobsinfo' j.Name %}">{{ j.Name }}</a></td>
+                      <td class="vertical-align text-center"><span class="badge {{ j.JobDefs|jdappcolor }}">{{ j.JobDefs|jdapptext }}</span></td>
+                      <td class="vertical-align text-center"><span class="badge {{ j.Level|joblevelbgcolor:j.Type }}">{{ j.Level|jobleveltext }}</span></td>
+                      <td class="vertical-align">{{ j.Descr }}</td>
+                      <td class="vertical-align text-center">
+                        <button class="btn btn-sm btn-default displayFS" type="button" data-jobname="{{ j.Name }}">
+                          <i class="fa fa-files-o" data-toggle="tooltip" data-original-title="Data info"></i></button>
+                      </td>
+                    </tr>
+                  {% endif %}{% endfor %}
+                  </tbody>
+                  <tfoot>
+                  {% include "restore/client.legend1.html" %}
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div id="fsdisplaydiv" class="col-lg-3 col-md-12" style="display: none;">
+              <div id="blockquotefs"></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- panel -->
+
+{% include 'restore/jobhistory.html' %}
+{% include 'restore/jobdata.html' %}
+
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "restore/client.js" %}
+{% endblock %}

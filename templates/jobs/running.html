@@ -1,0 +1,32 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-info">
+  <div class="box-header">
+    <i class="fa fa-gears"></i>
+    <h4 class="box-title">Running Backup Jobs</h4>
+    <div class="box-tools pull-right">
+      <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="jobsrunning" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "jobs/running.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "jobs/running.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/cancelconfirm.html" %}
+{% include "widgets/stopconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "jobs/running.js" %}
+{% endblock %}

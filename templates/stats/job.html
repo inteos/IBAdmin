@@ -1,0 +1,131 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+{% for stat in params %}
+  <div class="col-lg-6 col-xs-12">
+    <!-- default chart -->
+    <div class="box {{ stat.box|default:'box-primary' }}">
+      <div class="box-header with-border">
+        <i id="charticon{{ stat.id }}" class="fa {{ stat.chart|charticon }}"></i>
+        <h3 class="box-title">{{ stat.descr }}</h3>
+        <div class="box-tools pull-right">
+          <button id="chartrefresh{{ stat.id }}" type="button" class="btn btn-box-tool" data-widget="refresh" data-toggle="tooltip" data-original-title="Refresh"><i class="fa fa-refresh"></i></button>
+          <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" data-original-title="Minimize"><i class="fa fa-minus"></i></button>
+          <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" data-original-title="Close"><i class="fa fa-times"></i></button>
+        </div>
+      </div>
+      <div class="box-body">
+        <div class="row">
+          <div class="col-xs-12">
+            <div id="display{{ stat.id }}" style="height: {{ height|default:'200px' }};"></div>
+          </div>
+        </div>
+      </div><!-- /.box-body-->
+      <div class="box-footer">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="chtype{{ stat.id }}" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa {{ stat.chart|charticon }}"></i> {{ stat.chart|charttext }} <span class="caret"></span>
+                </button>
+                <ul id="chartmenu{{ stat.id }}" class="dropdown-menu">
+                  {% for type in '123' %}
+                  <li><a href="#" data-chart="{{ type }}"><i class="fa {{ type|charticon }}"></i> {{ type|charttext }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="lastdiv{{ stat.id }}" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-clock-o"></i> Last 10 Jobs <span class="caret"></span>
+                </button>
+                <ul id="lastopt{{ stat.id }}" class="dropdown-menu">
+                  <li><a href="#" data-last="1">Last 10 Jobs</a></li>
+                  <li><a href="#" data-last="2">Last 20 Jobs</a></li>
+                  <li><a href="#" data-last="3">Last 50 Jobs</a></li>
+                  <li><a href="#" data-last="4">Last 100 Jobs</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% if stat.unit == 1 %}
+          <div class="col-md-4">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="chdiv{{ stat.id }}1" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="glyphicon glyphicon-scale"></i> MBytes <span class="caret"></span>
+                </button>
+                <ul id="chartdiv{{ stat.id }}1" class="dropdown-menu">
+                  <li><a href="#" data-chart="1">Bytes</a></li>
+                  <li><a href="#" data-chart="2">kBytes</a></li>
+                  <li><a href="#" data-chart="3">MBytes</a></li>
+                  <li><a href="#" data-chart="4">GBytes</a></li>
+                  <li><a href="#" data-chart="5">TBytes</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% if stat.unit == 2 %}
+          <div class="col-md-4">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="chdiv{{ stat.id }}2" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="glyphicon glyphicon-scale"></i> Seconds <span class="caret"></span>
+                </button>
+                <ul id="chartdiv{{ stat.id }}2" class="dropdown-menu">
+                  <li><a href="#" data-chart="1">Seconds</a></li>
+                  <li><a href="#" data-chart="2">Minutes</a></li>
+                  <li><a href="#" data-chart="3">Hours</a></li>
+                  <li><a href="#" data-chart="4">Days</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% if stat.unit == 3 %}
+          <div class="col-md-4">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="chdiv{{ stat.id }}3" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="glyphicon glyphicon-scale"></i> MBytes/sec <span class="caret"></span>
+                </button>
+                <ul id="chartdiv{{ stat.id }}3" class="dropdown-menu">
+                  <li><a href="#" data-chart="1">Bytes/sec</a></li>
+                  <li><a href="#" data-chart="2">kBytes/sec</a></li>
+                  <li><a href="#" data-chart="3">MBytes/sec</a></li>
+                  <li><a href="#" data-chart="4">GBytes/sec</a></li>
+                  <!--<li><a href="#" data-chart="5">TBytes/sec</a></li>-->
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div><!-- /.box-footer-->
+      <div id="loading{{ stat.id }}" class="overlay">
+        <i class="fa fa-refresh fa-spin"></i>
+      </div>
+    </div><!-- /.box -->
+  </div><!-- /.col -->
+{% empty %}
+  <div class="col-lg-6 col-xs-12 col-lg-offset-3">
+    <div class="callout callout-info">
+      <h4>No statistics available for this Job: {{ Name }}</h4>
+      <p>This means that either no jobs run yet, or all jobs run was failed. If you think it is not what you expect, you should contact Inteos Support.</p>
+    </div>
+  </div>
+{% endfor %}
+</div><!-- /.row -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "stats/job.js" %}
+{% endblock %}

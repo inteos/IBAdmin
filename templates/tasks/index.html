@@ -1,0 +1,45 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-tasks"></i>
+    <h3 class="box-title">All Tasks</h3>
+    <div id="refreshbox" class="pull-right box-tools">
+      <span id="runningbadge" class="badge bg-aqua-gradient" style="display: none;">Running...</span>
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="taskslist" class="table table-bordered table-striped">
+        <thead>
+        {% include "tasks/index.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "tasks/index.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-lg-2 col-sm-6">
+        <a id="clearbutton" class="btn btn-app" data-url="{% url 'tasksclearall' %}"><i class="fa fa-recycle"></i>Clear All</a>
+      </div>
+      <div class="col-lg-10 col-sm-6">
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "tasks/index.js" %}
+{% endblock %}

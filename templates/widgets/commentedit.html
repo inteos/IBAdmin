@@ -1,0 +1,24 @@
+<div id="{{ id|default:'commentedit' }}" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><!-- Title --></h4>
+      </div>
+      <!-- form start -->
+      <form class="form-horizontal" id="{{ id|default:'commentedit' }}form" method="post">
+        {% csrf_token %}
+      <div class="modal-body">
+        <div class="box-body">
+          <!-- content -->
+          <textarea class="form-control" rows="3" placeholder="Loading ..." disabled></textarea>
+        </div><!-- /.box-body -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">No, not yet!</button>
+        <button id="{{ id|default:'commentedit' }}button" type="submit" value="1" class="btn btn-success" data-loading-text="Saving...">Save now</button>
+      </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

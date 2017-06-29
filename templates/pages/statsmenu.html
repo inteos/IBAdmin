@@ -1,0 +1,37 @@
+<!-- Statistics menu -->
+<li class="treeview{% if apppath.0 == 'Statistics' %} active{% endif %}">
+  <a href="#"><i class="fa fa-bar-chart"></i> <span>Statistics</span><span class="pull-right-container">
+    <i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    {% if jobstatsdisplay %}
+      {% include "pages/sjmenu.html" %}
+    {% endif %}
+    <li{% if apppath.1 == 'Backup' %} class="active"{% endif %}><a href="#"><i class="fa fa-archive"></i> <span>Backup</span>
+    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+      <ul class="treeview-menu">
+        <li{% if apppath.2 == 'Jobs' %} class="active"{% endif %}><a href="{% url 'statsbackupjobs' %}"><i class="fa fa-cubes"></i><span>Jobs</span></a></li>
+        <li{% if apppath.2 == 'Volumes' %} class="active"{% endif %}><a href="{% url 'statsbackupvolumes' %}"><i class="fa fa-database"></i><span>Volumes</span></a></li>
+        <li{% if apppath.2 == 'Tapes' %} class="active"{% endif %}><a href="{% url 'statsbackuptapes' %}"><i class="fa fa-simplybuilt"></i><span>Tapes</span></a></li>
+        <li{% if apppath.2 == 'Sizes' %} class="active"{% endif %}><a href="{% url 'statsbackupsizes' %}"><i class="fa fa-area-chart"></i><span>Sizes</span></a></li>
+      </ul>
+    </li>
+    <li{% if apppath.1 == 'System' %} class="active"{% endif %}><a href="#"><i class="fa fa-server"></i><span>System</span>
+    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+      <ul class="treeview-menu">
+        <li{% if apppath.2 == 'CPU' %} class="active"{% endif %}><a href="{% url 'statssystemcpu' %}"><i class="fa fa-cogs"></i><span>CPU</span></a></li>
+        <li{% if apppath.2 == 'Memory' %} class="active"{% endif %}><a href="{% url 'statssystemmemory' %}"><i class="fa fa-table"></i><span>Memory</span></a></li>
+        <li{% if apppath.2 == 'Swap' %} class="active"{% endif %}><a href="{% url 'statssystemswap' %}"><i class="fa fa-clone"></i><span>Swap</span></a></li>
+        <li{% if apppath.2 == 'Disks' %} class="active"{% endif %}><a href="{% url 'statssystemdisks' %}"><i class="fa fa-database"></i><span>Disks</span></a></li>
+        <li{% if apppath.2 == 'Filesystem' %} class="active"{% endif %}><a href="{% url 'statssystemfs' %}"><i class="fa fa-hdd-o"></i><span>Filesystems</span></a></li>
+        <li{% if apppath.2 == 'Network' %} class="active"{% endif %}><a href="{% url 'statssystemnet' %}"><i class="fa fa-exchange"></i><span>Network</span></a></li>
+      </ul>
+    </li>
+    <li{% if apppath.1 == 'Daemons' %} class="active"{% endif %}><a href="#"><i class="fa fa-sellsy"></i><span>Daemons</span>
+    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+      <ul class="treeview-menu">
+        <li{% if apppath.2 == 'Server' %} class="active"{% endif %}><a href="{% url 'statsserver' %}"><i class="fa fa-server"></i><span>Backup Server</span></a></li>
+        <li{% if apppath.2 == 'Clients' %} class="active"{% endif %}><a href="{% url 'statsclients' %}"><i class="fa fa-laptop"></i><span>Clients</span></a></li>
+      </ul>
+    </li>
+  </ul>
+</li>

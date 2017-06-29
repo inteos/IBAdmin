@@ -1,0 +1,26 @@
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box {% if LogHL %}box-warning{% else %}box-primary{% endif %}">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-bars"></i>
+            <a data-toggle="collapse" data-parent="#jobinfo" href="#One">Job Log</a>
+          </h2>
+        </div>
+        <div id="One" class="panel-collapse collapse in">
+          <div class="box-body no-padding">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                <tr>
+                  <th style="width: 150px">Time</th>
+                  <th>Log</th>
+                </tr>
+                </thead>
+                <tbody id="{{ id|default:'joblogwidget' }}">
+                {% include 'widgets/joblogwidget.html' %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>

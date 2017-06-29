@@ -1,0 +1,127 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-info">
+  <div class="box-header">
+    <i class="fa fa-cubes"></i>
+    <h4 class="box-title">Deduplication Storage Engine Info</h4>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="row">
+      <div class="col-lg-3 col-md-6">
+        <div class="col-xs-4"><p>Storage:</p></div>
+        <div class="col-xs-8"><p>{{ Storage.Name }}</p></div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="col-xs-4"></div>
+        <div class="col-xs-8"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-4 col-md-6">
+        <div class="col-xs-12">
+          <p><span class="label label-success">Space size</span></p>
+        </div>
+        <div class="col-xs-12">
+          <dl class="dl-horizontal">
+            <dt>Saved data size:</dt>
+              <dd id="ref_size"></dd>
+            <dt>Deduplication Ratio:</dt>
+              <dd id="size_ratio"></dd>
+            <dt>Disk Space Used:</dt>
+              <dd id="disk_space_used"></dd>
+            <dt>Disk Space Allocated:</dt>
+              <dd id="disk_space_allocated"></dd>
+          </dl>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="col-xs-12">
+          <p><span class="label label-warning">Chunks stats</span></p>
+        </div>
+        <div class="col-xs-12">
+          <dl class="dl-horizontal">
+            <dt>Reference count:</dt>
+              <dd id="ref_count"></dd>
+            <dt>Chunks Used:</dt>
+              <dd id="chunk_used"></dd>
+            <dt>Chunks Allocated:</dt>
+              <dd id="chunk_allocated"></dd>
+          </dl>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="col-xs-12">
+          <p><span class="label label-danger">Status</span></p>
+        </div>
+        <div class="col-xs-12">
+          <dl class="dl-horizontal">
+            <dt>DDE Errors:</dt>
+              <dd id="dde_errors"></dd>
+            <dt>Containers Errors:</dt>
+              <dd id="containers_errors"></dd>
+            <dt>Vacuum:</dt>
+              <dd id="vacuum_last_run"></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="box-group" id="dedupcontainersbox">
+      <div class="panel box box-success">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-database"></i>
+            <a data-toggle="collapse" data-parent="#dedupcontainersbox" href="#One">Deduplication Containers</a>
+          </h4>
+        </div>
+        <div id="One" class="panel-collapse collapse in">
+          <div class="box-body no-padding">
+            <table id="containers" class="table table-condensed">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width: 60px;">Block</th>
+                  <th class="text-center">Disk Space Allocated</th>
+                  <th class="text-center">Space Used</th>
+                  <th class="text-center">Used</th>
+                  <th class="text-center" style="width: 30%"></th>
+                </tr>
+              </thead>
+              <tbody id="dedupcontainers">
+              {% for c in blk %}
+                <tr>
+                  <td class="text-center vertical-align"><span class="label label-primary">{{ c }}k</span></td>
+                  <td class="text-center vertical-align" id="{{ c }}k_allocated_size"></td>
+                  <td class="text-center vertical-align" id="{{ c }}k_used_size"></td>
+                  <td class="text-center vertical-align" id="{{ c }}k_used_percent"></td>
+                  <td class="text-center vertical-align">
+                    <div class="progress progress-sm">
+                      <div id="{{ c }}k_pct" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="0" style="width: 0%"></div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- panel -->
+    </div>
+
+  </div><!-- /.box-body -->
+  <div id="storagestatusloading" class="overlay">
+    <i class="fa fa-refresh fa-spin"></i>
+  </div>
+</div><!-- /.box -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "storage/dedup.js" %}
+{% endblock %}

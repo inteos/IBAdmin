@@ -1,0 +1,26 @@
+{% extends "pages/base.html" %}
+{% with contentheader='500 Error Page' %}{% endwith %}
+{% block content %}
+          <div class="error-page">
+            <h2 class="headline text-red"> 500</h2>
+            <div class="error-content">
+              <h3><i class="fa fa-warning text-red"></i> Oops! Something went wrong.</h3>
+              <p>
+                We make all the best to make <a href="http://inteosbackup.pl/">IBAdmin</a> works perfectly, but shit happens. 
+                You should check <b>root@localhost</b> email to verify what is going on and contact 
+                <a href="https://inteos.freshservice.com/support/solutions/articles/26673">Inteos support</a> on this issue.
+                Meanwhile, you may <a href="/">return to dashboard</a>{% if searchpannel %} or try using the search form{% endif %}.
+              </p>
+            {% if searchpannel %}
+              <form class="search-form">
+                <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search">
+                  <div class="input-group-btn">
+                    <button type="submit" name="submit" class="btn btn-danger btn-flat"><i class="fa fa-search"></i></button>
+                  </div>
+                </div><!-- /.input-group -->
+              </form>
+            {% endif %}
+            </div><!-- /.error-content -->
+          </div><!-- /.error-page -->
+{% endblock %}

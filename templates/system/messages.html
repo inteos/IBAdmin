@@ -1,0 +1,54 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-info">
+      <div class="box-header">
+        <i class="fa fa-bars"></i>
+        <h3 class="box-title">System messages</h3>
+        <div class="box-tools pull-right">
+          <span id="runningbadge" class="badge bg-aqua-gradient" style="display: none;">Running...</span>
+          {% include "widgets/helpbutton.html" with box=1 %}
+          {% include "widgets/refreshbutton.html" with box=1 %}
+        </div>
+      </div><!-- /.box-header -->
+      <div class="box-body">
+        <div class="table-responsive">
+          <table id="messages" class="table table-bordered table-striped table-hover">
+            <thead>
+              <tr>
+                <th style="width: 150px">Time</th>
+                <th>Log</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div><!-- /.box-body -->
+      <div class="box-footer">
+        <div class="row">
+          <div class="col-lg-2 col-sm-3">
+            <a id="clearbutton" class="btn btn-app" data-url="{% url 'systemmessagesclear' %}"><i class="fa fa-recycle"></i>Clear all</a>
+          </div>
+          <div class="col-lg-3 col-sm-4">
+            <a class="btn btn-app" href="{% url 'systemconfig' %}"><i class="fa fa-cogs"></i>System config</a>
+            <a class="btn btn-app" href="{% url 'daemonindex' %}"><i class="fa fa-sellsy"></i>Daemons</a>
+          </div>
+          <div class="col-lg-7 col-sm-5">
+            <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+            <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+            <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+         </div>
+        </div>
+      </div>
+      <div id="messagesloading" class="overlay">
+        <i class="fa fa-refresh fa-spin"></i>
+      </div>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+
+{% block pagejs %}
+  {% include "system/messages.js" %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% for lj in LastJobs %}
+<tr>
+  <td class="text-center"><a href="{% url 'jobslog' lj.jobid %}">{{ lj.jobid }}</a></td>
+  <td><a href="{% url 'jobsinfo' lj.name %}">{{ lj.name }}</a></td>
+  <td class="text-center"><span class="badge {{ lj.level|joblevelbgcolor:lj.type }}">{{ lj.level|jobleveltext:lj.type }}</span></td>
+  <td class="text-center"><span class="label {{ lj.jobstatus|jobstatusbgcolor:lj.joberrors }}">{{ lj.jobstatus|jobstatustext:lj.joberrors }}</span></td>
+</tr>
+{% endfor %}

@@ -1,0 +1,86 @@
+{% extends "initial/base.html" %}
+{% block content %}
+{% load static %}
+    <div class="register-box">
+      <div class="register-logo">
+        <a href="http://www.inteosbackup.pl/"><img src="{% static "ibadmin.png" %}"/><b>IBAdmin</b></a>
+      </div>
+      <div class="register-box-body">
+        <p class="login-box-msg">Initial configuration</p>
+        {% if displayalert %}
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="alert alert-danger alert-dismissible">
+              <!-- <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> -->
+              <h4><i class="icon fa fa-ban"></i>{{ subject }}</h4>
+              {{ message|safe }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <form id="initsetup" method="post" action="{% url 'initialsetup' %}">
+          {% csrf_token %}
+          <div class="form-group has-feedback"> <!-- has-feedback -->
+            <input type="text" class="form-control" id="dirname" name="dirname" placeholder="System Name - required" required{% if disableall %} disabled{% endif %}>
+            <!--<span class="glyphicon glyphicon-user form-control-feedback"></span>-->
+            <span class="fa fa-bank form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div class="form-group has-feedback">
+            <input type="text" class="form-control" id="descr" name="descr" placeholder="Description"{% if disableall %} disabled{% endif %}>
+            <span class="fa fa-comment-o form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div class="form-group has-feedback">
+            <input type="email" class="form-control" id="email" name="email" placeholder="Administrator email - required"{% if disableall %} disabled{% endif %}>
+            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div class="form-group has-feedback">
+            <input type="password" class="form-control" id="admpass" name="admpass" placeholder="Administrator password - required" required{% if disableall %} disabled{% endif %}>
+            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div class="form-group has-feedback">
+            <input type="password" class="form-control" id="admrpass" name="admrpass" placeholder="Retype password - required" required{% if disableall %} disabled{% endif %}>
+            <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div class="form-group has-feedback">
+            <select class="form-control" id="storage" name="storage" required{% if disableall %} disabled{% endif %}><!-- style="width: 100%;"  -->
+              <option value="file" selected="selected">Disk based File storage</option>
+              <option value="dedup" {% if not enablededup %}disabled{% endif %}>Disk based Global Deduplication storage</option>
+              {% for s in Storage %}
+              <option value="{{ s.id }}">Tape Library {{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div><!-- /.form-group -->
+          <div id="divarchdir" class="form-group has-feedback">
+            <input type="text" class="form-control" id="archivedir" name="archivedir" placeholder="Archive directory - required. Directory must exist."
+            {% if disableall %} disabled{% endif %}>
+            <span class="glyphicon glyphicon-folder-close form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div id="divdedupidxdir" class="form-group has-feedback" style="display: none;">
+            <input type="text" class="form-control" id="dedupidxdir" name="dedupidxdir" placeholder="Deduplication Index directory - required. Directory must exist."
+            {% if disableall %} disabled{% endif %}>
+            <span class="fa fa-indent form-control-feedback"></span>
+          </div><!-- /.form-group -->
+          <div id="divdedupdir" class="form-group has-feedback" style="display: none;">
+            <input type="text" class="form-control" id="dedupdir" name="dedupdir" placeholder="Deduplication Engine directory - required. Directory must exist."
+            {% if disableall %} disabled{% endif %}>
+            <span class="fa fa-cubes form-control-feedback"></span>
+          </div><!-- /.form-group -->
+{% comment %}
+          <div class="checkbox icheck">
+            <label>
+              <input type="checkbox" id="checkimp" name="checkimp" disabled> Import current flat Bacula configuration</a>
+            </label>
+          </div><!-- /.icheck -->
+{% endcomment %}
+          <div class="row">
+            <div class="col-xs-4 pull-right">
+              <button type="submit" name="save" value="1" class="btn btn-primary btn-block btn-flat"{% if disableall %} disabled{% endif %}>Save</button>
+            </div><!-- /.col -->
+          </div>
+        </form>
+      </div><!-- /.form-box -->
+    </div><!-- /.register-box -->
+{% endblock %}
+{% block pagejs %}
+  {% include "initial/index.js" %}
+{% endblock %}

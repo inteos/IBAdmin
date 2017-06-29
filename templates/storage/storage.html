@@ -1,0 +1,106 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+{% if newstorageadded %}
+<div class="row">
+ <div class="col-xs-12">
+  <div id="restartinfo" class="alert alert-warning alert-dismissible">
+    <button type="button" class="close" data-hide="alert" aria-hidden="true">&times;</button>
+    <h4><i class="icon fa fa-check"></i>New Storage added!</h4>
+    <p>You have to <a href="{% url 'daemonindex' %}">restart the Storage service</a> if you want to use a new storage. You can't run successful job without it.</p>
+  </div>
+ </div>
+</div>
+{% endif %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa {{ Storage.MediaType|mediaicon }}"></i>
+    <h4 class="box-title">Storage Info</h4>
+      {% include "widgets/helpbutton.html" with box=0 %}
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <table class="table">
+        <tr>
+          <th>Storage Name</th>
+          <th>Storage Address</th>
+          <th class="text-center">Media Type</th>
+          {% if Storage.MType == 'Tape' %}
+          <th>Device</th>
+          {% else %}
+          <th>Directory</th>
+          {% if Storage.MType == 'Dedu' %}
+          <th>Index</th>
+          {% endif %}
+          {% endif %}
+          <th>Description</th>
+          <th class="text-center">Status</th>
+        </tr>
+        <tr>
+          <td>{{ Storage.Name }}</td>
+          <td>{{ Storage.Address }}</td>
+          <td class="vertical-align text-center storage-media-type"><span class="badge {{ Storage.MediaType|mediacolor }}">
+            <i class="fa {{ Storage.MediaType|mediaicon }}"></i></span>{{ Storage.MediaType }}</td>
+          <td>{{ Storage.StorageDirDevice }}</td>
+          {% if Storage.MType == 'Dedu' %}
+          <td>{{ Storage.StorageDirDedupidx }}</td>
+          {% endif %}
+          <td>{{ Storage.Descr }}</td>
+          <td class="text-center" style="width: 100px"><span class="label {{ Storage.Status|statusbgcolor }}">{{ Storage.Status|statustext }}</span></td>
+        </tr>
+      </table>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-sm-10 center-block">
+        <a class="btn btn-app" onclick='location.href="{% url 'storagestatus' Storage.Name %}"'><i class="fa fa-external-link"></i>Status</a>
+        {% if Storage.MType == 'Dedu' %}
+        <a class="btn btn-app disabled" data-toggle="modal" data-target="#dedupvacuum" data-name="{{ Storage.Name }}"><i class="fa fa-magic"></i>Vacuum</a>
+        <a class="btn btn-app" href="{% url 'storagededup' Storage.Name %}"><i class="fa fa-cubes"></i>Dedup Engine</a>
+        {% endif %}
+        <a class="btn btn-app" href="{% url 'storageedit' Storage.Name %}"><i class="fa fa-edit"></i>Edit</a>
+        {% if Storage.InternalStorage != 'Yes' %}
+        <a class="btn btn-app disabled" data-toggle="modal" data-target="#deleteconfirm" data-name="{{ Storage.Name }}"><i class="fa fa-trash"></i>Delete</a>
+        {% endif %}
+        <!--<a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
+        <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+      </div>
+    </div>
+
+    <div class="box-group" id="storageinfo">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-history"></i>
+            <a data-toggle="collapse" data-parent="#accordion" href="#One">Jobs History</a>
+          </h4>
+          {% include "widgets/refreshbutton.html" %}
+        </div>
+        <div id="One" class="panel-collapse collapse in"><!-- in -->
+          <div class="box-body">
+            <table id="jobshistory" class="table table-bordered table-striped table-hover">
+              <thead>
+              {% include "storage/storage.legend.html" %}
+              </thead>
+              <tfoot>
+              {% include "storage/storage.legend.html" %}
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div><!-- panel -->
+    </div>
+
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/cancelconfirm.html" %}
+{% include "widgets/stopconfirm.html" %}
+{% include "widgets/deletejobidconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "storage/storage.js" %}
+{% endblock %}

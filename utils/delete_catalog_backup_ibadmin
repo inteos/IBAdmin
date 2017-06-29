@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# Copyright (C) 2000-2015 Kern Sibbald
+# License: BSD 2-Clause; see file LICENSE-FOSS
+#
+# This script deletes a catalog dump
+#
+db_name=bacula
+mkdir -p /opt/bacula/working/bkp/
+bzip2 -9 /opt/bacula/working/${db_name}.sql
+mv /opt/bacula/working/${db_name}.sql.bz2 /opt/bacula/working/bkp/

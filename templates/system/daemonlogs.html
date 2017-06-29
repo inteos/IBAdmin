@@ -1,0 +1,12 @@
+<h4>{{ daemon }}</h4>
+<table class="table table-striped">
+    {% for log in Logs %}
+    {% if 'bsock.c:721 Write error sending 4 bytes to client:' not in log %}
+    <tr>
+        <td>
+            {{ log }}
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>

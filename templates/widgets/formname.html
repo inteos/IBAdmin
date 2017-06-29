@@ -1,0 +1,18 @@
+<div id="name-group" class="form-group"> <!-- has-success has-error -->
+  <label for="{{ form.name.id_for_label }}" class="col-sm-2 control-label">{{ form.name.label }}</label>
+  <div class="col-sm-10">
+    <div class="input-group">
+      <input type="text" class="form-control" id="{{ form.name.id_for_label }}" {% if form.name.value %}value="{{ form.name.value }}" {% endif %}placeholder="{{ form.name.placeholder }}" name="{{ form.name.name }}" {% if form.name.field.disabled %}disabled {% endif %}required>
+      <span class="input-group-addon"><i class="fa fa-paw"></i></span>
+    </div>
+  </div>
+</div><!-- /.form-group -->
+<div id="descr-group" class="form-group">
+  <label for="{{ form.descr.id_for_label }}" class="col-sm-2 control-label">{{ form.descr.label }}</label>
+  <div class="col-sm-10">
+    <div class="input-group">
+      <input type="text" class="form-control" id="{{ form.descr.id_for_label }}" {% if form.descr.value %}value="{{ form.descr.value }}" {% endif %}placeholder="..." name="{{ form.descr.name }}">
+      <span class="input-group-addon"><i class="fa fa-map-marker"></i></span>
+    </div>
+  </div>
+</div><!-- /.form-group -->

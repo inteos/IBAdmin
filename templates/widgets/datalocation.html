@@ -1,0 +1,17 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+      {% if Job.Type != 'D' and Job.Type != 'R' %}
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-database"></i>
+            <a data-toggle="collapse" data-parent="#jobinfo" href="#Three">{{ volumeheader|default:"Data Location" }}</a>
+          </h2>
+        </div>
+        <div id="Three" class="panel-collapse collapse">
+          <div id="{{ id|default:'datalocationwidget' }}" class="box-body">
+            {% include 'widgets/datalocationwidget.html' %}
+          </div>
+        </div>
+      </div>
+      {% endif %}

@@ -1,0 +1,6 @@
+              {% for jl in Log %}
+              <tr{% if jl.HL %} class="danger"{% endif %}>
+                <td style="width: 150px">{{ jl.Time|date:'Y-m-d H:i:s' }}</td>
+                <td>{% autoescape off %}{{ jl.Text }}{% endautoescape %}</td>
+              </tr>
+              {% endfor %}

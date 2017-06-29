@@ -1,0 +1,53 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-success">
+{% include 'restore/clientselected.html' with Name=Job.Client %}
+  <div class="box-body no-padding">
+    <div class="box-group" id="clientjobs">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      {% include 'restore/jobselected.html' %}
+
+      <div class="panel box box-info">
+        <div class="box-header with-border">
+          <i class="fa fa-history"></i>
+          <h4 class="box-title"> Job History<!-- <a data-toggle="collapse" data-parent="#accordion" href="#Two"> </a> --></h4>
+          <div class="pull-right box-tools">
+            <button id="listrefresh" type="button" class="btn btn-box-tool" data-toggle="tooltip" data-original-title="Refresh">
+              <i class="fa fa-refresh"></i>
+            </button>
+          </div>
+        </div>
+        <div id="Two" class="panel-collapse collapse in"><!-- in -->
+          <div class="box-body">
+            <div id="jhistorytab" class="col-lg-9 col-md-12">
+              <div class="table-responsive">
+                <table id="jobshistory" class="table table-bordered table-striped table-hover">
+                  <thead>
+                  {% include "restore/job.legend1.html" %}
+                  </thead>
+                  <tfoot>
+                  {% include "restore/job.legend1.html" %}
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div id="datedisplaydiv" class="col-lg-3 col-md-5 col-sm-6 col-xs-8">
+              <div id="datepiker" class="text-center"></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- panel -->
+
+{% include 'restore/jobdata.html' %}
+
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% endblock %}
+
+{% block pagejs %}
+  {% include "restore/job.js" %}
+{% endblock %}

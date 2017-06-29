@@ -1,0 +1,142 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box {{ Job.Status|jobstatusboxcolor:Job.Errors }}">
+  <div class="box-header">
+    <i class="fa fa-server"></i>
+    <h4 class="box-title">
+      {% if Job.Type == 'D' %}Admin
+      {% elif Job.Type == 'R' %}Restore
+      {% else %}Backup{% endif %} Job Info</h4>
+    {% include 'widgets/helpbutton.html' with box=0 %}
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <table class="table">
+        <tr>
+          <th class="text-center" style="width: 60px">JobId</th><!--  style="width: 10px" -->
+          <th>Job Name</th>
+          <th class="text-center" style="width: 60px">Type</th>
+          <th>Client</th>
+          <th>Start</th>
+          <th>End</th>
+          {% if Job.Type != 'D' and Job.Type != 'R' %}
+          <th>Level</th>
+          <th>Files</th>
+          <th>Size</th>
+          {% endif %}
+          <th class="text-center">Status</th>
+        </tr>
+        <tr>
+          <td class="text-center">{{ Job.JobId }}</td>
+          <td>{{ Job.Name }}</td>
+          <td class="text-center"><span class="badge {{ Job.Type|jobtypebgcolor }}">{{ Job.Type|jobtypetext }}</span></td>
+          <td><a href="{% url 'clientsinfo' Job.Client %}">{{ Job.Client }}</a></td>
+          <td>{{ Job.Start|date:'Y-m-d H:i:s' }}</td>
+          <td>{{ Job.End|date:'Y-m-d H:i:s' }}</td>
+          {% if Job.Type != 'D' and Job.Type != 'R' %}
+          <td><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext:Job.Type }}</span></td>
+          <td>{{ Job.Files }}</td>
+          <td>{{ Job.Bytes|bytestext }}</td>
+          {% endif %}
+          <td class="text-center" style="width: 50px"><span class="label {{ Job.Status|jobstatusbgcolor:Job.Errors }}">{{ Job.Status|jobstatustext:Job.Errors }}</span></td>
+        </tr>
+      </table>
+    </div>
+    <hr>
+    {% include "widgets/commentwidget.html" %}
+    <div class="row">
+      <div class="col-sm-10 center-block">
+        <a href="{% url 'jobsinfo' Job.Name %}" class="btn btn-app"><i class="fa fa-info-circle"></i>Info</a>
+        {% if Job.Type != 'D' %}<a href="{% url 'statsjob' Job.Name %}" class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>{% endif %}
+        {% if Job.Status in 'EfA' %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#restartjobidconfirm" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh"></i>Restart</a>
+        {% endif %}
+        {% if Job.Status == 'I' %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#restartijobidconfirm" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh"></i>Restart</a>
+        {% endif %}
+        {% if Job.Type == 'B' %}
+        {% if Job.Status in 'TI' %}
+        <a href="{% url 'restorejobid' Job.JobId %}" class="btn btn-app"><i class="fa fa-cloud-upload"></i>Restore</a>
+        {% endif %}
+        {% endif %}
+        {% if not Job.InternalJob %}
+        <a href="{% url 'jobsedit' Job.Name %}" class="btn btn-app"><i class="fa fa-wrench"></i>Edit</a>
+        {% endif %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#deletejobidconfirm" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
+        <a class="btn btn-app" data-toggle="modal" data-target="#commentedit" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}"><i class="fa fa-comment-o"></i>Comment</a>
+      </div>
+    </div>
+    <div class="box-group" id="jobinfo">
+      {% include "widgets/joblog.html" %}
+      {% if Job.Type == 'R' %}
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-info">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-folder-open"></i>
+            <a data-toggle="collapse" data-parent="#jobinfo" href="#Two">Restored Files</a>
+          </h4>
+        </div>
+        <div id="Two" class="panel-collapse collapse">
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="jobrestorefiles" class="table table-striped">
+                <thead>
+                {% include 'jobs/log.legend1.html' %}
+                </thead>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      {% if Job.Type != 'D' and Job.Type != 'R' %}
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-database"></i>
+            <a data-toggle="collapse" data-parent="#jobinfo" href="#Three">{{ volumeheader|default:"Data Location" }}</a>
+          </h2>
+        </div>
+        <div id="Three" class="panel-collapse collapse">
+          <div id="{{ id|default:'datalocationwidget' }}" class="box-body">
+            {% include 'widgets/datalocationwidget.html' %}
+          </div>
+        </div>
+      </div>
+      <div class="panel box box-primary">
+        <div class="box-header with-border">
+          <h2 class="box-title">
+            <i class="fa fa-folder"></i>
+            <a data-toggle="collapse" data-parent="#jobinfo" href="#Four">Files</a>
+          </h2>
+        </div>
+        <div id="Four" class="panel-collapse collapse">
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="jobbackupfiles" class="table table-striped">
+                <thead>
+                {% include 'jobs/log.legend2.html' %}
+                </thead>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/deletejobidconfirm.html" %}
+{% include "widgets/cancelconfirm.html" %}
+{% include "widgets/stopconfirm.html" %}
+{% include "widgets/restartincompleteconfirm.html" %}
+{% include "widgets/restartfailedconfirm.html" %}
+{% include "widgets/commentedit.html" with id='commentedit' %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "jobs/log.js" %}
+{% endblock %}

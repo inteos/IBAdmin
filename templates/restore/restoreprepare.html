@@ -1,0 +1,31 @@
+<div id="restoreinfo" class="modal modal-info fade" data-backdrop="static" role="dialog"><!-- data-backdrop="static" to brak zamknięcia modal przy kliknięciu w tło -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" onclick="location.href='{% url 'jobsrunning' %}';" data-dismiss="modal" aria-label="Close" style="display: none;"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Please Wait ...</h4>
+      </div>
+      <div class="modal-body">
+        <p>Preparing restore job based on files selection... <i class="fa fa-refresh fa-spin pull-right"></i></p>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div id="restoreerror" class="modal modal-danger fade" data-backdrop="static" role="dialog"><!-- data-backdrop="static" to brak zamknięcia modal przy kliknięciu w tło -->
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" onclick="location.href='{% url 'systemmessages' %}';" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Restore Job preparation error</h4>
+      </div>
+      <div class="modal-body">
+        <i class="fa fa-frown-o"></i>
+        <p>I'm very sorry and I'd like to apologize but something goes wrong this time and I cannot prepare a Restore Job for you.<br>
+          I know that it is the most important Job right now, so I recorded a special log for you which you should check at <b>Messages panel</b></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success pull-right" onclick="location.href='{% url 'systemmessages' %}';" data-dismiss="modal">OK, no problem. It happens, sometimes...</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

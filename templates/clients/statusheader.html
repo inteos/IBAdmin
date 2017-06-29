@@ -1,0 +1,12 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+        <tr>
+          <td>{{ Client.Name }}</td>
+          <td>{{ Client.Agent }}</td>
+          <td>{{ Client.Version }}</td>
+          <td>{{ Client.Started }}</td>
+          <td class="text-center">{{ Client.RunJobs }}</td>
+          <td class="text-center">{{ Client.JobsRunning }}</td>
+          <td>{% autoescape off %}{{ Client.Plugins }}{% endautoescape %}</td>
+          <td class="text-center" style="width: 100px"><span class="label {{ Client.Status|statusbgcolor }}">{{ Client.Status|statustext }}</span></td>
+        </tr>

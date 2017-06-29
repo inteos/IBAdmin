@@ -1,0 +1,11 @@
+{% load ibadtexts %} <!-- TODO przerobić na datatable -->
+              {% for file in RestoreFiles %}
+              <tr>
+                <td class="text-center">{{ file.1 }}</td>
+                <td class="text-center">{{ file.3 }}</td>
+                <td class="text-center">{{ file.4 }}</td>
+                <td>{{ file.5|bytestext }}</td>
+                <td class="text-center">{{ file.6 }}</td>
+                <td>{{ file.7 }}</td>
+              </tr>
+              {% endfor %}

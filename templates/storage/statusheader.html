@@ -1,0 +1,31 @@
+{% load ibadtexts %}
+{% load ibadcolors %}
+<thead>
+  <tr>
+    <th>Storage Name</th>
+    <th>Component name</th>
+    <th>Storage version</th>
+    <th>Started</th>
+    <th class="text-center">Media Type</th>
+    <th class="text-center">Run Jobs</th>
+    {% if Storage.JobsRunning %}<th class="text-center">Jobs running</th>{% endif %}
+    {% if Storage.Plugins %}<th>Plugins</th>{% endif %}
+    {% if Storage.Drivers %}<th>Drivers</th>{% endif %}
+    <th class="text-center">Status</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>{{ Storage.Name }}</td>
+    <td>{{ Storage.Agent }}</td>
+    <td>{{ Storage.Version }}</td>
+    <td>{{ Storage.Started }}</td>
+    <td class="vertical-align text-center storage-media-type"><span class="badge {{ Storparams.MediaType|mediacolor }}">
+      <i class="fa {{ Storparams.MediaType|mediaicon }}"></i></span>{{ Storparams.MediaType }}</td>
+    <td class="text-center">{{ Storage.RunJobs }}</td>
+    {% if Storage.JobsRunning %}<td class="text-center">{{ Storage.JobsRunning }}</td>{% endif %}
+    {% if Storage.Plugins %}<td>{% for plugin in Storage.Plugins %}{{ plugin }}<br>{% endfor %}</td>{% endif %}
+    {% if Storage.Drivers %}<td>{% for driver in Storage.Drivers %}{{ driver }}<br>{% endfor %}</td>{% endif %}
+    <td class="text-center" style="width: 100px"><span class="label {{ Storage.Status|statusbgcolor }}">{{ Storage.Status|statustext }}</span></td>
+  </tr>
+</tbody>

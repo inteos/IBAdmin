@@ -1,0 +1,70 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-primary">
+      <div class="box-header">
+        <i class="fa fa-cogs"></i>
+        <h3 class="box-title">Advanced properities for {{ Job }}</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+        </div>
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="editform" method="post" action="{% url 'jobsadminadvanced' form.name.value %}">
+        {% csrf_token %}
+        <div class="box-body">
+        {{ form.name }}
+        <!-- time Picker -->
+        <div id="{{ form.starttime.id_for_label }}-group" class="form-group">
+          <label for="{{ form.starttime.id_for_label }}" class="col-sm-2 control-label">{{ form.starttime.label }}</label>
+          <div class="col-sm-10">
+            <div class="bootstrap-timepicker">
+              <div class="input-group">
+                {{ form.starttime }}
+                <div class="input-group-addon">
+                  <i class="fa fa-clock-o"></i>
+                </div>
+              </div><!-- /.input group -->
+            </div>
+          </div>
+        </div><!-- /.form group -->
+        {{ form.enabled }}
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="save"><i class="glyphicon glyphicon-floppy-disk"></i>Save</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+<div id="disableconfirm" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button id="disableconfirmbuttonx" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Disabling Admin Job</h4>
+      </div>
+      <div class="modal-body">You are about to disable an Admin Job. <b>In most cases it is not what you want to do</b> and
+        in some situations can lead to national disasters like earthquake, flood or massive paranoia<br> - Just kidding! <i class="fa fa-smile-o"></i><br>
+        You need to have a very serious cause to switch an Admin Job off. I hope you know what you are doing and if something goes wrong, don't blame me.
+      </div>
+      <div class="modal-footer">
+        <button id="disableconfirmbutton" type="button" class="btn btn-success pull-left">No! Back!</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Yes, I'm sure what I'm doing. Disable!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+{% endblock %}
+{% block pagejs %}
+  {% include "jobs/adminadvanced.js" %}
+{% endblock %}

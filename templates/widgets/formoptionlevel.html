@@ -1,0 +1,13 @@
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 {{ class }} text-center">
+          <div class="row">
+            <h4><span class="label label-{{ col|default:'primary' }}">{{ label }}</span></h4>
+          </div>
+          <div class="row">
+            <select class="select2" id="{{ name }}" name="{{ name }}">
+              <option value="" selected>Off</option>
+              <option value="full">Full</option>
+              {% if not dlevelincr %}<option value="incr">Incremental</option>{% endif %}
+              {% if not dleveldiff %}<option value="diff">Differential</option>{% endif %}
+            </select>
+          </div>
+        </div>

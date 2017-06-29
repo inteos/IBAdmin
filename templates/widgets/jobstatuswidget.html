@@ -1,0 +1,75 @@
+{% load ibadcolors %}
+<div class="col-lg-3 col-xs-6">
+  <div class="small-box {{ jobsrunning|jobrunningbgcolor }}">
+    <div class="inner">
+      <h3>{{ jobsrunning|default:0 }}</h3>
+      {% if jobsrunning == 1 %}<p>Job is Running</p>{% else %}<p>Jobs Running</p>{% endif %}
+    </div>
+    <div class="icon">
+      <i class="fa fa-cogs"></i>
+    </div>
+    <a href="/jobs/running" class="small-box-footer">
+      More info <i class="fa fa-arrow-circle-right"></i>
+    </a>
+  </div>
+</div><!-- ./col -->
+{% if jobsqueued > 0 %}
+<div class="col-lg-3 col-xs-6">
+  <div class="small-box {{ jobsqueued|jobqueuedbgcolor }}">
+    <div class="inner">
+      <h3>{{ jobsqueued|default:0 }}</h3>
+      {% if jobsqueued == 1 %}<p>Job is Queued</p>{% else %}<p>Jobs Queued</p>{% endif %}
+    </div>
+    <div class="icon">
+      <i class="fa fa-coffee"></i>
+    </div>
+    <a href="/jobs/queued" class="small-box-footer">
+      More info <i class="fa fa-arrow-circle-right"></i>
+    </a>
+  </div>
+</div><!-- ./col -->
+{% endif %}
+<div class="col-lg-3 col-xs-6">
+  <div class="small-box {{ jobssuccess|jobsuccessbgcolor }}">
+    <div class="inner">
+      <h3>{{ jobssuccess|default:0 }}</h3>
+      {% if jobssuccess == 1 %}<p>Job is Successful</p>{% else %}<p>Jobs Successful</p>{% endif %}
+    </div>
+    <div class="icon">
+      <i class="fa fa-thumbs-o-up"></i>
+    </div>
+    <a href="/jobs/finished" class="small-box-footer">
+      More info <i class="fa fa-arrow-circle-right"></i>
+    </a>
+  </div>
+</div><!-- ./col -->
+<div class="col-lg-3 col-xs-6">
+  <div class="small-box {{ jobserror|joberrorbgcolor }}">
+    <div class="inner">
+      <h3>{{ jobserror|default:0 }}</h3>
+      {% if jobserror == 1 %}<p>Job with Error</p>{% else %}<p>Jobs Error</p>{% endif %}
+    </div>
+    <div class="icon">
+      <i class="fa fa-minus-circle"></i>
+    </div>
+    <a href="/jobs/errors" class="small-box-footer">
+      More info <i class="fa fa-arrow-circle-right"></i>
+    </a>
+  </div>
+</div><!-- ./col -->
+{% if jobsqueued == 0 or not jobsqueued %}
+<div class="col-lg-3 col-xs-6">
+  <div class="small-box {{ jobswarning|jobwarningbgcolor }}">
+    <div class="inner">
+      <h3>{{ jobswarning|default:0 }}</h3>
+      {% if jobswarning == 1 %}<p>Job with Warning</p>{% else %}<p>Jobs Warning</p>{% endif %}
+    </div>
+    <div class="icon">
+      <i class="fa fa-exclamation-circle"></i>
+    </div>
+    <a href="/jobs/warning" class="small-box-footer">
+      More info <i class="fa fa-arrow-circle-right"></i>
+    </a>
+  </div>
+</div><!-- ./col -->
+{% endif %}

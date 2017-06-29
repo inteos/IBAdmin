@@ -1,0 +1,4 @@
+%bacula ALL=NOPASSWD: /usr/bin/systemctl stop bacula-dir, /usr/bin/systemctl start bacula-dir, /usr/bin/systemctl restart bacula-dir
+%bacula ALL=NOPASSWD: /usr/bin/systemctl stop bacula-sd, /usr/bin/systemctl start bacula-sd, /usr/bin/systemctl restart bacula-sd
+%bacula ALL=NOPASSWD: /usr/bin/systemctl stop bacula-fd, /usr/bin/systemctl start bacula-fd, /usr/bin/systemctl restart bacula-fd
+%bacula ALL=NOPASSWD: /usr/bin/systemctl stop ibadstatd, /usr/bin/systemctl start ibadstatd, /usr/bin/systemctl restart ibadstatd

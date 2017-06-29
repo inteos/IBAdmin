@@ -1,0 +1,9 @@
+<div id="app-group" class="form-group">
+  <label for="inputApplication" class="col-sm-2 control-label">{{ AppName|default:'Application Name' }}</label>
+  <div class="col-sm-10">
+    <div class="input-group">
+      <input type="text" class="form-control" id="inputApplication" placeholder="{{ AppNameValue }}" name="application" value="{{ AppNameValue }}" required>
+      <span class="input-group-addon"><i class="fa {{ AppNameIcon|default:'fa-cube' }}"></i></span>
+    </div>
+  </div>
+</div><!-- /.form-group -->

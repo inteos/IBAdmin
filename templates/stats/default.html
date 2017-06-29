@@ -1,0 +1,167 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+{% for stat in params %}
+  <div class="col-lg-6 col-xs-12">
+    <!-- default chart -->
+    <div class="box {{ stat.parid.box|default:'box-primary' }}">
+      <div class="box-header with-border">
+        <i id="charticon{{ stat.parid.parid }}" class="fa {{ stat.parid.chart|charticon }}"></i>
+        <h3 class="box-title">{{ stat.parid.description }}</h3>
+        <div class="box-tools pull-right">
+          <button id="live{{ stat.parid.parid }}" type="button" class="btn btn-box-tool"><i id="liveico{{ stat.parid.parid }}" class="fa fa-play-circle-o" data-toggle="tooltip" data-original-title="Live chart"></i></button>
+          <button type="button" class="btn btn-box-tool" data-widget="collapse" data-toggle="tooltip" data-original-title="Minimize"><i class="fa fa-minus"></i></button>
+          <button type="button" class="btn btn-box-tool" data-widget="remove" data-toggle="tooltip" data-original-title="Close"><i class="fa fa-times"></i></button>
+        </div>
+      </div>
+      <div class="box-body">
+        <div class="row">
+          <div class="col-xs-12">
+            <div id="display{{ stat.parid.parid }}" style="height: {{ height|default:'200px' }};"></div>
+          </div>
+        </div>
+      </div><!-- /.box-body-->
+      <div class="box-footer">
+        <div class="row">
+          {% if stat.parid.unit == 'Bytes' or stat.parid.unit == 'Bytes/s' %}
+          <div class="col-md-3">
+          {% else %}
+          <div class="col-md-5 text-center">
+          {% endif %}
+            <div class="btn-group">
+              <button id="chtype{{ stat.parid.parid }}" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa {{ stat.parid.chart|charticon }}"></i> {{ stat.parid.chart|charttext }} <span class="caret"></span>
+              </button>
+              <ul id="chartmenu{{ stat.parid.parid }}" class="dropdown-menu">
+                {% for type in '123' %}
+                <li><a href="#" data-chart="{{ type }}"><i class="fa {{ type|charticon }}"></i> {{ type|charttext }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+          {% if stat.parid.unit == 'Bytes' or stat.parid.unit == 'Bytes/s' %}
+          <div class="col-md-6">
+          {% else %}
+          <div class="col-md-7">
+          {% endif %}
+            <button id="daterange{{ stat.parid.parid }}" type="button" class="btn btn-default center-block">
+              <i class="fa fa-calendar"></i><span id="daterangespan{{ stat.parid.parid }}"> xxxx-xx-xx - xxxx-xx-xx </span><span class="caret"></span>
+            </button>
+            <div id="daterange{{ stat.parid.parid }}cam" style="display: none">
+              <div class="text-center vertical-align">
+                <button id="live{{ stat.parid.parid }}btn" type="button" class="btn btn-danger center-block"><i class="fa fa-video-camera"></i> Live on air!</button>
+              </div>
+            </div>
+          </div>
+          {% if stat.parid.unit == 'Bytes' %}
+          <div class="col-md-3">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="chdiv{{ stat.parid.parid }}" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="glyphicon glyphicon-scale"></i> MBytes <span class="caret"></span>
+                </button>
+                <ul id="chartdiv{{ stat.parid.parid }}" class="dropdown-menu">
+                  <li><a href="#" data-chart="1">Bytes</a></li>
+                  <li><a href="#" data-chart="2">kBytes</a></li>
+                  <li><a href="#" data-chart="3">MBytes</a></li>
+                  <li><a href="#" data-chart="4">GBytes</a></li>
+                  <li><a href="#" data-chart="5">TBytes</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          {% if stat.parid.unit == 'Bytes/s' %}
+          <div class="col-md-3">
+            <div class="text-center">
+              <div class="btn-group">
+                <button id="chdiv{{ stat.parid.parid }}3" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="glyphicon glyphicon-scale"></i> Bytes/sec <span class="caret"></span>
+                </button>
+                <ul id="chartdiv{{ stat.parid.parid }}3" class="dropdown-menu">
+                  <li><a href="#" data-chart="1">Bytes/sec</a></li>
+                  <li><a href="#" data-chart="2">kBytes/sec</a></li>
+                  <li><a href="#" data-chart="3">MBytes/sec</a></li>
+                  <li><a href="#" data-chart="4">GBytes/sec</a></li>
+                  <!--<li><a href="#" data-chart="5">TBytes/sec</a></li>-->
+                </ul>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div><!-- /.box-footer-->
+      <div id="loading{{ stat.parid.parid }}" class="overlay">
+        <i class="fa fa-refresh fa-spin"></i>
+      </div>
+    </div><!-- /.box -->
+  </div><!-- /.col -->
+{% empty %}
+  <div class="col-lg-6 col-xs-12 col-lg-offset-3">
+    <div class="callout callout-info">
+      <h4>No statistics available in this category</h4>
+      <p>This means that either no statistics collestor daemon is running, or your system does not contain this kind of statistics. If you think it is not what you expect, you should contact Inteos Support.</p>
+    </div>
+  </div>
+{% endfor %}
+</div><!-- /.row -->
+{% comment %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+
+        <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="true">Tab 1</a></li>
+        <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false">Tab 2</a></li>
+        <li class=""><a href="#tab_3" data-toggle="tab" aria-expanded="false">Tab 3</a></li>
+        <li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-gear"></i></a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+          <b>How to use:</b>
+
+          <p>Exactly like the original bootstrap tabs except you should use
+            the custom wrapper <code>.nav-tabs-custom</code> to achieve this style.</p>
+          A wonderful serenity has taken possession of my entire soul,
+          like these sweet mornings of spring which I enjoy with my whole heart.
+          I am alone, and feel the charm of existence in this spot,
+          which was created for the bliss of souls like mine. I am so happy,
+          my dear friend, so absorbed in the exquisite sense of mere tranquil existence,
+          that I neglect my talents. I should be incapable of drawing a single stroke
+          at the present moment; and yet I feel that I never was a greater artist than now.
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="tab_2">
+          The European languages are members of the same family. Their separate existence is a myth.
+          For science, music, sport, etc, Europe uses the same vocabulary. The languages only differ
+          in their grammar, their pronunciation and their most common words. Everyone realizes why a
+          new common language would be desirable: one could refuse to pay expensive translators. To
+          achieve this, it would be necessary to have uniform grammar, pronunciation and more common
+          words. If several languages coalesce, the grammar of the resulting language is more simple
+          and regular than that of the individual languages.
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="tab_3">
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+          Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+          when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+          It has survived not only five centuries, but also the leap into electronic typesetting,
+          remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset
+          sheets containing Lorem Ipsum passages, and more recently with desktop publishing software
+          like Aldus PageMaker including versions of Lorem Ipsum.
+        </div>
+        <!-- /.tab-pane -->
+      </div>
+      <!-- /.tab-content -->
+    </div>
+  </div>
+</div>
+{% endcomment %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "stats/default.js" %}
+{% endblock %}

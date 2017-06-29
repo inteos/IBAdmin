@@ -1,0 +1,15 @@
+[Unit]
+Description=IBAdmin Collector Daemon
+After=network.target
+Requires=postgresql.service
+
+[Service]
+Type=forking
+User=bacula
+Group=bacula
+ExecStart=/opt/ibadmin/utils/ibadstatd.py start
+ExecStop=/opt/ibadmin/utils/ibadstatd.py stop
+PIDFile=/tmp/ibadstatd.pid
+
+[Install]
+WantedBy=default.target
