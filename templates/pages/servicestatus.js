@@ -1,4 +1,3 @@
-<script>
   function fetchData{{ id }}(){
     function onDataReceived(data) {
       dirstat = data['DIRStatus'];
@@ -41,8 +40,3 @@
       success: onDataReceived,
     });
   };
-
-  $(function(){
-    setInterval(fetchData{{ id }}, 60000);
-  });
-</script>

@@ -7,8 +7,6 @@ from libs.statistic import *
 from libs.system import *
 from jobs.models import Job
 from config.models import *
-from stats.models import *
-from datetime import *
 # import pytz
 
 
@@ -55,39 +53,17 @@ def backupsizewidget(request):
 
 
 def runningjobswidget(request):
-    hours = 1
-    past = datetime.today() - timedelta(hours=hours)
-    query = StatData.objects.filter(parid__name='bacula.jobs.bytes', time__gt=past).order_by('time')[0:hours * 60]
-    data = []
-    barwidth = timedelta(hours=hours).total_seconds() * 500 / query.count()
-    for d in query:
-        timestamp = int((d.time - datetime(1970, 1, 1)).total_seconds() * 1000)
-        data.append([timestamp, d.nvalue / 1073741824.0])
-    context = {'color': '#39cccc', 'label': 'GBytes', 'barWidth': barwidth, 'data': data}
+    hours = 12
+    npoints = 100
+    data = generate_series_stats(parname='bacula.jobs.running', npoints=npoints, hours=hours)
+    barwidth = (hours * 2000000) / npoints
+    context = {'color': '#5f5aad', 'label': 'Jobs', 'barWidth': barwidth, 'data': data}
     return JsonResponse(context)
 
 
 def alljobswidget(request):
-    hours = 1
-    past = datetime.today() - timedelta(hours=hours)
-    query = StatData.objects.filter(parid__name='bacula.jobs.bytes', time__gt=past).order_by('time')[0:hours * 60]
-    data = []
-    barwidth = timedelta(hours=hours).total_seconds() * 500 / query.count()
-    for d in query:
-        timestamp = int((d.time - datetime(1970, 1, 1)).total_seconds() * 1000)
-        data.append([timestamp, d.nvalue / 1073741824.0])
-    context = {'color': '#39cccc', 'label': 'GBytes', 'barWidth': barwidth, 'data': data}
-    return JsonResponse(context)
-
-
-def allfileswidget(request):
-    hours = 1
-    past = datetime.today() - timedelta(hours=hours)
-    query = StatData.objects.filter(parid__name='bacula.jobs.bytes', time__gt=past).order_by('time')[0:hours * 60]
-    data = []
-    barwidth = timedelta(hours=hours).total_seconds() * 500 / query.count()
-    for d in query:
-        timestamp = int((d.time - datetime(1970, 1, 1)).total_seconds() * 1000)
-        data.append([timestamp, d.nvalue / 1073741824.0])
-    context = {'color': '#39cccc', 'label': 'GBytes', 'barWidth': barwidth, 'data': data}
+    hours = 12
+    npoints = 100
+    data = generate_series_stats(parname='bacula.jobs.all', npoints=npoints, hours=hours)
+    context = {'color': '#001d41', 'label': 'Jobs', 'data': data}
     return JsonResponse(context)

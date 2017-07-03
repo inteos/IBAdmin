@@ -1,4 +1,3 @@
-<script>
   function fetchData{{ id }}() {
     function onDataReceived(series) {
       data = [series];
@@ -34,10 +33,3 @@
     });
   };
   {% include 'pages/refreshbutton.js' %}
-  // flot init and refresh calls
-  $(function () {
-    fetchData{{ id }}();
-    setInterval(fetchData{{ id }}, 60000);
-  });
-</script>
-

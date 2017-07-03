@@ -2,13 +2,15 @@
     function onDataReceived(series) {
       data = [series];
       $.plot("#{{ id }}", data, {
+        lines: {
+          show: true,
+          fill: false,
+        },
         series: {
           shadowSize: 0,
         },
-        bars: {
+        points: {
           show: true,
-          barWidth: series.barWidth,
-          align: "center"
         },
         xaxis: {
           tickDecimals: 0,
@@ -16,8 +18,7 @@
           timezone: "browser",
         },
         yaxis: {
-          tickDecimals: 1,
-          min: 0,
+          tickDecimals: 0,
         },
       });
       $("#{{ id }}loading").hide();
@@ -30,8 +31,3 @@
     });
   };
   {% include 'pages/refreshbutton.js' %}
-  // flot init and refresh calls
-  $(function () {
-    fetchData{{ id }}();
-    setInterval(fetchData{{ id }}, 60000);
-  });

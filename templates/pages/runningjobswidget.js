@@ -16,7 +16,7 @@
           timezone: "browser",
         },
         yaxis: {
-          tickDecimals: 1,
+          tickDecimals: 0,
           min: 0,
         },
       });
@@ -30,8 +30,3 @@
     });
   };
   {% include 'pages/refreshbutton.js' %}
-  // flot init and refresh calls
-  $(function () {
-    fetchData{{ id }}();
-    setInterval(fetchData{{ id }}, 60000);
-  });

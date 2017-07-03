@@ -4,13 +4,15 @@
 {% include "widgets/jobstatus.html" %}
 <div class="row">
   <section class="col-lg-7 col-md-6 col-sm-12">
-  {% include "pages/cpuutilwidget.html" with id='cpuutilwidget' title='System Utilization' height='189px' %}
-  {% include "pages/backupsizewidget.html" with id='backupsizewidget' title='Total Backup Size' height='189px' %}
+  {% include "pages/plotwidget.html" with id='cpuutilwidget' title='System Utilization' height='189px' %}
+  {% include "pages/plotwidget.html" with id='backupsizewidget' title='Total Backup Size' height='189px' icon='fa-bar-chart' %}
   {% include "pages/servicestatus.html" with id='servicestatus' title='Service status' %}
   </section><!-- /.col -->
 
   <section class="col-lg-5 col-md-6 col-sm-12">
   {% include "pages/lastjobs.html" with id='lastjobswidget' title='Latest Jobs' %}
+  {% include "pages/plotwidget.html" with id='runningjobswidget' title='Running Jobs' height='189px' icon='fa-bar-chart' %}
+  {% include "pages/plotwidget.html" with id='alljobswidget' title='All Jobs' height='189px' icon='fa-line-chart' %}
 
   </section><!-- /.col -->
 </div><!-- /.row -->
