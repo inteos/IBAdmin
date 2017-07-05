@@ -58,11 +58,6 @@ def initalize(request):
         call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-sd'])
         call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-fd'])
         call([SUDOCMD, SYSTEMCTL, 'stop', 'ibadstatd'])
-        address = detectip()
-        with transaction.atomic():
-            # create config files
-            initialize(name=dirname, descr=descr, email=email, password=admpass, stortype=storage, address=address,
-                       archdir=archdir, dedupdir=dedupdir, dedupidxdir=dedupidxdir)
         # create config files
         with open('/opt/bacula/etc/bacula-dir.conf', 'w') as f:
             f.write('@|"/opt/ibadmin/utils/ibadconf.py -d"\n')
@@ -76,6 +71,11 @@ def initalize(request):
         with open('/opt/bacula/etc/bconsole.conf', 'w') as f:
             f.write('@|"/opt/ibadmin/utils/ibadconf.py -c"\n')
             f.close()
+        address = detectip()
+        with transaction.atomic():
+            # create config files
+            initialize(name=dirname, descr=descr, email=email, password=admpass, stortype=storage, address=address,
+                       archdir=archdir, dedupdir=dedupdir, dedupidxdir=dedupidxdir)
         # start all services
         call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-dir'])
         call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-sd'])
