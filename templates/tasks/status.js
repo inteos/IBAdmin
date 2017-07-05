@@ -13,7 +13,7 @@
         $('#taskendtime').html(data[2]);
         $('#tasklog').html(data[3]);
         $('#taskstatus').html(rendertaskstatusbadge(data[4], 'label'));
-        if (data[0] == 100 || data[4] == 'F' || data[4] == 'E'){
+        if (data[4] == 'F' || data[4] == 'E'){
           clearInterval(rpintervalId);
           $('#listrefresh').hide()
           $('#taskdivprogress').hide()
