@@ -855,8 +855,12 @@ def adminadvanced(request, name):
         data = makeadminadvanceddata(name, job)
         form = JobAdminAdvancedForm(initial=data)
         # form.fields['enabled'].disabled = True
+        jobcontext = {
+            'Name': name,
+            'InternalJob': 'Yes',
+        }
         context = {'contentheader': 'Advanced properities', 'apppath': ['Jobs', 'Advanced', name], 'form': form,
-                   'jobstatusdisplay': 1, 'Job': name}
+                   'jobstatusdisplay': 1, 'Job': jobcontext}
         updateMenuNumbers(context)
         return render(request, 'jobs/adminadvanced.html', context)
     else:
@@ -887,8 +891,12 @@ def catalogdvanced(request, name):
         data = makeadminadvanceddata(name, job)
         form = JobCatalogAdvancedForm(initial=data)
         # form.fields['enabled'].disabled = True
+        jobcontext = {
+            'Name': name,
+            'InternalJob': 'Yes',
+        }
         context = {'contentheader': 'Advanced properities', 'apppath': ['Jobs', 'Advanced', name], 'form': form,
-                   'jobstatusdisplay': 1, 'Job': name}
+                   'jobstatusdisplay': 1, 'Job': jobcontext}
         updateMenuNumbers(context)
         return render(request, 'jobs/catalogadvanced.html', context)
     else:
