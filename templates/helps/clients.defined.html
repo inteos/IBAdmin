@@ -1,0 +1,15 @@
+{% load staticfiles %}
+<h4>Defined Clients</h4>
+<p>Here you can view all your defined Clients. You can verify a Client OS, Client Cluster or avaliability Status.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p><i class="fa fa-cubes"></i> It is a Cluster Node Client. All Cluster Node clients of the same cluster name share some of its properities.</p>
+<p><i class="fa fa-cube"></i> It is a Cluster Service Client. Cluster Service client is always associated with a cluster service floating IP address.
+    All Cluster Node clients and Cluster Service clients of the same cluster name share some of its properities.</p>
+<p><i class="fa fa-external-link-square"></i> At the Client address column shows a Client name it is Alias to.</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display detailed information about any selected Client.</p>
+<p><img src="{% static 'help/images/ibadmin-restoreb1.png' %}"> Make restore of selected Client.</p>
+<p><img src="{% static 'help/images/ibadmin-editb1.png' %}"> Edit selected Client.</p>
+<p><img src="{% static 'help/images/ibadmin-deleteb2.png' %}"> Delete selected Client with all its defined Jobs and job history.</p>
+<p><img src="{% static 'help/images/ibadmin-newclientb1.png' %}"> Add a New Standalone Client.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You cannot delete a defined Client when is has any running job.</p>
+<p>You can search or sort the list to find or check what you are looking for.</p>

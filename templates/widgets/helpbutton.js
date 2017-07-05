@@ -3,7 +3,7 @@
     trigger: 'click',
     placement: 'bottom',
     html: 'true',
-    container: "#{{ id|default:'helpbutton' }}",
+    container: "body",
   });
   $(function () {
     $.ajax({

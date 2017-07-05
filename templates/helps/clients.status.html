@@ -1,0 +1,13 @@
+{% load staticfiles %}
+<h4>Client Status</h4>
+<p>Here you can view all details about Client - Bacula File Daemon.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p>You can Define new Files Job <img src="{% static 'help/images/ibadmin-filesbackupb1.png' %}">, Restore <img src="{% static 'help/images/ibadmin-restoreb2.png' %}">,
+    Edit <img src="{% static 'help/images/ibadmin-editb2.png' %}">, Delete <img src="{% static 'help/images/ibadmin-deleteb1.png' %}"> the Backup Client
+    or go stright to the Client Info page with <img src="{% static 'help/images/ibadmin-infob2.png' %}">.</p>
+<p><i class="fa fa-info-circle text-danger"></i> You cannot delete a Client if it has a running Jobs. Deleting a Client will delete all defined Jobs and jobs history.</p>
+<p><b>Client Running Jobs</b> - display list of currently running jobs on the Client.</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display details and log information about selected JobId.</p>
+<p><img src="{% static 'help/images/ibadmin-cancelb1.png' %}"> Cancel a selected JobId. Job will be unsuccessful.</p>
+<p><img src="{% static 'help/images/ibadmin-stopb2.png' %}"> Stop a selected JobId. Job will be Incomplete.</p>
+<p>You can search or sort the list to find or check what you are looking for.</p>

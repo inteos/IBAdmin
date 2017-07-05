@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<h4>Client Info</h4>
+<p>Here you can view all details and manage your backup client.</p>
+<p>You can Check online Status <img src="{% static 'help/images/ibadmin-statusb1.png' %}">, Define new Files Job <img src="{% static 'help/images/ibadmin-filesbackupb1.png' %}">,
+    Restore <img src="{% static 'help/images/ibadmin-restoreb2.png' %}">, Edit <img src="{% static 'help/images/ibadmin-editb2.png' %}">
+    and Delete <img src="{% static 'help/images/ibadmin-deleteb1.png' %}"> the Backup Client.</p>
+<p><i class="fa fa-info-circle text-danger"></i> You cannot delete a Client if it has a running Jobs. Deleting a Client will delete all defined Jobs and jobs history.</p>
+<p><b>Client Defined Jobs</b> - information about defined Jobs of the client.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display detailed information about any selected Job.</p>
+<p><img src="{% static 'help/images/ibadmin-runb1.png' %}"> Start selected Job.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You can't start <span class="badge bg-purple">Restore</span> job manually, use Restore (<img src="{% static 'help/images/ibadmin-restoreb1.png' %}">) button for that.</p>
+<p><img src="{% static 'help/images/ibadmin-restoreb1.png' %}"> Make restore of selected Job.</p>
+<p><img src="{% static 'help/images/ibadmin-editb1.png' %}"> Edit selected Job.</p>
+<p><img src="{% static 'help/images/ibadmin-deleteb2.png' %}"> Delete selected Job with all its history.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You cannot delete a defined Job when it is running.</p>
+<p>You can search or sort the list to find or check what you are looking for.</p>
+<p><b>Jobs History</b> - information of the execution of this Job.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display details and log information about selected JobId.</p>
+<p><img src="{% static 'help/images/ibadmin-restoreb1.png' %}"> Make restore of selected JobId.</p>
+<p><img src="{% static 'help/images/ibadmin-deleteb2.png' %}"> Delete selected JobId.</p>
+<p>You can search or sort the list to find or check what you are looking for.</p>

@@ -1,0 +1,10 @@
+{% load staticfiles %}
+<h4>New Cluster Service Backup Client</h4>
+<p>Here you can define a new cluster service backup client. Cluster service backup client is always associated with a cluster service floating IP address.
+    All Cluster Node clients and Cluster Service clients of the same cluster name share some of its properities.</p>
+<p><b>Service name</b> - name of your new backup client - Cluster Service. It has to be unique in your system.</p>
+<p><b>Description</b> - any description of your backup client.</p>
+<p><b>Cluster name</b> - name of the existing cluster component for a cluster service client.</p>
+<p><b>Address</b> - IP address or FQDN of cluster service client. It has to be a valid (resolved) address.</p>
+<p><b>Create default backup Job</b> - when checked a defaut Job for the Client will be created together with a Client.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> Default Job will have the name <i>&lt;client_name&gt;-DefaultJob.</i></p>

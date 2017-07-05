@@ -76,6 +76,11 @@ ul.jstree-container-ul.jstree-children {
 .modal-dialog {
   top: 150px;
 }
-.popover{
-  width:300px;
+.popover {
+  width:30%;
+  max-width:30%;
 }
+.popover-content {
+  max-height: 400px;
+  overflow-y: auto;
+ }

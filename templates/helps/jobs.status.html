@@ -1,0 +1,15 @@
+{% load staticfiles %}
+<h4>Job Status</h4>
+<p>Here you can view all details regarding your running JobId.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p><b>Processing</b> - Display currently processing file (trimed name).</p>
+<p><b>Progress</b> - Display estimated job progres based on previous jobs. For first job in history display <u>Unknown</u>.</p>
+<p><b>Files examined</b> - Display a number of files checked during backup.</p>
+<p><b>Files backup</b> - Display a number of files already saved by job.</p>
+<p><b>Read Bytes</b> - Display the size of data read by job during backup.</p>
+<p>You can Cancel <img src="{% static 'help/images/ibadmin-cancelb2.png' %}">, Stop <img src="{% static 'help/images/ibadmin-stopb3.png' %}"> or
+Comment <img src="{% static 'help/images/ibadmin-commentb1.png' %}"> currently running JobId.</p>
+<p>Use <img src="{% static 'help/images/ibadmin-statsb1.png' %}"> to view a Statistics of the Job or go stright to the Job Info page with
+    <img src="{% static 'help/images/ibadmin-infob2.png' %}">.</p>
+<p><b>Job Log</b> - current log from execution of this JobId.</p>
+<p><b>Data Location</b> - information about storage location of this JobId.</p>

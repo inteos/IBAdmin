@@ -1,0 +1,15 @@
+{% load staticfiles %}
+<h4>Job Log</h4>
+<p>Here you can view all details regarding finished JobId.</p>
+<p>Terminated Status of the JobId: <span class="label label-success">Success</span>, <span class="label label-danger">Error</span>,
+<span class="label label-warning">Warning</span>, <span class="label bg-fuchsia">Cancel</span>, <span class="label bg-teal">Incomplete</span>.</p>
+<p>You can Restore <img src="{% static 'help/images/ibadmin-restoreb2.png' %}">, Edit <img src="{% static 'help/images/ibadmin-editb2.png' %}">,
+    Delete <img src="{% static 'help/images/ibadmin-deleteb1.png' %}"> or Comment <img src="{% static 'help/images/ibadmin-commentb1.png' %}"> this JobId.</p>
+<p>If Job is unsuccessful then you can Restart <img src="{% static 'help/images/ibadmin-restartb1.png' %}"> it.</p>
+<p>Use <img src="{% static 'help/images/ibadmin-statsb1.png' %}"> to view a Statistics of the Job or go stright to the Job Info page with
+    <img src="{% static 'help/images/ibadmin-infob2.png' %}">.</p>
+<p><b>Job Log</b> - current log from execution of this JobId.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> Errors in Job log are highlighted for better view.</p>
+<p><b>Data Location</b> - information about storage location of this JobId.</p>
+<p><b>Files</b> - information about files saved with JobId.</p>
+<p><b>Restored Files</b> - information about files restored with Restore Job.</p>
