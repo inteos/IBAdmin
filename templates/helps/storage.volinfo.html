@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<h4>Volume Info</h4>
+<p>Here you can view all details about archive Volume.</p>
+<p>You can Open <img src="{% static 'help/images/ibadmin-unlockb2.png' %}"> (change status to <span class="badge bg-green">Append</span>),
+    Close <img src="{% static 'help/images/ibadmin-lockb2.png' %}"> (change status to <span class="badge bg-aqua">Used</span>),
+    Recycle <img src="{% static 'help/images/ibadmin-lockb2.png' %}"> (change status to <span class="badge bg-yellow">Purged</span>)
+    or Comment <img src="{% static 'help/images/ibadmin-commentb1.png' %}"> on your Volume.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> Volume operations avaliability depends on the status of the Volume.</p>
+<p><b>Jobs Stored</b> - display a list of jobs stored on this Volume.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display details and log information about selected JobId.</p>
+<p><img src="{% static 'help/images/ibadmin-restoreb1.png' %}"> Make restore of selected JobId.</p>
+<p><img src="{% static 'help/images/ibadmin-deleteb2.png' %}"> Delete selected JobId.</p>
+<p>You can search or sort the list to find or check what you are looking for.</p>
+<p><b>Volume Logs</b> - display a list system logs for the Volume.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>

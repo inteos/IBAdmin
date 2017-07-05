@@ -1,0 +1,10 @@
+{% load staticfiles %}
+<h4>Add New Deduplication Storage</h4>
+<p>Here you can define a new disk based deduplication backup storage. It is an extended file based storage available in Bacula Enterprise and Inteos Backup.</p>
+<p><b>Storage name</b> - name of your new backup storage. It has to be unique in your system.</p>
+<p><b>Description</b> - any description of your backup storage.</p>
+<p><b>Existing Storage</b> - select already defined storage - Bacula Storage Daemon.</p>
+<p><b>Dedup index directory</b> - location for the deduplication index database. It should be located on fast storage (i.e. SSD) for best performance.</p>
+<p><b>Dedup engine directory</b> - location for the deduplication data containers and Volumes archive. All backups data will be stored in this location.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> Both Dedup index directory and Dedup engine directory locations must exist on local storage and has to be writable by bacula user. You can't make successful backup if Storage will be unable to write to this location.</p>
+<p><i class="fa fa-info-circle text-yellow"></i> When you add a new storage you need to restart Storage Daemon manually for fully use of this storage.</p>

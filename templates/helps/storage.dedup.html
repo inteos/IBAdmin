@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<h4>Deduplication Storage Engine Info</h4>
+<p>Here you can view all details about Deduplication Storage Enfine.</p>
+<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p><span class="label label-success">Space size</span></p>
+<p><b>Saved data size</b> - space size for the all data stored without deduplication.</p>
+<p><b>Deduplication Ratio</b> - space save factor for using deduplication.</p>
+<p><b>Disk Space Used</b> - space size of all used data in containers.</p>
+<p><b>Disk Space Allocated</b> - disk space size allocated for containers.</p>
+<p><span class="label label-warning">Chunks stats</span></p>
+<p><b>Reference count</b> - number of chunks referenced by stored data.</p>
+<p><b>Chunks Used</b> - number of chunks used in containers.</p>
+<p><b>Chunks Allocated</b> - number of all allocated chunks in containers.</p>
+<p><span class="label label-danger">Status</span></p>
+<p><b>DDE Errors</b> - number of deduplication engine errors.</p>
+<p><b>Containers Errors</b> - number of chunks encountered errors.</p>
+<p><b>Vacuum</b> - date of the last run vacuum process.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> It could be <u>Never</u> if no vacuum process was running till now or <u>Running</u> for currently running vacuum process.</p>
+<p><b>Deduplication containers</b> - display a stats for all deduplication containers listed by container block size.</p>
+<p><span class="label label-primary">1k</span> - <span class="label label-primary">65k</span> - container block size.</p>
+<p><b>Disk space allocated</b> - disk space size allocated for this container.</p>
+<p><b>Space used</b> - space size used in container.</p>
+<p><b>Used</b> - space size used to space size allocated ratio for container.</p>
