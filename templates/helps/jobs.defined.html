@@ -1,0 +1,11 @@
+{% load staticfiles %}
+<h4>Defined Jobs</h4>
+<p>Here you can view all your defined backup jobs.</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display detail information about any selected Job.</p>
+<p><img src="{% static 'help/images/ibadmin-runb1.png' %}"> Start selected Job.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You can't start <span class="badge bg-purple">Restore</span> job manually, use Restore (<img src="{% static 'help/images/ibadmin-restoreb1.png' %}">) button for that.</p>
+<p><img src="{% static 'help/images/ibadmin-restoreb1.png' %}"> Make restore of selected Job.</p>
+<p><img src="{% static 'help/images/ibadmin-editb1.png' %}"> Edit selected Job.</p>
+<p><img src="{% static 'help/images/ibadmin-deleteb2.png' %}"> Deletes selected Job with all its history.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You cannot delete a defined Job when it is running.</p>
+<p>You can search or sort the list to find or check what you are looking for.</p>
