@@ -9,9 +9,7 @@
       <div class="box-header">
         <i class="fa fa-plus"></i>
         <h3 class="box-title">Add New Cluster Node Backup Client</h3>
-        <div class="box-tools pull-right">
-          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
-        </div>
+        {% include "widgets/helpbutton.html" with box=0 %}
       </div><!-- /.box-header -->
       <!-- form start -->
       <form class="form-horizontal" id="addform" method="post" action="{% url 'clientsaddnode' %}">

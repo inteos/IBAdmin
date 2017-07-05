@@ -9,9 +9,7 @@
       <div class="box-header">
         <i class="fa fa-edit"></i>
         <h4 class="box-title">{% if Client.ClusterName %}Edit Cluster Node Backup Client{% else %}Edit Backup Client{% endif %}</h4>
-        <div class="box-tools pull-right">
-          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
-        </div>
+        {% include "widgets/helpbutton.html" with box=0 %}
       </div><!-- /.box-header -->
       <!-- form start -->
       <form class="form-horizontal" id="editform" method="post" action="{% url 'clientseditstd' form.name.value %}">

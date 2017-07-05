@@ -58,3 +58,4 @@ $(function () {
 {% include "widgets/confirmmodal2.js" with selector='#canceljobconfirm, #stopjobconfirm, #deletejobidconfirm' %}
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
+{% include 'widgets/helpbutton.js' with helppage='storage.info' %}

@@ -101,3 +101,4 @@ $(function () {
 {% include "widgets/renderlinks.js" %}
 </script>
 {% include "pages/refresh.js" %}
+{% include 'widgets/helpbutton.js' with helppage='clients.defined' %}

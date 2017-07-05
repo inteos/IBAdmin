@@ -76,3 +76,6 @@ ul.jstree-container-ul.jstree-children {
 .modal-dialog {
   top: 150px;
 }
+.popover{
+  width:300px;
+}

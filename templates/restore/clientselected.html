@@ -1,7 +1,5 @@
   <div class="box-header">
     <i class="fa fa-laptop"></i>
     <h4 class="box-title">Client selected for restore: <a href="{% url 'clientsinfo' Name %}">{{ Name }}</a></h4>
-    <div class="box-tools pull-right">
-      <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
-    </div>
+    {% include "widgets/helpbutton.html" with box=0 %}
   </div><!-- /.box-header -->

@@ -111,3 +111,5 @@
     }
   });
 </script>
+{% include "pages/refresh.js" %}
+{% include 'widgets/helpbutton.js' with helppage='clients.addnode' %}

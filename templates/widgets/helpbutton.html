@@ -1,7 +1,7 @@
 {% if not box %}
 <div class="pull-right box-tools">
 {% endif %}
-<button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
+<button id="{{ id|default:'helpbutton' }}" type="button" class="btn btn-box-tool" data-toggle="popover" title="Help" data-content="No help available for this topic."><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
 {% if not box %}
 </div>
 {% endif %}

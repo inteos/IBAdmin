@@ -5,7 +5,10 @@
   <div class="box-header">
     <i class="fa fa-database"></i>
     <h3 class="box-title">Volumes List</h3>
-    {% include "widgets/refreshbutton.html" %}
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
   </div><!-- /.box-header -->
   <div class="box-body">
     <div class="table-responsive">

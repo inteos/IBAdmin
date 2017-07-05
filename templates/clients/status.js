@@ -103,3 +103,4 @@ $(function(){
 {% include "widgets/confirmmodal2.js" with selector='#canceljobconfirm, #stopjobconfirm' %}
 </script>
 {% include "pages/refresh.js" %}
+{% include 'widgets/helpbutton.js' with helppage='clients.status' %}

@@ -146,3 +146,5 @@ $('#fdbuttonstop, #ibadbuttonstop, #masterbuttonstart, #sdbuttonstart, #fdbutton
 });
 </script>
 {% include "pages/refresh.js" %}
+{% include 'widgets/helpbutton.js' with helppage='system.daemons' %}
+{% include 'widgets/helpbutton.js' with helppage='system.daemonlog' id='helplogbutton' %}

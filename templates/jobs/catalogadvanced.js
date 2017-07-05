@@ -17,3 +17,5 @@ $('#disableconfirmbutton, #disableconfirmbuttonx').on('click', function () {
   $('#{{ form.enabled.id_for_label }}').bootstrapToggle('on');
 });
 </script>
+{% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
+{% include 'widgets/helpbutton.js' with helppage='jobs.catalogadvanced' %}

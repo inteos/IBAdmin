@@ -28,9 +28,7 @@
       <div class="box-header">
         <i class="fa fa-sellsy"></i>
         <h3 class="box-title">Inteos Backup Daemons</h3>
-        <div class="box-tools pull-right">
-          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
-        </div>
+        {% include "widgets/helpbutton.html" with box=0 %}
       </div><!-- /.box-header -->
       <div class="box-body no-padding">
         <table class="table">
@@ -97,9 +95,7 @@
       <div class="box-header">
         <i class="fa fa-bars"></i>
         <h3 class="box-title">Daemon logs</h3>
-        <div class="box-tools pull-right">
-          <button type="button" class="btn btn-box-tool" data-widget="modal"><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></button>
-        </div>
+        {% include "widgets/helpbutton.html" with box=0 id='helplogbutton' %}
       </div><!-- /.box-header -->
       <div class="box-body">
         <small id="daemonlogsinfo">Select daemon button to view logs.</small>

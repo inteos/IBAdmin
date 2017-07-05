@@ -7,9 +7,12 @@
   <div class="box-header">
     <i class="fa fa-flag"></i>
     <h4 class="box-title">Background Task Status</h4>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
     {% if Task.status in 'RN' %}
-    {% include "widgets/refreshbutton.html" with box=0 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
     {% endif %}
+    </div>
   </div><!-- /.box-header -->
   <div class="box-body">
     <div class="row">

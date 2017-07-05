@@ -161,3 +161,5 @@ $(".dropdown-menu li a").click(function(){
   $('#{{ form.retention.id_for_label }}-interval').val(selValue);
 });
 </script>
+{% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
+{% include 'widgets/helpbutton.js' with helppage='jobs.finished' %}

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
 from django.shortcuts import render
-from django.http import HttpResponseServerError, JsonResponse
+from django.http import HttpResponseServerError, JsonResponse, HttpResponse
 from libs.menu import updateMenuNumbers
 from libs.statistic import *
 from libs.system import *
@@ -67,3 +67,11 @@ def alljobswidget(request):
     data = generate_series_stats(parname='bacula.jobs.all', npoints=npoints, hours=hours)
     context = {'color': '#001d41', 'label': 'Jobs', 'data': data}
     return JsonResponse(context)
+
+
+def helppage(request, page):
+    context = {}
+    try:
+        return render(request, 'helps/' + page + '.html', context)
+    except:
+        return HttpResponse('No help available for this topic.')

@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^runningjobswidget/$', views.runningjobswidget, name='runningjobswidget'),
     url(r'^alljobswidget/$', views.alljobswidget, name='alljobswidget'),
     url(r'^goeswrong/$', views.goeswrong, name='goeswrong'),
+    url(r'^helppage/(?P<page>.*)/$', views.helppage, name='helppage'),
 ]
