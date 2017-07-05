@@ -435,6 +435,8 @@ def adddisk(request):
 
 
 def adddedup(request):
+    if not storagededupavailable():
+        raise Http404()
     st = getStorageNames()
     storages = ()
     for s in st:

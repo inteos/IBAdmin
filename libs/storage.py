@@ -45,7 +45,11 @@ def updateStorageVolumesnr(context):
     context.update({'storagevolumesnr': val})
 
 
-def updateStoragedetectdedup(context):
+def storagededupavailable():
     ded = ConfParameter.objects.filter(name='.StorageDirDedupidx').count()
     val = detectdedup()
-    context.update({'storagedetectdedup': (ded < 1) and val})
+    return (ded < 1) and val
+
+
+def updateStoragedetectdedup(context):
+    context.update({'storagedetectdedup': storagededupavailable()})
