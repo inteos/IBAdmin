@@ -47,7 +47,7 @@ def handler(signal, frame):
 
 
 def maininit(fg=0):
-    cont = 10
+    cont = 60
     conn = None
     while cont:
         try:
@@ -84,14 +84,25 @@ def maininit(fg=0):
 
 
 def mainloop(fg=0):
-    conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
+    conn = None
     while cont:
         if fg:
-            print(time.asctime() + " : Collecting ...")
+            print(time.asctime() + " : Connection ...")
+        if conn is None:
+            try:
+                conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
+            except psycopg2.OperationalError:
+                conn = None
+                time.sleep(10)
+                continue
         try:
             conn.isolation_level
         except psycopg2.OperationalError:
-            conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
+            conn = None
+            time.sleep(10)
+            continue
+        if fg:
+            print(time.asctime() + " : Collecting ...")
         # colled the data
         Catalog.collect(conn, fg)
         Bacula.collect(conn, fg)
