@@ -11,7 +11,8 @@ IBADVERSION = '2017.01'
 # Bacula Enterprise 8.4.x - 1017
 # Bacula Enterprise 8.6.x - 1018
 # Bacula Enterprise 8.8.x - 1019
-CATVERSUPPORTED = (1017, 1018, 1019)
+# Bacula Community 7.4.x - 15
+CATVERSUPPORTED = (1017, 1018, 1019, 15)
 # system commands
 JOURNALCTL = "/usr/bin/journalctl --no-pager -u "
 NETIPCMD = "/usr/sbin/ip"
