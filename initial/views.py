@@ -14,8 +14,13 @@ from libs.plat import *
 def index(request):
     try:
         versionid = Version.objects.get().versionid
-    except:
-        versionid = 0
+    except Exception as err:
+        # redisplay initial
+        return render(request, 'initial/index.html', {
+            'displayalert': 1, 'subject': 'Error during preinitialize.',
+            'message': 'PreInitialize encountered an error: ' + str(err) +
+                       '. Try again later or contact <a href="https://inteos.freshservice.com">Inteos support</a>.',
+        })
     if versionid not in CATVERSUPPORTED:
         context = {'displayalert': 1,
                    'subject': "Wrong catalog version",
