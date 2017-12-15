@@ -42,6 +42,34 @@ def generate_series_stats(parname=None, starttime=None, endtime=None, hours=1, n
     return data
 
 
+def generate_series_nvalue_fast(parname=None, npoints=0, div=1):
+    if parname is None or npoints == 0:
+        return None
+    if div == 0:
+        div = 1
+    query = StatData.objects.filter(parid__name=parname).order_by('-time')[:npoints]
+    rev = reversed(query)
+    data = []
+    for i in rev:
+        timestamp = int((i.time - datetime(1970, 1, 1)).total_seconds() * 1000)
+        data.append([timestamp, i.nvalue / div])
+    return data
+
+
+def generate_series_fvalue_fast(parname=None, npoints=0, div=1):
+    if parname is None or npoints == 0:
+        return None
+    if div == 0:
+        div = 1
+    query = StatData.objects.filter(parid__name=parname).order_by('-time')[:npoints]
+    rev = reversed(query)
+    data = []
+    for i in rev:
+        timestamp = int((i.time - datetime(1970, 1, 1)).total_seconds() * 1000)
+        data.append([timestamp, i.fvalue / div])
+    return data
+
+
 def generate_series_job(name=None, level='F', npoints=0, field=None, div=1):
     if name is None or npoints == 0 or field is None:
         return None
