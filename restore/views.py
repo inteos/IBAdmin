@@ -18,7 +18,9 @@ from time import sleep
 
 
 # Create your views here.
-def client(request, name):
+def client(request, name=None):
+    if name is None:
+        return redirect('clientsdefined')
     clientres = getDIRClientinfo(name=name)
     if clientres is None:
         raise Http404()
