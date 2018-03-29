@@ -40,7 +40,9 @@ def client(request, name=None):
     return render(request, 'restore/client.html', context)
 
 
-def job(request, name):
+def job(request, name=None):
+    if name is None:
+        return redirect('jobsdefined')
     jobres = getDIRJobinfo(name=name)
     if jobres is None:
         raise Http404()
@@ -61,7 +63,9 @@ def job(request, name):
     return render(request, 'restore/job.html', context)
 
 
-def jobidre(request, jobid):
+def jobidre(request, jobid=None):
+    if jobid is None:
+        raise Http404()
     jobp = getJobidinfo(jobid)
     if jobp is None:
         raise Http404()
@@ -80,9 +84,11 @@ def jobidre(request, jobid):
     raise Http404()
 
 
-def jobidfiles(request, jobid):
+def jobidfiles(request, jobid=None):
+    if jobid is None:
+        raise Http404()
     jobp = getJobidinfo(jobid)
-    if job is None:
+    if jobp is None:
         raise Http404()
     jobids = bvfs_get_jobids(jobid)
     if jobids is not None:
@@ -110,9 +116,11 @@ def jobidfiles(request, jobid):
     return render(request, 'restore/jobidfiles.html', context)
 
 
-def jobidcatalog(request, jobid):
+def jobidcatalog(request, jobid=None):
+    if jobid is None:
+        raise Http404()
     jobp = getJobidinfo(jobid)
-    if job is None:
+    if jobp is None:
         raise Http404()
     jobids = bvfs_get_jobids(jobid)
     if jobids is not None:
@@ -140,7 +148,9 @@ def jobidcatalog(request, jobid):
     return render(request, 'restore/jobidcatalog.html', context)
 
 
-def updatecache(request, jobids):
+def updatecache(request, jobids=None):
+    if jobids is None:
+        return JsonResponse(False, safe=False)
     bvfs_update(jobids)
     return JsonResponse(True, safe=False)
 
@@ -182,7 +192,9 @@ def historydata(request, name):
     return JsonResponse(context)
 
 
-def displayfs(request, name):
+def displayfs(request, name=None):
+    if name is None:
+        raise Http404()
     jobres = getDIRJobinfo(name=name)
     if jobres is None:
         raise Http404()
@@ -204,7 +216,9 @@ def displayfs(request, name):
     return render(request, 'restore/displayfs.html', context)
 
 
-def displaytree(request, jobids, pathid):
+def displaytree(request, jobids, pathid=None):
+    if pathid is None:
+        raise Http404()
     context = []
     if pathid == 'root':
         if jobids == 'unavl':
@@ -273,7 +287,9 @@ def displaytree(request, jobids, pathid):
     return JsonResponse(context, safe=False)
 
 
-def displaytreecatalog(request, jobids, pathid):
+def displaytreecatalog(request, jobids, pathid=None):
+    if pathid is None:
+        raise Http404()
     context = []
     if pathid == 'root':
         if jobids == 'unavl':
