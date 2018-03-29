@@ -166,7 +166,7 @@ def runningdata(request):
     data = []
     for j in query:
         data.append([j.jobid, j.name, j.clientid.name, j.starttime.strftime('%Y-%m-%d %H:%M:%S'),
-                    [j.level, j.type], j.jobfiles, j.jobbytes, [j.jobid, j.name, j.type]])
+                    [j.level, j.type], [j.jobid, j.name, j.type]])
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 
