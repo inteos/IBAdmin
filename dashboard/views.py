@@ -36,35 +36,33 @@ def lastjobswidget(request):
 
 
 def cpuutilwidget(request):
-    hours = 24
     npoints = 200
-    data = generate_series_stats(parname='system.cpu.util', npoints=npoints, hours=hours, field='fvalue')
+    # data = generate_series_stats(parname='system.cpu.util', npoints=npoints, hours=hours, field='fvalue')
+    data = generate_series_fvalue_fast(parname='system.cpu.util', npoints=npoints)
     context = {'color': '#00c0ef', 'label': 'CPU Util%', 'data': data}
     return JsonResponse(context)
 
 
 def backupsizewidget(request):
-    hours = 12
-    npoints = 50
-    data = generate_series_stats(parname='bacula.size.jobs.bytes', npoints=npoints, hours=hours, div=1073741824.0)   # , allownull=False
-    barwidth = (hours * 2000000) / npoints
+    npoints = 60
+    # data = generate_series_stats(parname='bacula.size.jobs.bytes', npoints=npoints, hours=hours, div=1073741824.0)   # , allownull=False
+    data = generate_series_nvalue_fast(parname='bacula.size.jobs.bytes', npoints=npoints, div=1073741824.0)
+    barwidth = 10000000 / npoints
     context = {'color': '#39cccc', 'label': 'GBytes', 'barWidth': barwidth, 'data': data}
     return JsonResponse(context)
 
 
 def runningjobswidget(request):
-    hours = 12
-    npoints = 100
-    data = generate_series_stats(parname='bacula.jobs.running', npoints=npoints, hours=hours)
-    barwidth = (hours * 2000000) / npoints
+    npoints = 30
+    data = generate_series_nvalue_fast(parname='bacula.jobs.running', npoints=npoints)
+    barwidth = 8000000 / npoints
     context = {'color': '#5f5aad', 'label': 'Jobs', 'barWidth': barwidth, 'data': data}
     return JsonResponse(context)
 
 
 def alljobswidget(request):
-    hours = 12
-    npoints = 100
-    data = generate_series_stats(parname='bacula.jobs.all', npoints=npoints, hours=hours)
+    npoints = 30
+    data = generate_series_nvalue_fast(parname='bacula.jobs.all', npoints=npoints)
     context = {'color': '#001d41', 'label': 'Jobs', 'data': data}
     return JsonResponse(context)
 
