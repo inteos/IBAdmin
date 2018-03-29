@@ -57,6 +57,14 @@
       });
     };
     table.on('draw', updateJobidselect);
+    $('.jobselected').on('click', function (e){
+      var client = $(this).data('client');
+      $('#Two').collapse('toggle');
+      $('#Two').on('hidden.bs.collapse', function () {
+          url = "{% url 'restoreclient_rel' %}" + client + '/';
+          location.href = url;
+      });
+    });
   });
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}

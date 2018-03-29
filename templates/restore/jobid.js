@@ -96,6 +96,22 @@ $(function () {
 $(function () {
   //Initialize Select2 Elements
   $(".select2").select2();
+  $('.jobselected').on('click', function (e){
+    var client = $(this).data('client');
+    $('#Three').collapse('toggle');
+    $('#Three').on('hidden.bs.collapse', function () {
+        url = "{% url 'restoreclient_rel' %}" + client + '/';
+        location.href = url;
+    });
+  });
+  $('.jobidselected').on('click', function (e){
+    var job = $(this).data('job');
+    $('#Three').collapse('toggle');
+    $('#Three').on('hidden.bs.collapse', function () {
+        url = "{% url 'restorejob_rel' %}" + job + '/';
+        location.href = url;
+    });
+  });
 });
 </script>
 {% endif %}

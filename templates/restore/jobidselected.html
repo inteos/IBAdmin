@@ -1,8 +1,7 @@
   <div class="panel box box-success">
     <div class="box-header with-border">
       <i class="fa fa-history"></i>
-      <h4 class="box-title"> JobId selected for restore: <a href="{% url 'jobslog' Job.JobId %}">{{ Job.JobId }}</a></h4>
-      <!-- <a data-toggle="collapse" data-parent="#accordion" href="#Two"> </a> -->
+      <h4 class="box-title"> JobId selected for restore: <a class="jobidselected" data-job={{ Job.Name }} href="#">{{ Job.JobId }}</a></h4>
       <div class="pull-right box-tools">
       </div>
     </div>
