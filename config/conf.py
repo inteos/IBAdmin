@@ -370,7 +370,7 @@ def createDIRSchHours(resid=None, params=None):
     if cycle == 'r12':
         # every 12H, so 2 entries
         for h in range(0, 2):
-            sch = params['level'] + ' at ' + number2time(times, h * 12)
+            sch = level + ' at ' + number2time(times, h * 12)
             addparameter(resid, 'Run', sch)
         return
 
