@@ -1,10 +1,21 @@
 {% load staticfiles %}
+{% load ibadcolors %}
 <h4>Storage Status</h4>
 <p>Here you can view all details about Storage.</p>
 <p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
-<p>You can Edit <img src="{% static 'help/images/ibadmin-editb2.png' %}">, Display detailed information about Deduplication Engine <img src="{% static 'help/images/ibadmin-dedupengineb1.png' %}"> of your Storage
-    or go stright to the Storage Info page with <img src="{% static 'help/images/ibadmin-infob2.png' %}">.</p>
-<p><i class="fa fa-info-circle text-aqua"></i> Deduplication Engine status is available for deduplication enabled storage only.</p>
+<p>You can Edit <img src="{% static 'help/images/ibadmin-editb2.png' %}">, Display detailed information about
+    Deduplication Engine <img src="{% static 'help/images/ibadmin-dedupengineb1.png' %}"> of your Storage
+    or go straight to the Storage Info page with <img src="{% static 'help/images/ibadmin-infob2.png' %}">.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> Deduplication Engine status is available for deduplication enabled
+    storage only.</p>
 <p><b>Devices Status</b> - display a list of defined storage devices with some online information about each one.</p>
-<p><span class="label label-info">Running</span> - device is busy running a backup job.</p>
-<p><span class="label label-primary">Idle</span> - device is idle, no job running on this device.</p>
+<p><span class="label {{ 'Running'|devstatuscolor }}">Running</span> - device is busy running a backup job.</p>
+<p><span class="label {{ 'Idle'|devstatuscolor }}">Idle</span> - device is idle, no job running on this device.</p>
+<p><span class="label {{ 'Disabled'|devstatuscolor }}">Disabled</span> - device is temporary disabled, no job will be
+    running on this device in the future. The <i>Disabled</i> status will be valid until manually enabled or Storage
+    Daemon restart.</p>
+<p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display detailed information about any selected Storage
+    Device.</p>
+<p><img src="{% static 'help/images/ibadmin-toggle-off.png' %}"> Allow to enable a selected Storage Device when a device
+    is <span class="label {{ 'Disabled'|devstatuscolor }}">Disabled</span>.</p>
+<p><img src="{% static 'help/images/ibadmin-toggle-on.png' %}"> Allow to disable a selected Storage Device.</p>

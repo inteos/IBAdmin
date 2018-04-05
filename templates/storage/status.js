@@ -9,7 +9,26 @@ $(function(){
     $("#storagestatusloading").show();
     refresh();
   });
-  setInterval( refresh, 60000 );
+  $(document).on('click', '[data-dev="devena"]', function () {
+    function onDataReceived(data) {
+        $("#storagestatusloading").show();
+        refresh();
+    };
+    var button = $(this);
+    var name = button.data('name');
+    var status = button.data('status');
+    var url = "{% url 'storagedisabledevice_rel' Storage.Name %}" + name + '/';
+    if (status == 'Disabled'){
+        url = "{% url 'storageenabledevice_rel' Storage.Name %}" + name + '/';
+    };
+    $.ajax({
+      url: url,
+      type: "GET",
+      dataType: "json",
+      success: onDataReceived,
+    });
+  });
+  setInterval(refresh, 60000);
   refresh();
 });
 </script>

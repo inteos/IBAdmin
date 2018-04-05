@@ -6,11 +6,18 @@
     <td>{% if dev.Volume %}<a href="{% url 'storagevolumeinfo' dev.Volume  %}">{{ dev.Volume }}</a>{% else %}-{% endif %}</td>
     <td>{{ dev.Pool|retentiontext }}</td>
     <td>{{ dev.Size|bytestext|default:'-' }}</td>
-    <td class="vertical-align text-center">{% if dev.Online %}<span class="label label-info">Running</span>{% else %}<span class="label label-primary">Idle</span>{% endif %}</td>
+    <td class="vertical-align text-center"><span class="label {{ dev.Status|devstatuscolor }}">{{ dev.Status }}</span></td>
     <td class="vertical-align text-center">
       <div class="btn-group">
         <button class="btn btn-sm btn-default disabled" type="button" onclick="location.href='{% url 'storageinfo' st.Name %}';">
           <i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>
+        <button class="btn btn-sm btn-default" data-dev="devena" type="button" data-name="{{ dev.Name }}" data-status="{{ dev.Status }}">
+        {% if dev.Status == 'Disabled' %}
+          <i class="fa fa-toggle-off" data-toggle="tooltip" data-original-title="Enable"></i>
+        {% else %}
+          <i class="fa fa-toggle-on" data-toggle="tooltip" data-original-title="Disable"></i>
+        {% endif %}
+          </button>
       </div>
     </td>
   </tr>

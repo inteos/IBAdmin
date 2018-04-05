@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from subprocess import Popen, PIPE
 import re
+import utils
 
 
 def bconsolecommand(cmd, api=False, timeout=True):
@@ -161,6 +162,24 @@ def getClientStatus(client='ibadmin'):
         return None
 
 
+def disableDevice(storage='ibadmin', device='File0'):
+    """
+    *disable storage=devel1-File1 device=File1Dev1 drive=0
+    3002 Device ""File1Dev1" (/home/backup)" disabled.
+    """
+    out = getbconsolefilter("disable storage=\"" + storage + "\" device=\"" + device + "\" drive=0", 'disabled')
+    return out
+
+
+def enableDevice(storage='ibadmin', device='File0'):
+    """
+    *disable storage=devel1-File1 device=File1Dev1 drive=0
+    3002 Device ""File1Dev1" (/home/backup)" disabled.
+    """
+    out = getbconsolefilter("enable storage=\"" + storage + "\" device=\"" + device + "\" drive=0", 'enabled')
+    return out
+
+
 def getStorageStatus(storage='ibadmin'):
     """
     *.status storage=ibadmin-File1 header
@@ -214,15 +233,22 @@ def getStorageStatusDevice(storage='ibadmin', device='File0'):
     Device file: "File1Dev1" (/home/backup) is not open.
         Drive 1 is not loaded.
         Available Space=41.67 GB
+
+    Device File: "File1Dev7" (/home/backup) is not open.
+       Device is disabled. User command.
+       Drive 7 is not loaded.
+       Available Space=472.5 GB
     """
     bconsole = bconsolecommand(".status storage=\"" + storage + "\" devices device=\"" + device + "\"")[7:]
-    out = {'Online': True}
+    out = {'Status': 'Running'}
     if len(bconsole) > 0:
         for line in bconsole:
             if line == '':
                 continue
             if 'is not open' in line:
-                out['Online'] = False
+                out['Status'] = 'Idle'
+            if 'Device is disabled' in line:
+                out['Status'] = 'Disabled'
             if 'Available Space' in line:
                 out['AvailableSpace'] = line.split('=')[1]
             if 'Volume:' in line:
@@ -232,7 +258,7 @@ def getStorageStatusDevice(storage='ibadmin', device='File0'):
             if 'Media type:' in line:
                 out['MediaType'] = line.split(':')[1].lstrip()
             if 'Total Bytes=' in line:
-                out['Size'] = line.split()[1].split('=')[1].replace(',','')
+                out['Size'] = line.split()[1].split('=')[1].replace(',', '')
     return out
 
 
@@ -383,22 +409,6 @@ def getClientJobiddata(client, jobid):
                 break
             jobparams = {}
     return jobs
-
-
-def countbytes(fbyte, bs):
-    if bs == 'B':
-        return int(float(fbyte))
-    if bs == 'K':
-        return int(float(fbyte) * 1024)
-    if bs == 'M':
-        return int(float(fbyte) * 1048576)
-    if bs == 'G':
-        return int(float(fbyte) * 1024 * 1048576)
-    if bs == 'T':
-        return int(float(fbyte) * 1048576 * 1048576)
-    if bs == 'P':
-        return int(float(fbyte) * 1024 * 1048576 * 1048576)
-    return int(float(fbyte))
 
 
 def getrunningjobs():

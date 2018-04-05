@@ -299,3 +299,13 @@ def jdappcolor(value):
         if value == 'jd-backup-catalog':
             return 'bg-navy'
     return 'label-default'
+
+
+@register.filter
+def devstatuscolor(value):
+    if value is not None:
+        if value == 'Running':
+            return 'label-info'
+        if value == 'Disabled':
+            return 'label-danger'
+    return 'label-primary'

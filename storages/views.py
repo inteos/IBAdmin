@@ -616,3 +616,23 @@ def editdedup(request, name):
                 print form.is_valid()
                 print form.errors.as_data()
     return redirect('storagedefined')
+
+
+def enabledevice(request, storage, device):
+    storageres = getDIRStorageinfo(name=storage)
+    if storageres is None:
+        raise Http404()
+    out = enableDevice(storage=storage, device=device)
+    if len(out) > 0 and out[0].startswith('3002'):
+        return JsonResponse(True, safe=False)
+    return JsonResponse(False, safe=False)
+
+
+def disabledevice(request, storage, device):
+    storageres = getDIRStorageinfo(name=storage)
+    if storageres is None:
+        raise Http404()
+    out = disableDevice(storage=storage, device=device)
+    if len(out) > 0 and out[0].startswith('3002'):
+        return JsonResponse(True, safe=False)
+    return JsonResponse(False, safe=False)
