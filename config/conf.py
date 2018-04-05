@@ -1199,6 +1199,8 @@ def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', startt
     query = ConfParameter.objects.filter(resid=resid)
     query.delete()
     schtime = str(starttime)[:-3]
+    if forcelevel is not None:
+        backuplevel = forcelevel
     params = {
         'level': backuplevel,
         'time': schtime,
@@ -1226,8 +1228,6 @@ def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', startt
         else:
             backuplevel = 'incr'
     jresid = getresourceid(compid=dircompid, name=jobname, typename='Job')
-    if forcelevel is not None:
-        backuplevel = forcelevel
     updateparameterresid(resid=jresid, name='Level', value=getlevelname(backuplevel))
     schparam = data['backupsch'] + ':' + data['backuprepeat']
     updateparameterresid(resid=jresid, name='.Scheduleparam', value=schparam)
