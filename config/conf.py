@@ -1418,7 +1418,8 @@ def createStoragetape(dircompid=None, dirname=None, storname='ibadmin', address=
     password = randomstr()
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=dirstorname, password=password, address=address,
-                     descr=descr, device=mediatype, mediatype=mediatype, internal=internal, sdcomponent=storname)
+                     descr=descr, device=mediatype, mediatype=mediatype, internal=internal, sdcomponent=storname,
+                     sddirdevice=tapelib['Lib']['name'])
     # create SD component
     sdcompid = createSDcomponent(name=storname)
     # insert new Director {} resource into SD conf
