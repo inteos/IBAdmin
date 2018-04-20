@@ -153,7 +153,7 @@ def createDIRClient(dircompid=None, dirname=None, name='ibadmin', password='ibad
 
 
 def createDIRPool(dircompid=None, name='Default', disktype=False, retention=None, useduration=None, nextpool=None,
-                  storage=None, descr=''):
+                  storage=None, descr='', cleaning=False):
     # create resource
     resid = createDIRresPool(dircompid=dircompid, name=name, descr=descr)
     # add parameters
@@ -170,6 +170,8 @@ def createDIRPool(dircompid=None, name='Default', disktype=False, retention=None
         addparameterstr(resid, 'NextPool', nextpool)
     if storage is not None:
         addparameterstr(resid, 'Storage', storage)
+    if cleaning:
+        addparameterstr(resid, 'CleaningPrefix', "CLN")
 
 
 def check_or_createPool(dircompid=None, name='Default', disktype=False, retention=None, useduration=None):
@@ -1772,7 +1774,7 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
     createDIRPool(dircompid=dircompid, name='Default', disktype=stortype is not 'Tape', retention='2 weeks',
                   useduration='1 day', descr='Default System Pool with 2W retention')
     # create Scratch Pool
-    createDIRPool(dircompid=dircompid, name='Scratch', retention='2 weeks', descr='Management Scratch Pool')
+    createDIRPool(dircompid=dircompid, name='Scratch', retention='2 weeks', descr='Management Scratch Pool', cleaning=True)
     # create Admin JobDefs
     createDIRJobDefsAdmin(dircompid=dircompid, client=name, storage=storname)
     # create Restore JobDefs
