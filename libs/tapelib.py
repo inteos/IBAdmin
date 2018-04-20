@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from __future__ import print_function
 from .system import *
-# import time
+import time
 import os.path
 import re
 
@@ -29,7 +29,7 @@ def detectlibs():
 
 
 def mt_status(dev=None):
-    # time.sleep(1)
+    time.sleep(1)
     if dev is None:
         return None
     lines = []
@@ -43,7 +43,7 @@ def mt_status(dev=None):
 
 
 def mtx_statusinfo(dev=None):
-    # time.sleep(1)
+    time.sleep(1)
     if dev is None:
         return None
     libraryinfo = {
@@ -113,7 +113,7 @@ def mtx_statusinfo(dev=None):
 
 
 def mtx_load(dev=None, drive=None, slot=0, volume=None):
-    # time.sleep(1)
+    time.sleep(1)
     if dev is not None and drive is not None and (slot != 0 or volume is not None):
         if os.path.exists(dev):
             if volume is not None:
@@ -134,7 +134,7 @@ def mtx_load(dev=None, drive=None, slot=0, volume=None):
 
 
 def mtx_unload(dev=None, drive=None):
-    # time.sleep(1)
+    time.sleep(1)
     if dev is not None and drive is not None:
         if os.path.exists(dev):
             lib = mtx_statusinfo(dev)
