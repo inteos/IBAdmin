@@ -55,7 +55,7 @@
     <hr>
     <div class="row">
       <div class="col-sm-10 center-block">
-        <a class="btn btn-app" onclick='location.href="{% url 'storagestatus' Storage.Name %}"'><i class="fa fa-external-link"></i>Status</a>
+        <a class="btn btn-app" href="{% url 'storagestatus' Storage.Name %}"><i class="fa fa-external-link"></i>Status</a>
         {% if Storage.MType == 'Dedu' %}
         <a class="btn btn-app disabled" data-toggle="modal" data-target="#dedupvacuum" data-name="{{ Storage.Name }}"><i class="fa fa-magic"></i>Vacuum</a>
         <a class="btn btn-app" href="{% url 'storagededup' Storage.Name %}"><i class="fa fa-cubes"></i>Dedup Engine</a>
@@ -63,6 +63,9 @@
         <a class="btn btn-app" href="{% url 'storageedit' Storage.Name %}"><i class="fa fa-edit"></i>Edit</a>
         {% if Storage.InternalStorage != 'Yes' %}
         <a class="btn btn-app disabled" data-toggle="modal" data-target="#deleteconfirm" data-name="{{ Storage.Name }}"><i class="fa fa-trash"></i>Delete</a>
+        {% endif %}
+        {% if Storage.MType == 'Tape' %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#labelconfirm" data-name="{{ Storage.StorageDirDevice }}" data-url="{% url 'storagelabel' Storage.Name %}"><i class="fa fa-tags"></i>Label tapes</a>
         {% endif %}
         <!--<a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
         <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
@@ -99,6 +102,7 @@
 {% include "widgets/cancelconfirm.html" %}
 {% include "widgets/stopconfirm.html" %}
 {% include "widgets/deletejobidconfirm.html" %}
+{% include "widgets/labelconfirm.html" %}
 {% endblock %}
 
 {% block pagejs %}

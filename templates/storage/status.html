@@ -47,6 +47,9 @@
         <a class="btn btn-app" href="{% url 'storagededup' Storage.Name %}"><i class="fa fa-cubes"></i>Dedup Engine</a>
         {% endif %}
         <a class="btn btn-app" href="{% url 'storageedit' Storage.Name %}"><i class="fa fa-edit"></i>Edit</a>
+        {% if Storage.MType == 'Tape' %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#labelconfirm" data-name="{{ Storage.StorageDirDevice }}" data-url="{% url 'storagelabel' Storage.Name %}"><i class="fa fa-tags"></i>Label tapes</a>
+        {% endif %}
         <!--<a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
         <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
       </div>
@@ -71,7 +74,7 @@
                   <th>Retention</th>
                   <th>Size</th>
                   <th class="text-center" style="width: 120px;">Status</th>
-                  <th class="text-center" style="width: 96px;">Manage</th>
+                  <th class="text-center" style="width: 128px;">Manage</th>
                 </tr>
                 </thead>
                 <tbody id="storagedevices">
@@ -95,6 +98,7 @@
     <i class="fa fa-refresh fa-spin"></i>
   </div>
 </div><!-- /.box -->
+{% include "widgets/labelconfirm.html" %}
 {% endblock %}
 
 {% block pagejs %}

@@ -28,9 +28,27 @@ $(function(){
       success: onDataReceived,
     });
   });
+  $(document).on('click', '[data-dev="umount"]', function () {
+    function onDataReceived(data) {
+        $("#storagestatusloading").show();
+        refresh();
+    };
+    var button = $(this);
+    var name = button.data('name');
+    var slot = button.data('slot');
+    var url = "{% url 'storageumountdevice_rel' Storage.Name %}" + slot + '/' + name + '/';
+    $.ajax({
+      url: url,
+      type: "GET",
+      dataType: "json",
+      success: onDataReceived,
+    });
+  });
   setInterval(refresh, 60000);
   refresh();
 });
+{% include "widgets/labelconfirm.js" %}
+{% include 'widgets/confirmmodal1a.js' with selector='#labelconfirm' %}
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
 {% include 'widgets/helpbutton.js' with helppage='storage.status' %}

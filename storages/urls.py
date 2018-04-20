@@ -11,23 +11,36 @@ urlpatterns = [
     url(r'^status/(?P<name>.*)/$', views.status, name='storagestatus'),
     url(r'^statusheader/(?P<name>.*)/$', views.statusheader, name='storagestatusheader'),
     url(r'^statusdevices/(?P<name>.*)/$', views.statusdevices, name='storagestatusdevices'),
+
     url(r'^enabledevice/(?P<storage>.*)/(?P<device>.*)/$', views.enabledevice, name='storageenabledevice'),
     url(r'^enabledevice/(?P<storage>.*)/$', views.enabledevice, name='storageenabledevice_rel'),
     url(r'^disabledevice/(?P<storage>.*)/(?P<device>.*)/$', views.disabledevice, name='storagedisabledevice'),
-    url(r'^disabledevice/(?P<storage>.*)/$', views.disabledevice, name='storagedisabledevice_rel'),
+    url(r'^disabledevice/(?P<storage>.*)/$', views.umountdevice, name='storagedisabledevice_rel'),
+    url(r'^umountdevice/(?P<storage>.*)/(?P<slot>.*)/(?P<device>.*)/$', views.umountdevice, name='storageumountdevice'),
+    url(r'^umountdevice/(?P<storage>.*)/$', views.umountdevice, name='storageumountdevice_rel'),
+
     url(r'^dedup/(?P<name>.*)/$', views.dedup, name='storagededup'),
     url(r'^dedupdata/(?P<name>.*)/$', views.dedupdata, name='storagededupdata'),
+    url(r'^label/(?P<storage>.*)/$', views.labeltape, name='storagelabel'),
+
     url(r'^name/$', views.name, name='storagename'),
     url(r'^address/$', views.address, name='storageaddress'),
     url(r'^archivedir$', views.archivedir, name='storagearchivedir'),
+
     url(r'^adddisk/$', views.adddisk, name='storageadddisk'),
     url(r'^adddedup/$', views.adddedup, name='storageadddedup'),
+    url(r'^addtape/$', views.adddedup, name='storageaddtape'),
+
     url(r'^edit/(?P<name>.*)/$', views.edit, name='storageedit'),
     url(r'^editdisk/(?P<name>.*)/$', views.editdisk, name='storageeditdisk'),
     url(r'^editdedup/(?P<name>.*)/$', views.editdedup, name='storageeditdedup'),
+    url(r'^edittape/(?P<name>.*)/$', views.editdedup, name='storageedittape'),
 
     url(r'^volume/$', views.volinfo, name='storagevolumeinfo_rel'),
     url(r'^volume/(?P<name>.*)/$', views.volinfo, name='storagevolumeinfo'),
+    url(r'^volumes/$', views.volumes, name='storagevolumes'),
+    url(r'^volumesdata/$', views.volumesdata, name='storagevolumesdata'),
+
     url(r'^vol/makeused/$', views.makeused, name='storagemakeused_rel'),
     url(r'^vol/makeused/(?P<name>.*)/$', views.makeused, name='storagemakeused'),
     url(r'^vol/makeappend/$', views.makeappend, name='storagemakeappend_rel'),
@@ -38,8 +51,7 @@ urlpatterns = [
     url(r'^vol/makedelete/(?P<name>.*)/$', views.makedeletevolume, name='storagemakedeletevolume'),
     url(r'^vol/comment/$', views.comment, name='storagevolcomment_rel'),
     url(r'^vol/comment/(?P<name>.*)/$', views.comment, name='storagevolcomment'),
+
     url(r'^vol/historydata/(?P<name>.*)/$', views.volhistorydata, name='volumeshistorydata'),
     url(r'^vol/logdata/(?P<name>.*)/$', views.vollogdata, name='volumeslogdata'),
-    url(r'^volumes/$', views.volumes, name='storagevolumes'),
-    url(r'^volumesdata/$', views.volumesdata, name='storagevolumesdata'),
 ]

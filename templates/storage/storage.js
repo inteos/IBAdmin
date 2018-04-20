@@ -52,9 +52,11 @@ $(function () {
   setInterval( function () {
     table.ajax.reload( null, false ); // user paging is not reset on reload
   }, 60000 );
+{% include "widgets/labelconfirm.js" %}
 {% include "widgets/refreshbutton.js" %}
 {% include "widgets/confirmbutton.js" with selector='#canceljobconfirmbutton, #stopjobconfirmbutton, #deletejobidconfirmbutton' %}
 });
+{% include 'widgets/confirmmodal1a.js' with selector='#labelconfirm' %}
 {% include "widgets/confirmmodal2.js" with selector='#canceljobconfirm, #stopjobconfirm, #deletejobidconfirm' %}
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}

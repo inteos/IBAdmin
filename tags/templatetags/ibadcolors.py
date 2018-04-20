@@ -306,6 +306,8 @@ def devstatuscolor(value):
     if value is not None:
         if value == 'Running':
             return 'label-info'
-        if value == 'Disabled':
+        if value == 'Disabled' or value == 'Blocked':
             return 'label-danger'
+        if value == 'Mounted':
+            return 'bg-navy'
     return 'label-primary'

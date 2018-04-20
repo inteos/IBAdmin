@@ -9,6 +9,7 @@ from libs.menu import updateMenuNumbers
 from libs.storage import *
 from libs.system import *
 from libs.bconsole import *
+from libs.task import prepareTask
 from config.conf import *
 from config.confinfo import *
 from .models import *
@@ -637,3 +638,25 @@ def disabledevice(request, storage, device):
     if len(out) > 0 and out[0].startswith('3002'):
         return JsonResponse(True, safe=False)
     return JsonResponse(False, safe=False)
+
+
+def umountdevice(request, storage, slot, device):
+    storageres = getDIRStorageinfo(name=storage)
+    if storageres is None:
+        raise Http404()
+    out = umountDevice(storage=storage, device=device, slot=slot)
+    if len(out) > 0 and out[0].startswith('3002'):
+        return JsonResponse(True, safe=False)
+    return JsonResponse(False, safe=False)
+
+
+def labeltape(request, storage):
+    storageres = getDIRStorageinfo(name=storage)
+    if storageres is None:
+        raise Http404()
+    taskid = 0
+    logi = Log(jobid_id=0, logtext='User labeled tapes in "' + storage + '"')
+    logi.save()
+    taskid = prepareTask(name="Label tapes", proc=4, params=storage, log="Starting...")
+    context = {'taskid': taskid}
+    return JsonResponse(context, safe=False)
