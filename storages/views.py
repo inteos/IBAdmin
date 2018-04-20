@@ -384,6 +384,7 @@ def name(request):
     return JsonResponse(check, safe=False)
 
 
+# TODO: Move to libs/storage.py
 def archivedir(request):
     archdir = request.GET.get('archivedir')
     if archdir is not None:

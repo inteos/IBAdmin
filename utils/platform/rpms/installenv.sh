@@ -9,6 +9,7 @@ systemctl stop bacula-dir
 systemctl stop bacula-sd
 systemctl stop bacula-fd
 systemctl stop httpd
+systemctl stop postgresql
 su - postgres -c "initdb /var/lib/pgsql/data/"
 systemctl enable postgresql
 systemctl start postgresql
@@ -38,7 +39,7 @@ chown bacula:bacula /opt/bacula/bsr/
 mkdir -p /opt/bacula/working/bkp
 chown bacula:bacula /opt/bacula/working/bkp
 # and apache user needs to run bconsole and have access to the system logs and services
-usermod -G bacula,systemd-journal apache
+usermod -G bacula,systemd-journal,tape apache
 cp /opt/ibadmin/utils/platform/rpms/ibadmin_sudoers /etc/sudoers.d/
 systemctl enable httpd
 systemctl start httpd

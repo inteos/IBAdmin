@@ -39,7 +39,7 @@ chown bacula:bacula /opt/bacula/bsr/
 mkdir -p /opt/bacula/working/bkp
 chown bacula:bacula /opt/bacula/working/bkp
 # and apache user needs to run bconsole and have access to the system logs and services
-usermod -G bacula,systemd-journal www-data
+usermod -G bacula,systemd-journal,tape www-data
 cp /opt/ibadmin/utils/platform/debs/ibadmin_sudoers /etc/sudoers.d/
 systemctl restart apache2
 # permissions to manage configs

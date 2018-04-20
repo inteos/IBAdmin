@@ -68,7 +68,7 @@ def detectdedup():
     ded = os.path.isfile('/opt/bacula/plugins/dedup-sd.so')
     if ded is True:
         return True
-    plugs = glob.glob('/opt/bacula/plugins/bacula-sd-dedup-driver-?.?.?.so')
+    plugs = glob.glob('/opt/bacula/plugins/bacula-sd-dedup-driver-*.*.*.so')
     if len(plugs) > 0:
         return True
     else:
@@ -77,28 +77,6 @@ def detectdedup():
 
 def checkarchivedir(archivedir):
     return os.path.isdir(archivedir)
-
-
-def detectlib():
-    tapeliblist = []
-    out = Popen(LSSCSICMD, shell=True, stdout=PIPE).stdout.read()
-    lines = out.splitlines()
-    pattern = re.compile(r'^(\[\d+:\d+:\d+:\d+\])\s+(\S+)\s+(\S+)\s+(.{16})\s(.{5})\s(\S+)\s+(\S+)')
-    for data in lines:
-        m = pattern.search(data)
-        saddr = m.group(1)
-        stype = m.group(2)
-        vendor = m.group(3)
-        model = m.group(4)
-        generic = m.group(7)
-        if stype == 'mediumx':
-            libname = vendor + " " + model + " " + saddr
-            tapeliblist.append({
-                'name': libname,
-                'dev': generic,
-                'id': saddr,
-            })
-    return tapeliblist
 
 
 def updateservicestatus(context):
@@ -120,3 +98,37 @@ def getsystemdlog(name=None):
     out = Popen(JOURNALCTL + name, shell=True, stdout=PIPE).stdout.read()
     lines = out.splitlines()
     return lines
+
+
+def gettapedrvlist():
+    tapedrvlist = []
+    out = Popen(LSSCSICMD, shell=True, stdout=PIPE).stdout.read()
+    lines = out.splitlines()
+    pattern = re.compile(r'^(\[\d+:\d+:\d+:\d+\])\s+(\S+)\s+(\S+)\s+(.{16})\s(.{5})\s(\S+)\s+(\S+)')
+    for data in lines:
+        m = pattern.search(data)
+        saddr = m.group(1)
+        stype = m.group(2)
+        vendor = m.group(3)
+        model = m.group(4)
+        dev = m.group(6).replace('st', 'nst')
+        if stype == 'tape':
+            tapename = vendor + ' ' + model + ' ' + saddr
+            tapedrvlist.append({
+                'name': tapename,
+                'dev': dev,
+                'id': saddr,
+            })
+    return tapedrvlist
+
+
+def getdevsymlink(name=None):
+    if name is None:
+        return None
+    if os.path.exists(name):
+        # udevadm info --query=symlink --name=/dev/nst0
+        out = Popen(UDEVADMCMD + ' info --query=symlink --name=' + name, shell=True, stdout=PIPE).stdout.read()
+        lines = out.splitlines()
+        if len(lines) > 0:
+            return '/dev/' + lines[0]
+    return None

@@ -1,42 +1,49 @@
 <script>
-  $('#storage').change(function(){
-    if ($('#storage').val() == 'file'){
+  $('#{{ form.storage.id_for_label }}').change(function(){
+    var storage = $('#{{ form.storage.id_for_label }}').val();
+    if (storage == 'file'){
       $('#divarchdir').show();
       $('#divdedupdir').hide();
       $('#divdedupidxdir').hide();
+      $('#sbutton').html('Save');
+      $('#initsetup').attr('action', "{% url 'initialsetup' %}");
     } else
-    if ($('#storage').val() == 'dedup'){
+    if (storage == 'dedup'){
       $('#divarchdir').hide();
       $('#divdedupdir').show();
       $('#divdedupidxdir').show();
+      $('#sbutton').html('Save');
+      $('#initsetup').attr('action', "{% url 'initialsetup' %}");
     } else {
       $('#divarchdir').hide();
       $('#divdedupdir').hide();
       $('#divdedupidxdir').hide();
+      $('#sbutton').html('Next <i class="fa fa-chevron-right"></i>');
+      $('#initsetup').attr('action', "{% url 'initiallibdetect' %}");
     }
   });
   $("#initsetup").validate({
     rules: {
-      admrpass: {
-        equalTo: "#admpass",
+      {{ form.admrpass.name }}: {
+        equalTo: "#{{ form.admpass.id_for_label }}",
       },
-      email: {
+      {{ form.email.name }}: {
         required: true,
         email: true,
       },
-      archivedir: {
+      {{ form.archivedir.name }}: {
         required: true,
         remote: {
           url: "{% url 'initialarchivedir' %}"
         }
       },
-      dedupdir: {
+      {{ form.dedupdir.name }}: {
         required: true,
         remote: {
           url: "{% url 'initialarchivedir' %}"
         },
       },
-      dedupidxdir: {
+      {{ form.dedupidxdir.name }}: {
         required: true,
         remote: {
           url: "{% url 'initialarchivedir' %}"
@@ -44,10 +51,10 @@
       },
     },
     messages: {
-      dirname: "You have to provide a System name.",
-      admrpass: "Passords does not match. Retype again.",
-      archivedir: "You have to provide archive directory name which exist on system.",
-      dedupdir: "You have to provide deduplication index directory name which exist on system.",
+      {{ form.dirname.name }}: "You have to provide a System name.",
+      {{ form.admrpass.name }}: "Passords does not match. Retype again.",
+      {{ form.archivedir.name }}: "You have to provide archive directory name which exist on system.",
+      {{ form.dedupdir.name }}: "You have to provide deduplication index directory name which exist on system.",
     },
     highlight: function(element) {
         $(element).closest('.form-group').addClass('has-error');

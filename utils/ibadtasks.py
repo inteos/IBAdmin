@@ -19,7 +19,7 @@ sys.path.append('/opt/ibadmin')
 from libs.daemon import Daemon
 from libs.bconsole import doDeleteJobid, directorreload
 from ibadmin.settings import DATABASES
-
+from libs.tapelib import *
 
 # load config
 dbname = DATABASES['default']['NAME']
@@ -36,15 +36,17 @@ def handler(signal, frame):
     cont = 0
 
 
-def maininit(taskid=None):
+def maininit(taskid=None, fg=False):
     if taskid is None:
-        return None
+        if fg:
+            print ('Invalid taskid in maininit!')
+        sys.exit(3)
     conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cur.execute("select count(1) from tasks_tasks;")
     except:
-        print ("No tasks tables found or DB error")
+        print ('No tasks tables found or DB error!')
         sys.exit(3)
     cur.execute("select * from tasks_tasks where status='N' and taskid=%s;", (taskid,))
     row = cur.fetchone()
@@ -52,12 +54,14 @@ def maininit(taskid=None):
         return None
     cur.close()
     conn.close()
+    if fg:
+        print (row)
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTERM, handler)
     return row
 
 
-def update_status(curtask=None, taskid=0, progress=0, log='', status='R'):
+def update_status(curtask=None, taskid=0, progress=0.0, log='', status='R'):
     curtask.execute("update tasks_tasks set progress=%s, log=%s, status=%s where taskid=%s",
                     (int(round(progress)), log, status, taskid,))
 
@@ -67,9 +71,14 @@ def update_status_error(curtask=None, taskid=0, log=''):
                     (log, taskid,))
 
 
-def update_status_finish(curtask=None, taskid=0, progress=100, log=''):
+def update_status_finish(curtask=None, taskid=0, progress=100.0, log=''):
     curtask.execute("update tasks_tasks set progress=%s, log=%s, status='F', endtime=now() where taskid=%s",
                     (int(round(progress)), log, taskid,))
+
+
+def update_status_out(curtask=None, taskid=0, outlog=''):
+    curtask.execute("update tasks_tasks set output=%s where taskid=%s",
+                    (outlog, taskid,))
 
 
 def delete_parameters(cur=None, resid=None):
@@ -325,18 +334,165 @@ def delete_client(conn=None, cur=None, curtask=None, tasks=None):
     conn.commit()
 
 
-def mainloop():
+def detectlib(conn=None, cur=None, tasks=None, fg=False):
+    global cont
+    conn.autocommit = True
+    if conn is None or tasks is None or cur is None:
+        return
+    # update status
+    if fg:
+        print ('In procedure: detectlib')
+    taskid = tasks['taskid']
+    log = 'Starting...\n'
+    update_status(curtask=cur, taskid=taskid)
+    conn.commit()
+    # prepare required variables
+    progress = 0
+    tapeid = tasks['params']
+    if tapeid is None or not tapeid.startswith('tape['):
+        if fg:
+            print ('No valid library to detect!')
+        log = 'No valid library to detect! All I found: ' + str(tapeid)
+        update_status_error(curtask=cur, taskid=taskid, log=log)
+    else:
+        step = 12.5
+        libs = detectlibs()
+        dev = ''
+        for d in libs:
+            dt = 'tape' + d['id']
+            if dt == tapeid:
+                dev = d['dev']
+                if fg:
+                    print ('Found dev: ' + str(dev))
+                break
+        if os.path.exists(dev):
+            # 1
+            log += 'Unloading all tapes\n'
+            update_status(curtask=cur, taskid=taskid, log=log)
+            lib = mtx_statusinfo(dev)
+            log += 'mtx_statusinfo executed\n'
+            progress += step
+            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            # 2
+            drvstep = len(lib['Drives'])
+            for drv in lib['Drives']:
+                if drv['Loaded'] is not None:
+                    drvindx = drv['DriveIndex']
+                    if fg:
+                        print ('Unloading tape: ' + str(drvindx))
+                    log += 'Unloading tape: ' + str(drvindx) + '\n'
+                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                    mtx_unload(dev=dev, drive=drvindx)
+                    log += 'Unloading done.\n'
+                    progress += step / drvstep
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            # 3
+            log += 'Getting tapedrv list\n'
+            progress = step * 2
+            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            tapes = gettapedrvlist()
+            tapeslist = []
+            if fg:
+                print ('All tapes', tapes)
+            # 4
+            log += 'Selecting tapes\n'
+            progress = step * 3
+            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            for tape in tapes:
+                (stat, lines) = mt_status(tape['dev'])
+                if not stat:
+                    tapeslist.append(tape)
+            if fg:
+                print ("Selected tapes", tapeslist)
+            # 5
+            log += 'Getting library status\n'
+            progress = step * 4
+            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            lib = mtx_statusinfo(dev)
+            if fg:
+                print ("LIB status:", lib)
+            slot = 0
+            # 6
+            log += 'Selecting library slot to test\n'
+            progress = step * 5
+            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            for sl in lib['Slots']:
+                if sl['Loaded'] is not None:
+                    slot = sl['Slot']
+                    if fg:
+                        print ("selected slot", slot)
+                    break
+            if slot == 0:
+                # Error
+                if fg:
+                    print('No available volumes in library found!')
+                log += 'No available volumes in library found!'
+                update_status_error(curtask=cur, taskid=taskid, log=log)
+            else:
+                drvconfig = []
+                # 7,8
+                log += 'Mapping tape drives to library index\n'
+                progress = step * 6
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                for drv in lib['Drives']:
+                    drvindx = drv['DriveIndex']
+                    if fg:
+                        print ("test drvindx", drvindx)
+                    mtx_load(dev=dev, drive=drvindx, slot=slot)
+                    log += 'Testing tape drive: ' + str(drvindx) + '\n'
+                    progress += drvstep
+                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                    for tape in tapeslist:
+                        (stat, lines) = mt_status(tape['dev'])
+                        if fg:
+                            print ("load status", stat)
+                        if stat:
+                            if fg:
+                                print ("Got it!", drv, tape)
+                            drvconfig.append({
+                                'DriveIndex': drvindx,
+                                'Tape': tape,
+                            })
+                            break
+                    mtx_unload(dev=dev, drive=drvindx)
+                if fg:
+                    print (drvconfig)
+                update_status_out(curtask=cur, outlog=str(drvconfig), taskid=taskid)
+                if len(drvconfig) > 0:
+                    log += 'Library detection success!'
+                else:
+                    log += 'Library detection failed.'
+                update_status_finish(curtask=cur, log=log, taskid=taskid)
+        else:
+            if fg:
+                print('No valid device for library found!')
+            log = 'No valid device for library found! dev=' + str(dev)
+            update_status_error(curtask=cur, taskid=taskid, log=log)
+    conn.commit()
+
+
+def mainloop(fg=False):
+    if fg:
+        print ('Entering the mainloop...')
     conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    curtask = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     # we support a following tasks
     if task['proc'] == 1:
+        if fg:
+            print (' > Proc delete Job')
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        curtask = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         delete_job(conn=conn, cur=cur, curtask=curtask, tasks=task)
+        directorreload()
     if task['proc'] == 2:
+        print(' > Proc delete Client')
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        curtask = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         delete_client(conn=conn, cur=cur, curtask=curtask, tasks=task)
-    #if task['proc'] == 3:
-    #    delete_job(conn=conn, cur=cur, curtask=curtask, tasks=task)
-    directorreload()
+        directorreload()
+    if task['proc'] == 3:
+        print(' > Proc detect library')
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        detectlib(conn=conn, cur=cur, tasks=task, fg=fg)
     conn.close()
     sys.exit(0)
 
@@ -363,14 +519,19 @@ if __name__ == "__main__":
                 daemon.start()
     elif len(sys.argv) == 3:
         if '-f' == sys.argv[1]:
+            print ('Foreground mode enabled.')
             try:
                 taskid = int(sys.argv[2])
             except ValueError:
                 print ('Invalid task number!')
                 sys.exit(2)
-            task = maininit(taskid=taskid)
+            task = maininit(taskid=taskid, fg=True)
             if task is not None:
-                mainloop()
+                print (task)
+                mainloop(fg=True)
+            else:
+                print ('taskid finished or not found!')
+                sys.exit(4)
         # elif 'stop' == sys.argv[1]:
         #    daemon.stop()
     else:

@@ -1,0 +1,61 @@
+{% extends "initial/base.html" %}
+{% block content %}
+{% load static %}
+    <div class="register-box">
+      <div class="register-logo">
+        <a href="http://www.inteosbackup.pl/"><img src="{% static 'ibadmin.png' %}"/><b>IBAdmin</b></a>
+      </div>
+      <div class="register-box-body">
+        <p class="login-box-msg">Tape Library detection</p>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="alert alert-info alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <h4><i class="icon fa fa-lightbulb-o"></i>Info</h4>
+              Here <b>IBAdmin</b> will detect a {{ storage }} you selected. It will require to execute tape load/unload
+              operations which will take some time to complete. You can check the operation progress below.<br>
+              By default IBAdmin will automatically <u>initialize</u> all tapes found in library for future use.
+              If you want to make this initialization later you have to deselect the checkbox below.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div id="progressbox" class="box box-warning">
+              <div class="box-header with-border">
+                <h4 id="header"><i class="fa fa-cog fa-spin"></i> Library {{ storage }} detection in progress. Please wait...</h4>
+              </div>
+              <div class="box-body">
+                <p><i id="operationlog">Operation log...</i></p>
+                <div class="progress">
+                  <div class="progress active">
+                    <div id="taskprogress" class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <form id="initsetup" method="post" action="{% url 'initialsetup2' %}">
+          {% csrf_token %}
+          {{ form.dirname }}
+          {{ form.descr }}
+          {{ form.email }}
+          {{ form.admpass }}
+          {{ form.storage }}
+          {{ form.taskid }}
+          <div class="checkbox icheck">
+            <label>{{ form.tapeinit }} {{ form.tapeinit.label }}</label>
+          </div><!-- /.icheck -->
+          <div class="row">
+            <div class="col-xs-4 pull-right">
+              <button id="okbutton" type="submit" name="ok" value="1" class="btn btn-primary btn-block btn-flat" disabled="disabled">OK</button>
+            </div><!-- /.col -->
+          </div>
+        </form>
+      </div><!-- /.form-box -->
+    </div><!-- /.register-box -->
+{% endblock %}
+{% block pagejs %}
+  {% include "initial/libdetect.js" %}
+{% endblock %}

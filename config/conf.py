@@ -386,7 +386,8 @@ def createDIRSchDay(resid=None, params=None):
     if resid is None or params is None:
         return
     level = getlevelname(params['level'])
-    sch = level + ' at ' + number2time(params['time'], 0)
+    timestr = number2time(params['time'], 0)
+    sch = level + ' at ' + timestr
     addparameter(resid, 'Run', sch)
 
 
@@ -1340,7 +1341,7 @@ def createSDDevice(sdcompid=None, dtype='File', device=None):
 
 
 def createStorage(dircompid=None, dirname=None, storname='ibadmin', address='localhost', descr='', stortype='file',
-                  archdir='/tmp', dedupdir=None, dedupidxdir=None, internal=False):
+                  archdir='/tmp', dedupdir=None, dedupidxdir=None, internal=False, tapelib=None):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
@@ -1355,6 +1356,9 @@ def createStorage(dircompid=None, dirname=None, storname='ibadmin', address='loc
         dedupidxdirn = os.path.abspath(dedupidxdir)
         return createStoragededup(dircompid=dircompid, dirname=dirname, storname=storname, address=address, descr=descr,
                                   dedupdir=dedupdirn, dedupidxdir=dedupidxdirn, internal=internal)
+    if stortype == 'tape':
+        return createStoragetape(dircompid=dircompid, dirname=dirname, storname=storname, address=address, descr=descr,
+                                 tapelib=tapelib, internal=internal)
     return None
 
 
@@ -1393,6 +1397,48 @@ def createStoragefile(dircompid=None, dirname=None, storname='ibadmin', address=
         })
     # create new Autochanger {} resource in SD conf
     createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev='/dev/null', changercmd='', devices=devices)
+    for dev in devices:
+        createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
+    return dirstorname
+
+
+def createStoragetape(dircompid=None, dirname=None, storname='ibadmin', address='localhost', descr='', tapelib=None,
+                      internal=False):
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if dirname is None:
+        dirname = getDIRname()
+    if tapelib is None:
+        return None
+    devtype = 'Tape'
+    mediatype = devtype + getnextStorageid()
+    dirstorname = storname + '-' + mediatype
+    # generate password
+    password = randomstr()
+    # insert new Storage {} resource into Dir conf
+    createDIRStorage(dircompid=dircompid, dirname=dirname, name=dirstorname, password=password, address=address,
+                     descr=descr, device=mediatype, mediatype=mediatype, internal=internal, sdcomponent=storname)
+    # create SD component
+    sdcompid = createSDcomponent(name=storname)
+    # insert new Director {} resource into SD conf
+    createSDDirector(sdcompid=sdcompid, dirname=dirname, name=storname, password=password, descr=descr)
+    # insert new Storage {} resource into SD conf
+    createSDStorage(sdcompid=sdcompid, name=storname, descr=descr, address=address)
+    # insert new Messages {} resource into SD conf
+    createSDMessages(sdcompid=sdcompid, dirname=dirname)
+    # create a list of archive devices
+    devices = []
+    for dev in tapelib['Devices']:
+        devices.append({
+            'name': mediatype + 'Dev' + str(dev['DriveIndex']),
+            'archdir': dev['Tape']['dev'],
+            'devindex': dev['DriveIndex'],
+            'mediatype': mediatype,
+        })
+    # create new Autochanger {} resource in SD conf
+    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=tapelib['Lib']['dev'],
+                        changercmd='/opt/bacula/scripts/mtx-changer %c %o %S %a %d', devices=devices)
     for dev in devices:
         createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
     return dirstorname
@@ -1679,7 +1725,7 @@ def deleteFDClient(name=None):
 
 
 def initialize(name='ibadmin', descr='', email='root@localhost', password=None, stortype='File',
-               address='localhost', archdir='/tmp', dedupdir=None, dedupidxdir=None):
+               address='localhost', archdir='/tmp', dedupdir=None, dedupidxdir=None, tapelib=None):
     # prepare variables
     clientip = address
     storip = address
@@ -1700,7 +1746,7 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
                       fatal=False)
     # create Admin Schedule
     scheduletimeadmin = '05:00'
-    createDIRSchedule(dircompid=dircompid, name='sch-admin', cycle='Day', params={'level': '', 'time': scheduletimeadmin})
+    createDIRSchedule(dircompid=dircompid, name='sch-admin', cycle='Day', params={'level': 'full', 'time': scheduletimeadmin})
     # create Catalog backup Schedule
     scheduletime = '05:05'
     createDIRSchedule(dircompid=dircompid, name='sch-backup-catalog', cycle='Day',
@@ -1720,7 +1766,7 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
     # create Storage
     storname = createStorage(dircompid=dircompid, dirname=name, storname=name, address=storip,
                              descr='Default local storage', stortype=stortype, archdir=archdir, dedupdir=dedupdir,
-                             dedupidxdir=dedupidxdir, internal=True)
+                             dedupidxdir=dedupidxdir, internal=True, tapelib=tapelib)
     # create default Pool
     createDIRPool(dircompid=dircompid, name='Default', disktype=stortype is not 'Tape', retention='2 weeks',
                   useduration='1 day', descr='Default System Pool with 2W retention')

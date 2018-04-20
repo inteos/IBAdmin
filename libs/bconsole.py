@@ -345,6 +345,7 @@ def getStorageStatusDedup(storage='ibadmin'):
     # 40 chars=100% container file
     """
     bconsole = bconsolecommand(".status storage=\"" + storage + "\" dedupengine", timeout=False)[7:-2]
+
     outengine = bconsole[:9]
     outcontainers = bconsole[10:]
     print (outcontainers)
@@ -378,14 +379,16 @@ def getStorageStatusDedup(storage='ibadmin'):
     dedupcontainers = []
     pattern = re.compile(r' \[\d+\]\s+(\d+k) filesize=(.*)/(.*) usage=\d+/\d+/\d+ (.*) (........................................)')
     for con in outcontainers:
+        # print (con)
         scan_data = pattern.match(con)
-        dedupcontainers.append({
-            'block_size': scan_data.group(1),
-            'used_size': scan_data.group(2),
-            'allocated_size': scan_data.group(3),
-            'used_percent': scan_data.group(4).replace('%', ''),
-            'fsm': scan_data.group(5),
-        })
+        if scan_data is not None:
+            dedupcontainers.append({
+                'block_size': scan_data.group(1),
+                'used_size': scan_data.group(2),
+                'allocated_size': scan_data.group(3),
+                'used_percent': scan_data.group(4).replace('%', ''),
+                'fsm': scan_data.group(5),
+            })
     return dedupengine, dedupcontainers
 
 

@@ -48,7 +48,7 @@ def getlevelname(level):
         return 'Incremental'
     if str(level).lower().startswith('diff'):
         return 'Differential'
-    return None
+    return 'Full'
 
 
 def number2time(times='0:0', offset=0):

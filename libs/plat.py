@@ -17,12 +17,16 @@ CATVERSUPPORTED = (1017, 1018, 1019, 15)
 JOURNALCTL = "/usr/bin/journalctl --no-pager -u "
 NETIPCMD = "/usr/sbin/ip"
 LSSCSICMD = "/usr/bin/lsscsi -g"
+MTCMD = "/usr/bin/mt"
+MTXCMD = "/usr/sbin/mtx"
+UDEVADMCMD = "/sbin/udevadm"
 # platform specific
 ourplatform = platform.linux_distribution(full_distribution_name=0)[0]
 if ourplatform in ('Ubuntu', 'debian'):
     SYSTEMCTL = "/bin/systemctl"
     JOURNALCTL = "/bin/journalctl --no-pager -u "
     NETIPCMD = "/sbin/ip"
+    MTCMD = "/bin/mt"
 
 
 def getOSVersion():

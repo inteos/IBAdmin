@@ -87,7 +87,9 @@ def status(request, taskid):
     PROCEDURE = {
         1: 'Deleting Job from configuration with job history',
         2: 'Deleting Client from configuration with job configuration and history',
-        3: 'Lorem ipsum...',
+        3: 'Detecting tape library and drives',
+        4: 'Initializing tape library volumes for Bacula',
+        5: 'Lorem ipsum...',
     }
     procedure = PROCEDURE[task.proc]
     if task.log is None:
