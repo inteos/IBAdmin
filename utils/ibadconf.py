@@ -127,7 +127,8 @@ if __name__ == "__main__":
             if log is not None:
                 log.write("System not configured.\n")
             print("System not configured.")
-            log.close()
+            if log is not None:
+                log.close()
             sys.exit(2)
         else:
             name = row['name']
