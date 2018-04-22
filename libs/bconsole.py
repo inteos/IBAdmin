@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 from subprocess import Popen, PIPE
+from .utils import safe_unicode
 import re
 import utils
 
@@ -20,7 +21,9 @@ def bconsolecommand(cmd, api=False, timeout=True):
     bcmd = cmd + '\n'
     bconsole.stdin.write(bcmd.encode('utf-8'))
     bconsole.stdin.close()
-    out = bconsole.stdout.read().decode('utf-8')
+    out = bconsole.stdout.read()
+    oututf8 = safe_unicode(out)
+    # .decode('utf-8')
     bconsole.wait()
     lines = out.splitlines()
     return lines
