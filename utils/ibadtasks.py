@@ -516,7 +516,7 @@ def labeltapes(conn=None, cur=None, tasks=None, fg=False):
                 else:
                     if fg:
                         print ("cleaning tape...")
-                    log += 'Skipping cleaning tape: ' + str(volname)
+                    log += 'Skipping cleaning tape: ' + str(volname) + '\n'
                 progress += step
                 update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
             log += 'Task finish.\n'
