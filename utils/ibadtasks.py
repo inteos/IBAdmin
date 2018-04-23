@@ -510,8 +510,9 @@ def labeltapes(conn=None, cur=None, tasks=None, fg=False):
                     if status:
                         log += out + '\n'
                     else:
-                        # TODO: Rethink how it should be really handled, error the whole task or not...
                         log += 'Label ERROR!\n' + str(out) + '\n'
+                        update_status_error(curtask=cur, taskid=taskid, log=log)
+                        return
                 else:
                     if fg:
                         print ("cleaning tape...")
