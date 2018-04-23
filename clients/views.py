@@ -268,7 +268,7 @@ def addstd(request):
                 with transaction.atomic():
                     createClient(name=name, address=address, os=os, descr=descr)
                     if defjob:
-                        createDefaultClientJob(name=name, os=os)
+                        createDefaultClientJob(name=name, clientos=os)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
@@ -313,7 +313,7 @@ def addnode(request):
                     createClientNode(name=name, address=address, os=os, descr=descr, cluster=cluster,
                                      clusterlist=clusterlist)
                     if defjob:
-                        createDefaultClientJob(name=name, os=os)
+                        createDefaultClientJob(name=name, clientos=os)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
