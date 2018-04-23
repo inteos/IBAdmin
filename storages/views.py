@@ -138,10 +138,16 @@ def statusdevices(request, name):
         storageparams = extractstorageparams(storage)
         devname = storageparams['Device']
         devices = getSDDevicesList(component=storageparams['StorageComponent'], storage=devname)
+        runningjobs = getStoragerunningJobs(name)
         status = []
         for dev in devices:
             params = getStorageStatusDevice(storage=name, device=dev)
             params['Name'] = dev
+            for job in runningjobs:
+                if job['Device'] == dev:
+                    print (job, dev)
+                    params['Status'] = 'Running'
+                    break
             status.append(params)
         context = {'Devices': status}
     return render(request, 'storage/statusdevices.html', context)

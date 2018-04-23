@@ -19,9 +19,9 @@
       <div class="btn-group">
         <button class="btn btn-sm btn-default disabled" type="button" onclick="location.href='{% url 'storageinfo' st.Name %}';">
           <i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>
-        {% if dev.Status == 'Mounted' or dev.Slot > 0 %}
+        {% if dev.Status == 'Mounted' %}
         <button class="btn btn-sm btn-default" data-dev="umount" type="button" data-name="{{ dev.Name }}" data-slot="{{ dev.Slot }}">
-          <i class="glyphicon glyphicon-share" data-toggle="tooltip" data-original-title="Unmount"></i></button>
+          <i class="glyphicon glyphicon-open" data-toggle="tooltip" data-original-title="Unmount"></i></button>
         {% endif %}
         <button class="btn btn-sm btn-default" data-dev="devena" type="button" data-name="{{ dev.Name }}" data-status="{{ dev.Status }}">
         {% if dev.Status == 'Disabled' %}
