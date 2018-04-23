@@ -64,7 +64,7 @@ def delete(request, taskid):
 
 def progress(request, taskid):
     task = get_object_or_404(Tasks, taskid=taskid)
-    context = [task.progress, str(task.progress) + '%']
+    context = [task.progress, str(task.progress) + '%', task.status]
     return JsonResponse(context, safe=False)
 
 

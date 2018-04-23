@@ -44,6 +44,7 @@ $(function () {
       $('#deleteclientconfirmprogress').on('hidden.bs.modal', function (){
         $('#taskprogress').css('width','0%').attr('aria-valuenow',0);
         $('#taskprogress').html("0%");
+        $('#deleteclientconfirmprogress').removeClass('modal-danger');
       });
     };
     function refreshProgress(){
@@ -56,7 +57,12 @@ $(function () {
           $('#taskprogress').html(data[1]);
           if (data[0] == 100){
             $('#deleteclientconfirmprogress').modal('hide');
-          }
+          };
+          if (data[2] == 'E'){
+            $('#deleteclientconfirmprogress').addClass('modal-danger');
+            $('#deleteclientconfirmprogress').find('.modal-header').find('h4').html('Failed...')
+            closeProgress();
+          };
         },
       });
     };

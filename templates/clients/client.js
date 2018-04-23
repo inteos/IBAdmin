@@ -99,6 +99,16 @@ $(function () {
     tablehis.ajax.reload( null, false ); // user paging is not reset on reload
   }, 60000 );
 {% include "widgets/refreshbutton.js" with id='jobhistoryrefresh' table='tablehis' %}
+  function closeProgress(){
+    clearInterval(rpintervalId);
+    $('#deletejobconfirmprogress').on('hidden.bs.modal', function (){
+      $('#taskprogress').css('width','0%').attr('aria-valuenow',0);
+      $('#taskprogress').html("0%");
+      $('#deletejobconfirmprogress').removeClass('modal-danger');
+      $('#deleteclientconfirmprogress').removeClass('modal-danger');
+      tablehis.ajax.reload( null, false ); // user paging is not reset on reload
+    });
+  };
   $('#deletejobconfirmbutton').on('click', function () {
     var button = $(this);
     var text = button.text();
@@ -106,14 +116,6 @@ $(function () {
     var url = button.data('url');
     var taskid = 0;
     var rpintervalId;
-    function closeProgress(){
-      clearInterval(rpintervalId);
-      $('#deletejobconfirmprogress').on('hidden.bs.modal', function (){
-        $('#taskprogress').css('width','0%').attr('aria-valuenow',0);
-        $('#taskprogress').html("0%");
-        tablehis.ajax.reload( null, false ); // user paging is not reset on reload
-      });
-    };
     function refreshProgress(){
       $.ajax({
         url: '{% url 'tasksprogress_rel' %}' + taskid + '/',
@@ -125,6 +127,11 @@ $(function () {
           if (data[0] == 100){
             $('#deletejobconfirmprogress').modal('hide');
           }
+          if (data[2] == 'E'){
+            $('#deletejobconfirmprogress').addClass('modal-danger');
+            $('#deletejobconfirmprogress').find('.modal-header').find('h4').html('Failed...')
+            closeProgress();
+          };
         },
       });
     };
@@ -175,7 +182,12 @@ $(function () {
           $('#taskprogress').html(data[1]);
           if (data[0] == 100){
             $('#deleteclientconfirmprogress').modal('hide');
-          }
+          };
+          if (data[2] == 'E'){
+            $('#deleteclientconfirmprogress').addClass('modal-danger');
+            $('#deleteclientconfirmprogress').find('.modal-header').find('h4').html('Failed...')
+            closeProgress();
+          };
         },
       });
     };

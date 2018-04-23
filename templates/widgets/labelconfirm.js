@@ -10,6 +10,7 @@
       $('#labelconfirmprogress').on('hidden.bs.modal', function (){
         $('#taskprogress').css('width','0%').attr('aria-valuenow',0);
         $('#taskprogress').html("0%");
+        $('#labelconfirmprogress').removeClass('modal-danger');
       });
     };
     function refreshProgress(){
@@ -22,6 +23,11 @@
           $('#taskprogress').html(data[1]);
           if (data[0] == 100){
             $('#labelconfirmprogress').modal('hide');
+          };
+          if (data[2] == 'E'){
+            $('#labelconfirmprogress').addClass('modal-danger');
+            $('#labelconfirmprogress').find('.modal-header').find('h4').html('Failed...')
+            closeProgress();
           }
         },
       });

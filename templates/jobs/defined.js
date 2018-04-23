@@ -54,6 +54,7 @@ $(function () {
       $('#deletejobconfirmprogress').on('hidden.bs.modal', function (){
         $('#taskprogress').css('width','0%').attr('aria-valuenow',0);
         $('#taskprogress').html("0%");
+        $('#deletejobconfirmprogress').removeClass('modal-danger');
       });
     };
     function refreshProgress(){
@@ -65,8 +66,14 @@ $(function () {
           $('#taskprogress').css('width',data[1]).attr('aria-valuenow',data[0]);
           $('#taskprogress').html(data[1]);
           if (data[0] == 100){
+            closeProgress();
             $('#deletejobconfirmprogress').modal('hide');
-          }
+          };
+          if (data[2] == 'E'){
+            $('#deletejobconfirmprogress').addClass('modal-danger');
+            $('#deletejobconfirmprogress').find('.modal-header').find('h4').html('Failed...')
+            closeProgress();
+          };
         },
       });
     };
