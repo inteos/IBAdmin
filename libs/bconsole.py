@@ -329,6 +329,7 @@ def getStorageStatusDevice(storage='ibadmin', device=None):
                     out['Status'] = 'Mounted'
                 if 'Device is disabled' in line:
                     out['Status'] = 'Disabled'
+                    out['Disabled'] = True
                     st = True
                 if 'Device is BLOCKED' in line and not st:
                     out['Status'] = 'Blocked'
