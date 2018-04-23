@@ -58,6 +58,67 @@ def getClientrunningJobid(client):
     return jobs
 
 
+def getStoragerunningJobs(storage=None):
+    """
+    *.status storage=devel1-Tape1 running
+    Connecting to Storage daemon devel1-Tape1 at 192.168.0.215:9103
+
+    Running Jobs:
+    Writing: Full Backup job devel1-etc JobId=10 Volume="E01002L4"
+        pool="Pool-30-days" device="Tape1Dev0" (/dev/nst0)
+        spooling=0 despooling=0 despool_wait=0
+        Files=19 Bytes=716,381 AveBytes/sec=15,242 LastBytes/sec=15,784
+        FDReadSeqNo=157 in_msg=110 out_msg=7 fd=7
+    Writing: Full Backup job testjob JobId=12 Volume="E01005L4"
+        pool="Pool-30-days" device="Tape1Dev1" (/dev/nst1)
+        spooling=0 despooling=0 despool_wait=0
+        Files=1 Bytes=65,641 AveBytes/sec=32,820 LastBytes/sec=32,820
+        FDReadSeqNo=13 in_msg=11 out_msg=7 fd=11
+    ====
+    """
+    jobs = []
+    if storage is not None:
+        bconsole = bconsolecommand(".status storage=\"" + storage + "\" running")[8:]
+        # print bconsole
+        jobparams = {}
+        first = True
+        for line in bconsole:
+            scan_data = re.search(r'JobId=(.*) Volume="(.*)"', line)
+            # print (first, scan_data, line)
+            if scan_data is not None:
+                if not first:
+                    # print (jobparams)
+                    jobs.append(jobparams)
+                    jobparams = {}
+                jobparams['Jobid'] = scan_data.group(1)
+                jobparams['Volume'] = scan_data.group(2)
+                first = False
+                continue
+            line = line.replace('Bytes/sec', 'Bytessec').replace(',', '')
+            scan_data = re.search(r'pool="(.*)" device="(.*)"', line)
+            if scan_data is not None:
+                jobparams['Pool'] = scan_data.group(1)
+                jobparams['Device'] = scan_data.group(2)
+                continue
+            scan_data = re.search(r'spooling=(\d+) despooling=(\d+) despool_wait=(\d+)', line)
+            if scan_data is not None:
+                jobparams['Spooling'] = scan_data.group(1)
+                jobparams['Despooling'] = scan_data.group(2)
+                jobparams['DespoolingWait'] = scan_data.group(3)
+                continue
+            scan_data = re.search(r'Files=(\d+) Bytes=(\d+) AveBytessec=(\d+) LastBytessec=(\d+)', line)
+            if scan_data is not None:
+                jobparams['Files'] = scan_data.group(1)
+                jobparams['Bytes'] = scan_data.group(2)
+                jobparams['AveBytessec'] = scan_data.group(3)
+                jobparams['LastBytessec'] = scan_data.group(4)
+                continue
+            if '====' in line and len(jobparams) > 0:
+                jobs.append(jobparams)
+                break
+    return jobs
+
+
 def getClientrunningJobs(client):
     """
     *.status client=sun running
@@ -180,6 +241,18 @@ def enableDevice(storage='ibadmin', device='File0'):
     return out
 
 
+def umountDevice(storage='ibadmin', device=None, slot=0):
+    """
+    *disable storage=devel1-File1 device=File1Dev1 drive=0
+    3002 Device ""File1Dev1" (/home/backup)" disabled.
+    """
+    if storage is None or device is None or slot == 0:
+        return []
+    out = getbconsolefilter("release storage=\"" + storage + "\" device=\"" + device + "\" slot=\"" + str(slot) +
+                            "\" drive=0", 'released')
+    return out
+
+
 def getStorageStatus(storage='ibadmin'):
     """
     *.status storage=ibadmin-File1 header
@@ -208,7 +281,7 @@ def getStorageStatus(storage='ibadmin'):
         return None
 
 
-def getStorageStatusDevice(storage='ibadmin', device='File0'):
+def getStorageStatusDevice(storage='ibadmin', device=None):
     """
     *.status storage=sun-dedup-sd devices device=DedupStorageDrv3
     
@@ -238,27 +311,43 @@ def getStorageStatusDevice(storage='ibadmin', device='File0'):
        Device is disabled. User command.
        Drive 7 is not loaded.
        Available Space=472.5 GB
+
+    Device Tape: "Tape1Dev0" (/dev/nst0) open but no Bacula volume is currently mounted.
+        Total Bytes Read=0 Blocks Read=0 Bytes/block=0
+        Positioned at File=0 Block=0
+       Slot 1 is loaded in drive 0.
     """
-    bconsole = bconsolecommand(".status storage=\"" + storage + "\" devices device=\"" + device + "\"")[7:]
-    out = {'Status': 'Running'}
-    if len(bconsole) > 0:
-        for line in bconsole:
-            if line == '':
-                continue
-            if 'is not open' in line:
-                out['Status'] = 'Idle'
-            if 'Device is disabled' in line:
-                out['Status'] = 'Disabled'
-            if 'Available Space' in line:
-                out['AvailableSpace'] = line.split('=')[1]
-            if 'Volume:' in line:
-                out['Volume'] = line.split(':')[1].lstrip()
-            if 'Pool:' in line:
-                out['Pool'] = line.split(':')[1].lstrip()
-            if 'Media type:' in line:
-                out['MediaType'] = line.split(':')[1].lstrip()
-            if 'Total Bytes=' in line:
-                out['Size'] = line.split()[1].split('=')[1].replace(',', '')
+    out = {'Status': 'Idle'}
+    if device is not None:
+        bconsole = bconsolecommand(".status storage=\"" + storage + "\" devices device=\"" + device + "\"")
+        if len(bconsole) > 0:
+            st = False
+            for line in bconsole:
+                if line == '':
+                    continue
+                if 'mounted with:' in line and not st:
+                    out['Status'] = 'Mounted'
+                if 'Device is disabled' in line:
+                    out['Status'] = 'Disabled'
+                    st = True
+                if 'Device is BLOCKED' in line and not st:
+                    out['Status'] = 'Blocked'
+                    st = True
+                if 'Available Space' in line:
+                    out['AvailableSpace'] = line.split('=')[1]
+                if 'Volume:' in line:
+                    out['Volume'] = line.split(':')[1].lstrip()
+                if 'Pool:' in line:
+                    out['Pool'] = line.split(':')[1].lstrip()
+                if 'Media type:' in line:
+                    out['MediaType'] = line.split(':')[1].lstrip()
+                if 'Total Bytes=' in line:
+                    out['Size'] = line.split()[1].split('=')[1].replace(',', '')
+                if 'Slot' in line and 'loaded' in line:
+                    out['Slot'] = line.split()[1]
+                if 'open but no Bacula volume is currently mounted' in line:
+                    out['Status'] = 'Mounted'
+    # print (out)
     return out
 
 
@@ -430,7 +519,7 @@ def getrunningjobs():
             'Type': jobparam[1],
             'Level': jobparam[2],
             'Files': jobparam[3],
-            'Bytes': countbytes(jobparam[4], jobparam[5]),
+            # 'Bytes': countbytes(jobparam[4], jobparam[5]),
             'Name': jobparam[6]
         })
     return out
@@ -600,7 +689,7 @@ def doRestore(client, restoreclient, where=None, replace='always', comment=None,
     commentstr = ''
     if comment is not None and comment != '':
         commentstr = ' comment="' + comment + '"'
-    cmd = 'restore client=' + str(client) + ' restoreclient=' + str(restoreclient) + ' file=?' + str(pathtable) + \
+    cmd = 'restore client=\"' + str(client) + '\" restoreclient=\"' + str(restoreclient) + '\" file=?' + str(pathtable) + \
           ' replace=' + replace + wherestr + commentstr + ' yes'
     out = bconsolecommand(cmd, timeout=False)
     return out
@@ -608,3 +697,45 @@ def doRestore(client, restoreclient, where=None, replace='always', comment=None,
 
 def getBackupVersion():
     return getbconsolefilter('version', 'bacula-enterprise')
+
+
+def doUpdateslots(storage=None):
+    volumes = []
+    if storage is not None:
+        out = getbconsolefilter("update slots drive=0 storage=\"" + str(storage) + "\"", 'not found in catalog')
+        for vol in out:
+            data = vol.split(',')
+            # print data
+            volname = data[1].replace('"', '')
+            volslot = int(data[6].split('=')[1])
+            volumes.append({
+                'name': volname,
+                'slot': volslot,
+            })
+    return volumes
+
+
+def doLabel(storage=None, volume=None, slot=0):
+    """
+    *label drive=0 storage=devel1-Tape1 volume=F01037L5 slot=37 pool=Scratch
+    Connecting to Storage daemon devel1-Tape1 at 192.168.0.215:9103 ...
+    Sending label command for Volume "F01037L5" Slot 37 ...
+    3304 Issuing autochanger "load Volume F01037L5, Slot 37, Drive 0" command.
+    3305 Autochanger "load Volume F01037L5, Slot 37, Drive 0", status is OK.
+    3000 OK label. VolBytes=64512 VolABytes=0 VolType=0 Volume="F01037L5" Device="Tape1Dev0" (/dev/nst0)
+    Catalog record for Volume "F01037L5", Slot 37  successfully created.
+    Requesting to mount Tape1 ...
+    3001 Mounted Volume: F01037L5
+    3001 Device ""Tape1Dev0" (/dev/nst0)" is already mounted with Volume "F01037L5"
+
+    """
+    bconsole = []
+    if storage is not None and volume is not None and slot != 0:
+        bconsole = bconsolecommand("label drive=0 pool=Scratch storage=\"" + str(storage) + "\" volume=\"" + str(volume) + "\" slot=" + str(slot))
+        for line in bconsole:
+            if '3000 OK label.' in line:
+                # it is an expected return value
+                return True, line
+            if '3920 Cannot label Volume' in line:
+                return False, line
+    return False, bconsole

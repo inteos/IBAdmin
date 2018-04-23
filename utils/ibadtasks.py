@@ -17,7 +17,7 @@ def printhelp():
 
 sys.path.append('/opt/ibadmin')
 from libs.daemon import Daemon
-from libs.bconsole import doDeleteJobid, directorreload
+from libs.bconsole import doDeleteJobid, directorreload, doUpdateslots, doLabel
 from ibadmin.settings import DATABASES
 from libs.tapelib import *
 
@@ -345,7 +345,6 @@ def detectlib(conn=None, cur=None, tasks=None, fg=False):
     taskid = tasks['taskid']
     log = 'Starting...\n'
     update_status(curtask=cur, taskid=taskid)
-    conn.commit()
     # prepare required variables
     progress = 0
     tapeid = tasks['params']
@@ -471,6 +470,63 @@ def detectlib(conn=None, cur=None, tasks=None, fg=False):
     conn.commit()
 
 
+def labeltapes(conn=None, cur=None, tasks=None, fg=False):
+    global cont
+    conn.autocommit = True
+    if conn is None or tasks is None or cur is None:
+        return
+    # update status
+    if fg:
+        print ('In procedure: labeltapes')
+    taskid = tasks['taskid']
+    log = 'Starting...\n'
+    update_status(curtask=cur, taskid=taskid)
+    # prepare required variables
+    storage = tasks['params']
+    if storage is None:
+        if fg:
+            print ('No valid storage to label!')
+        log += 'No valid storage to label! All I found: ' + str(storage) + '\n'
+        update_status_error(curtask=cur, taskid=taskid, log=log)
+    else:
+        volumes = doUpdateslots(storage)
+        if fg:
+            print (volumes)
+        volsnr = len(volumes)
+        step = 100.0 / (volsnr + 1)
+        progress = step
+        log += 'Getting slots information from storage\n'
+        update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+        if volsnr > 0:
+            for vol in volumes:
+                volname = vol['name']
+                if not volname.startswith('CLN'):
+                    volslot = vol['slot']
+                    log += 'Label volume: ' + str(volname) + ' slot: ' + str(volslot) + '\n'
+                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                    (status, out) = doLabel(storage=storage, volume=volname, slot=volslot)
+                    if fg:
+                        print (status, out)
+                    if status:
+                        log += out + '\n'
+                    else:
+                        # TODO: Rethink how it should be really handled, error the whole task or not...
+                        log += 'Label ERROR!\n' + str(out) + '\n'
+                else:
+                    if fg:
+                        print ("cleaning tape...")
+                    log += 'Skipping cleaning tape: ' + str(volname)
+                progress += step
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+            log += 'Task finish.\n'
+        else:
+            if fg:
+                print('No volumes to label!')
+            log += 'No volumes to label!' + '\n'
+        update_status_finish(curtask=cur, taskid=taskid, log=log)
+    conn.commit()
+
+
 def mainloop(fg=False):
     if fg:
         print ('Entering the mainloop...')
@@ -493,6 +549,10 @@ def mainloop(fg=False):
         print(' > Proc detect library')
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         detectlib(conn=conn, cur=cur, tasks=task, fg=fg)
+    if task['proc'] == 4:
+        print(' > Proc label tapes')
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        labeltapes(conn=conn, cur=cur, tasks=task, fg=fg)
     conn.close()
     sys.exit(0)
 
