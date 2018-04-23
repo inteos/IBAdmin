@@ -90,7 +90,7 @@ def mainloop(fg=0):
             print(time.asctime() + " : Collecting ...")
         try:
             conn.isolation_level
-        except OperationalError:
+        except psycopg2.OperationalError:
             conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
         # colled the data
         Catalog.collect(conn, fg)
