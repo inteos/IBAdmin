@@ -325,7 +325,7 @@ def getStorageStatusDevice(storage='ibadmin', device=None):
             for line in bconsole:
                 if line == '':
                     continue
-                if 'mounted with:' in line and not st:
+                if ('mounted with:' in line or 'open but no Bacula volume is currently mounted' in line) and not st:
                     out['Status'] = 'Mounted'
                 if 'Device is disabled' in line:
                     out['Status'] = 'Disabled'
@@ -346,8 +346,6 @@ def getStorageStatusDevice(storage='ibadmin', device=None):
                     out['Size'] = line.split()[1].split('=')[1].replace(',', '')
                 if 'Slot' in line and 'loaded' in line:
                     out['Slot'] = line.split()[1]
-                if 'open but no Bacula volume is currently mounted' in line:
-                    out['Status'] = 'Mounted'
     # print (out)
     return out
 
