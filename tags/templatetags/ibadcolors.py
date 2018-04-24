@@ -46,9 +46,9 @@ def jobsuccessbgcolor(value):
 @register.filter
 def OSfgcolor(value):
     # Linux
-    if value == 'rhel':
+    if value == 'rhel' or value == 'xen':
         return "#dd4b39"
-    if value == 'deb':
+    if value == 'deb' or value == 'proxmox':
         return "#ff851b"
     # Windows
     if value == 'win32' or value == 'win64':
@@ -71,9 +71,9 @@ def OSfgcolor(value):
 @register.filter
 def OSbgcolor(value):
     # Linux
-    if value == 'rhel':
+    if value == 'rhel' or value == 'xen':
         return "bg-red"
-    if value == 'deb':
+    if value == 'deb' or value == 'proxmox':
         return "bg-orange"
     # Windows
     if value == 'win32' or value == 'win64':
@@ -290,10 +290,12 @@ def tasksprogresscolor(value):
 @register.filter
 def jdappcolor(value):
     if value is not None:
+        if value == 'jd-backup-files':
+            return 'label-primary'
+        if value == 'jd-backup-proxmox':
+            return 'bg-orange'
         if value == 'jd-admin':
             return 'bg-maroon'
         if value == 'jd-backup-catalog':
             return 'bg-navy'
-        if value == 'jd-backup-files':
-            return 'label-primary'
     return 'label-default'

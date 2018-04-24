@@ -1,29 +1,41 @@
 <div class="row">
   <div class="col-lg-12 col-xs-6">
-  {% if Include %}
+
+    {% if FSData.Include %}
     <p><span class="label label-success">Include</span></p>
     <ul>
-    {% for i in Include %}
+    {% for i in FSData.Include %}
       <li>{{ i.value }}</li>
     {% endfor %}
     </ul>
-  {% endif %}
-  {% if DisplayFS.FS %}
+    {% endif %}
+
+    {% if FSData.FS %}
     <p><span class="label label-success">Data to backup</span></p>
     <ul>
-    {% for d in DisplayFS.FS %}
+    {% for d in FSData.FS %}
       <li><i class="{{ d.icon }}"></i> {{ d.text }}</li>
     {% endfor %}
     </ul>
-  {% endif %}
+    {% endif %}
+
+    {% if FSData.VMS %}
+    <p><span class="label label-success">Guest VM to backup</span></p>
+    <ul class="row">
+    {% for vm in FSData.VMS %}
+      <li><i class="fa {{ FSData.VMSicon }}"></i> {{ vm }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
   </div>
 </div>
-{% if Exclude %}
+{% if FSData.Exclude %}
 <div class="row">
   <div class="col-lg-12 col-xs-6">
     <p><span class="label label-warning">Exclude</span></p>
     <ul>
-    {% for e in Exclude %}
+    {% for e in FSData.Exclude %}
       <li>{{ e.value }}</li>
     {% endfor %}
     </ul>

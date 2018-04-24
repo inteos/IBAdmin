@@ -23,7 +23,7 @@
               </div>
             </div>
             <div class="col-xs-12">
-              <form class="form-horizontal" id="restoreform" method="post" action="{% url 'clientsaddnode' %}" style="margin-top: 12px;">
+              <form class="form-horizontal" id="restoreform" method="post" style="margin-top: 12px;">
                 {% csrf_token %}
                 {{ form.rselected }}
                 {{ form.client }}

@@ -1,8 +1,8 @@
 <script>
   $(function () {
-    //Initialize Select2 Elements
+    // Initialize Select2 Elements
     $(".select2").select2();
-    // TODO: zastanowić się czy da się zrobić to poniżej dynamiczne
+    // Initialize backupsch and all forms
     $('#divrepeat').show();
     $('#divweekdays').hide();
     $('#divmonthdays').hide();
@@ -60,18 +60,18 @@
     showMeridian: false,
   });
   $(function(){
-    $('#id_backupsch').change(function(){
-      if ($('#id_backupsch').val() == 'c1'){
+    $('#{{ form.backupsch.id_for_label }}').change(function(){
+      if ($('#{{ form.backupsch.id_for_label }}').val() == 'c1'){
         $('#divrepeat').show();
         $('#divweekdays').hide();
         $('#divmonthdays').hide();
       } else
-      if ($('#id_backupsch').val() == 'c2'){
+      if ($('#{{ form.backupsch.id_for_label }}').val() == 'c2'){
         $('#divrepeat').hide();
         $('#divweekdays').show();
         $('#divmonthdays').hide();
       } else
-      if ($('#id_backupsch').val() == 'c3'){
+      if ($('#{{ form.backupsch.id_for_label }}').val() == 'c3'){
         $('#divrepeat').hide();
         $('#divweekdays').hide();
         $('#divmonthdays').show();

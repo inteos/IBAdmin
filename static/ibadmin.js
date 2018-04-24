@@ -318,10 +318,10 @@ function renderclientcluster(name,service){
 
 function osbgcolor(value){
     // Linux
-    if (value == 'rhel'){
+    if (value == 'rhel' || value == 'xen'){
         return "bg-red";
     };
-    if (value == 'deb'){
+    if (value == 'deb' || value == 'proxmox'){
         return "bg-orange";
     };
     // Windows
@@ -374,6 +374,12 @@ function ostext(value){
     };
     if (value == 'hpux'){
         return "HP-UX";
+    };
+    if (value == 'proxmox'){
+        return "Proxmox";
+    };
+    if (value == 'xen'){
+        return "XenServer";
     };
     return "Unknown";
 };

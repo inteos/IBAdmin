@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.db import transaction
 from libs.job import *
 from libs.menu import updateMenuNumbers
-from libs.appdata import catalogfs_getall
+from libs.appdata import *
 from libs.bconsole import *
 from .models import *
 from .forms import *
@@ -70,16 +70,11 @@ def info(request, name):
     fsdata = {}
     if jobparams['JobDefs'] == 'jd-backup-catalog':
         # special hack for Catalog Backup job
-        fsdata = {'FS': catalogfs_getall()}
+        fsdata = catalog_fsdata()
+    elif jobparams['JobDefs'] == 'jd-backup-proxmox':
+        fsdata = proxmox_fsdata(jobparams)
     else:
-        fsname = jobparams.get('FileSet', None)
-        if fsname is not None:
-            (inclist, exclist, optionlist) = getDIRFSparams(name=fsname)
-            fsdata = {
-                'Include': inclist,
-                'Exclude': exclist,
-                'Options': optionlist,
-            }
+        fsdata = files_fsdata(jobparams)
     context = {'contentheader': 'Job info', 'apppath': ['Jobs', name, 'Info'], 'Job': jobparams, 'jobstatusdisplay': 1,
                'FSData': fsdata}
     updateMenuNumbers(context)
@@ -572,14 +567,14 @@ def makestopid(request, jobid):
     return JsonResponse(context, safe=False)
 
 
-def name(request):
+def jname(request):
     """
         JSON for Job name
         when Job name already exist then return false
     """
-    nam = request.GET.get('name', '').encode('ascii', 'ignore')
+    n = request.GET.get('name', '').encode('ascii', 'ignore')
     check = True
-    if ConfResource.objects.filter(compid__type='D', type__name='Job', name=nam).count() == 1:
+    if ConfResource.objects.filter(compid__type='D', type__name='Job', name=n).count() == 1:
         check = False
     return JsonResponse(check, safe=False)
 
@@ -628,7 +623,46 @@ def addfiles(request):
             if form.is_valid():
                 # print "cleaned data", form.cleaned_data
                 with transaction.atomic():
-                    createJobForm(data=form.cleaned_data)
+                    createJobFilesForm(data=form.cleaned_data)
+                directorreload()
+                return redirect('jobsinfo', form.cleaned_data['name'].encode('ascii', 'ignore'))
+            else:
+                # TODO zrobic obsługę błędów albo i nie
+                print form.is_valid()
+                print form.errors.as_data()
+    return redirect('jobsdefined')
+
+
+def addproxmox(request):
+    checkDIRProxmoxJobDef()
+    st = getDIRStorageNames()
+    storages = ()
+    for s in st:
+        storages += ((s, s),)
+    cl = getDIRClientsNamesos(os='proxmox')
+    clients = ()
+    for c in cl:
+        clients += ((c, c),)
+    if request.method == 'GET':
+        initialclient = request.GET.get('c', None)
+        if initialclient is not None:
+            # TODO zrobić weryfikację, czy już nie ma odpowiedniego zadania i odpowiednio zmienić jobname
+            form = JobProxmoxForm(storages=storages, clients=clients, initial={'client': initialclient,
+                                                                             'name': initialclient + '-guest'})
+        else:
+            form = JobProxmoxForm(storages=storages, clients=clients)
+        context = {'contentheader': 'Add Proxmox GuestVM Job', 'apppath': ['Jobs', 'Add', 'Proxmox Backup'], 'form': form}
+        updateMenuNumbers(context)
+        return render(request, 'jobs/addproxmox.html', context)
+    else:
+        # print request.POST
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            form = JobProxmoxForm(storages=storages, clients=clients, data=request.POST)
+            if form.is_valid():
+                # print "cleaned data", form.cleaned_data
+                with transaction.atomic():
+                    createJobProxmoxForm(data=form.cleaned_data)
                 directorreload()
                 return redirect('jobsinfo', form.cleaned_data['name'].encode('ascii', 'ignore'))
             else:
@@ -647,10 +681,13 @@ def edit(request, name):
     jd = job['JobDefs']
     if jd == 'jd-backup-files':
         response = redirect('jobseditfiles', name)
-        if backurl is not None:
-            response['Location'] += '?b=' + backurl
-        return response
-    raise Http404()
+    elif jd == 'jd-backup-proxmox':
+        response = redirect('jobseditproxmox', name)
+    else:
+        raise Http404()
+    if backurl is not None:
+        response['Location'] += '?b=' + backurl
+    return response
 
 
 def advanced(request, name):
@@ -661,6 +698,8 @@ def advanced(request, name):
     jd = job['JobDefs']
     if jd == 'jd-backup-files':
         return redirect('jobsfilesadvanced', name)
+    if jd == 'jd-backup-proxmox':
+        return redirect('jobsproxmoxadvanced', name)
     if jd == 'jd-admin':
         return redirect('jobsadminadvanced', name)
     if jd == 'jd-backup-catalog':
@@ -674,12 +713,12 @@ def makeinitialdatafiles(name, job):
     include = ''
     for i in inclist:
         if len(include):
-            include += '\r\n'           # TODO required for textarea handling, but it is a platform specyfic
+            include += '\r\n'           # TODO required for textarea handling, but it is a platform specific
         include += i['value']
     exclude = ''
     for e in exclist:
         if len(exclude):
-            exclude += '\r\n'           # TODO required for textarea handling, but it is a platform specyfic
+            exclude += '\r\n'           # TODO required for textarea handling, but it is a platform specific
         exclude += e['value']
     data = {
         'name': name,
@@ -697,6 +736,67 @@ def makeinitialdatafiles(name, job):
         'schedulemonth': job['Schedulemonth'],
     }
     return data
+
+
+def makeinitialdataproxmox(name, job):
+    (backupsch, backuprepeat) = job['Scheduleparam'].split(':')
+    inclist = job['Objsinclude'].split(':')
+    include = ''
+    for i in inclist:
+        if len(include):
+            include += '\r\n'           # TODO required for textarea handling, but it is a platform specific
+        include += i
+    exclude = job['Objsexclude']
+    if job['Allobjs'] == 'True':
+        allvms = True
+    else:
+        allvms = False
+    data = {
+        'name': name,
+        'descr': job['Descr'],
+        'retention': getretentionform(job['Pool']),
+        'storage': job['Storage'],
+        'client': job['Client'],
+        'allvms': allvms,
+        'include': include,
+        'exclude': exclude,
+        'backupsch': backupsch,
+        'starttime': datetime.strptime(job['Scheduletime'], '%H:%M').time(),
+        'backuprepeat': backuprepeat,
+        'backuplevel': level2form(job['Level']),
+        'scheduleweek': job['Scheduleweek'],
+        'schedulemonth': job['Schedulemonth'],
+    }
+    return data
+
+
+def updatejobparams(name=None, form=None, forcelevel=None):
+    if form is None or name is None:
+        return
+    if 'descr' in form.changed_data:
+        # print "Update description"
+        with transaction.atomic():
+            updateDIRJobDescr(name=name, descr=form.cleaned_data['descr'])
+    if 'storage' in form.changed_data:
+        # print "Update storage"
+        with transaction.atomic():
+            updateJobStorage(name=name, storage=form.cleaned_data['storage'])
+    if 'client' in form.changed_data:
+        # print "Update client"
+        with transaction.atomic():
+            updateJobClient(name=name, client=form.cleaned_data['client'])
+    if 'backupsch' in form.changed_data or 'starttime' in form.changed_data or \
+       'scheduleweek' in form.changed_data or 'schedulemonth' in form.changed_data or \
+       'backuprepeat' in form.changed_data or 'backuplevel' in form.changed_data:
+        # update Schedule
+        # print "Update schedule"
+        with transaction.atomic():
+            updateSchedule(jobname=name, data=form.cleaned_data, forcelevel=forcelevel)
+    if 'retention' in form.changed_data:
+        # update retention
+        # print "update retention"
+        with transaction.atomic():
+            updateRetention(name=name, retention=form.cleaned_data['retention'])
 
 
 def editfiles(request, name):
@@ -733,21 +833,7 @@ def editfiles(request, name):
             form = JobFilesForm(storages=storages, clients=clients, data=post, initial=data)
             if form.is_valid() and form.has_changed():
                 # print "form valid and changed ... ", form.changed_data
-                if 'descr' in form.changed_data:
-                    # update description
-                    # print "Update description"
-                    with transaction.atomic():
-                        updateDIRJobDescr(name=name, descr=form.cleaned_data['descr'])
-                if 'storage' in form.changed_data:
-                    # update description
-                    # print "Update storage"
-                    with transaction.atomic():
-                        updateJobStorage(name=name, storage=form.cleaned_data['storage'])
-                if 'client' in form.changed_data:
-                    # update description
-                    # print "Update client"
-                    with transaction.atomic():
-                        updateJobClient(name=name, client=form.cleaned_data['client'])
+                updatejobparams(name, form)
                 if 'include' in form.changed_data:
                     # update include
                     # print "Update include"
@@ -761,18 +847,56 @@ def editfiles(request, name):
                     with transaction.atomic():
                         updateFSExclude(fsname=fsname, exclude=form.cleaned_data['exclude'],
                                         client=form.cleaned_data['client'])
-                if 'backupsch' in form.changed_data or 'starttime' in form.changed_data or \
-                   'scheduleweek' in form.changed_data or 'schedulemonth' in form.changed_data or \
-                   'backuprepeat' in form.changed_data or 'backuplevel' in form.changed_data:
-                    # update Schedule
-                    # print "Update schedule"
+                directorreload()
+            return redirect('jobsinfo', name)
+    return redirect('jobsdefined')
+
+
+def editproxmox(request, name):
+    dircompid = getDIRcompid()
+    jobres = getDIRJobinfo(dircompid=dircompid, name=name)
+    if jobres is None:
+        raise Http404()
+    job = extractjobparams(jobres)
+    st = getDIRStorageNames(dircompid=dircompid)
+    storages = ()
+    for s in st:
+        storages += ((s, s),)
+    cl = getDIRClientsNamesos(dircompid=dircompid, os='proxmox')
+    clients = ()
+    for c in cl:
+        clients += ((c, c),)
+    if request.method == 'GET':
+        backurl = request.GET.get('b', None)
+        # print backurl
+        data = makeinitialdataproxmox(name, job)
+        form = JobProxmoxForm(storages=storages, clients=clients, initial=data)
+        form.fields['name'].disabled = True
+        context = {'contentheader': 'Edit Proxmox GuestVM Job', 'apppath': ['Jobs', 'Edit', 'Proxmox Backup'],
+                   'form': form, 'jobstatusdisplay': 1, 'Job': job}
+        updateMenuNumbers(context)
+        return render(request, 'jobs/editproxmox.html', context)
+    else:
+        # print request.POST
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            # print "Save!"
+            post = request.POST.copy()
+            post['name'] = name
+            data = makeinitialdataproxmox(name, job)
+            form = JobProxmoxForm(storages=storages, clients=clients, data=post, initial=data)
+            if form.is_valid() and form.has_changed():
+                # print "form valid and changed ... ", form.changed_data
+                updatejobparams(name, form, forcelevel='full')
+                plugin = []
+                fsname = 'fs-' + name
+                if 'allvms' in form.changed_data or 'include' in form.changed_data or 'exclude' in form.changed_data:
+                    allvms = form.cleaned_data['allvms']
+                    plugin, include, exclude = prepareFSProxmoxPlugin(form.cleaned_data)
                     with transaction.atomic():
-                        updateSchedule(jobname=name, data=form.cleaned_data)
-                if 'retention' in form.changed_data:
-                    # update retention
-                    # print "update retention"
-                    with transaction.atomic():
-                        updateRetention(name=name, retention=form.cleaned_data['retention'])
+                        updateFSIncludePlugin(dircompid=dircompid, fsname=fsname, include=plugin)
+                        updateJobAllobjs(dircompid=dircompid, name=name, allobjs=allvms, objsinclude=include,
+                                         objsexclude=exclude)
                 directorreload()
             return redirect('jobsinfo', name)
     return redirect('jobsdefined')
@@ -789,6 +913,15 @@ def makefilesadvanceddata(name, job):
     return data
 
 
+def makeproxmoxadvanceddata(name, job):
+    data = {
+        'name': name,
+        'enabled': job['Enabled'] == 'Yes',
+        'dedup': job.get('Dedup'),
+    }
+    return data
+
+
 def makeadminadvanceddata(name, job):
     data = {
         'name': name,
@@ -799,13 +932,14 @@ def makeadminadvanceddata(name, job):
 
 
 def filesadvanced(request, name):
-    jobres = getDIRJobinfo(name=name)
+    dircompid = getDIRcompid()
+    jobres = getDIRJobinfo(dircompid=dircompid, name=name)
     if jobres is None:
         raise Http404()
     job = extractjobparams(jobres)
     storagededup = getStorageisDedup(job.get('Storage'))
     fsname = 'fs-' + name
-    fsoptions = getDIRFSoptions(name=fsname)
+    fsoptions = getDIRFSoptions(dircompid=dircompid, name=fsname)
     dedup = False
     for param in fsoptions:
         if param['name'] == 'Dedup':
@@ -829,25 +963,26 @@ def filesadvanced(request, name):
                 if 'enabled' in form.changed_data:
                     # update job enabled
                     with transaction.atomic():
-                        updateJobEnabled(name=name, enabled=form.cleaned_data['enabled'])
+                        updateJobEnabled(dircompid=dircompid, name=name, enabled=form.cleaned_data['enabled'])
                 if 'runbefore' in form.changed_data:
                     # update runbefore parameter
                     with transaction.atomic():
-                        updateJobRunBefore(name=name, runbefore=form.cleaned_data['runbefore'])
+                        updateJobRunBefore(dircompid=dircompid, name=name, runbefore=form.cleaned_data['runbefore'])
                 if 'runafter' in form.changed_data:
                     # update runafter parameter
                     with transaction.atomic():
-                        updateJobRunAfter(name=name, runafter=form.cleaned_data['runafter'])
+                        updateJobRunAfter(dircompid=dircompid, name=name, runafter=form.cleaned_data['runafter'])
                 if 'dedup' in form.changed_data:
                     # update job enabled
                     with transaction.atomic():
-                        updateFSOptionsDedup(fsname=fsname, dedup=form.cleaned_data['dedup'])
+                        updateFSOptionsDedup(dircompid=dircompid, fsname=fsname, dedup=form.cleaned_data['dedup'])
                 directorreload()
     return redirect('jobsinfo', name)
 
 
 def adminadvanced(request, name):
-    jobres = getDIRJobinfo(name=name)
+    dircompid = getDIRcompid()
+    jobres = getDIRJobinfo(dircompid=dircompid, name=name)
     if jobres is None:
         raise Http404()
     job = extractjobparams(jobres)
@@ -873,17 +1008,19 @@ def adminadvanced(request, name):
                 if 'enabled' in form.changed_data:
                     # update job enabled
                     with transaction.atomic():
-                        updateJobEnabled(name=name, enabled=form.cleaned_data['enabled'])
+                        updateJobEnabled(dircompid=dircompid, name=name, enabled=form.cleaned_data['enabled'])
                 if 'starttime' in form.changed_data:
                     # update job time parameter
                     with transaction.atomic():
-                        updateScheduletime(name='sch-admin', jobname=name, starttime=form.cleaned_data['starttime'])
+                        updateScheduletime(dircompid=dircompid, name='sch-admin', jobname=name,
+                                           starttime=form.cleaned_data['starttime'])
                 directorreload()
     return redirect('jobsinfo', name)
 
 
 def catalogdvanced(request, name):
-    jobres = getDIRJobinfo(name=name)
+    dircompid = getDIRcompid()
+    jobres = getDIRJobinfo(dircompid=dircompid, name=name)
     if jobres is None:
         raise Http404()
     job = extractjobparams(jobres)
@@ -909,11 +1046,53 @@ def catalogdvanced(request, name):
                 if 'enabled' in form.changed_data:
                     # update job enabled
                     with transaction.atomic():
-                        updateJobEnabled(name=name, enabled=form.cleaned_data['enabled'])
+                        updateJobEnabled(dircompid=dircompid, name=name, enabled=form.cleaned_data['enabled'])
                 if 'starttime' in form.changed_data:
                     # update job time parameter
                     with transaction.atomic():
-                        updateScheduletime(name='sch-backup-catalog', jobname=name, starttime=form.cleaned_data['starttime'])
+                        updateScheduletime(dircompid=dircompid, name='sch-backup-catalog', jobname=name,
+                                           starttime=form.cleaned_data['starttime'])
+                directorreload()
+    return redirect('jobsinfo', name)
+
+
+def proxmoxadvanced(request, name):
+    dircompid = getDIRcompid()
+    jobres = getDIRJobinfo(dircompid=dircompid, name=name)
+    if jobres is None:
+        raise Http404()
+    job = extractjobparams(jobres)
+    storagededup = getStorageisDedup(job.get('Storage'))
+    fsname = 'fs-' + name
+    fsoptions = getDIRFSoptions(dircompid=dircompid, name=fsname)
+    dedup = False
+    for param in fsoptions:
+        if param['name'] == 'Dedup':
+            dedup = True
+    job['Dedup'] = dedup
+    if request.method == 'GET':
+        data = makeproxmoxadvanceddata(name, job)
+        form = JobProxmoxAdvancedForm(initial=data)
+        # form.fields['enabled'].disabled = True
+        context = {'contentheader': 'Advanced properities', 'apppath': ['Jobs', 'Advanced', name], 'form': form,
+                   'jobstatusdisplay': 1, 'Job': job, 'Storagededup': storagededup}
+        updateMenuNumbers(context)
+        return render(request, 'jobs/proxmoxadvanced.html', context)
+    else:
+        # print request.POST
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            data = makeproxmoxadvanceddata(name, job)
+            form = JobProxmoxAdvancedForm(initial=data, data=request.POST)
+            if form.is_valid() and form.has_changed():
+                if 'enabled' in form.changed_data:
+                    # update job enabled
+                    with transaction.atomic():
+                        updateJobEnabled(name=name, enabled=form.cleaned_data['enabled'])
+                if 'dedup' in form.changed_data:
+                    # update job enabled
+                    with transaction.atomic():
+                        updateFSOptionsDedup(fsname=fsname, dedup=form.cleaned_data['dedup'])
                 directorreload()
     return redirect('jobsinfo', name)
 

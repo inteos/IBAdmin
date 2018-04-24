@@ -18,7 +18,11 @@
           icon = 'fa fa-windows';
           break;
         case 'osx':
-          icon = 'fa fa-apple'
+          icon = 'fa fa-apple';
+          break;
+        case 'proxmox':
+        case 'xen':
+          icon = 'fa fa-cloud';
           break;
       };
       $('#{{ form.os.id_for_label }}icon').removeClass().addClass(icon);

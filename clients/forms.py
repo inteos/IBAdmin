@@ -10,6 +10,9 @@ OSES = (
     ("osx", "Mac OS X"),
     ("solsparc", "Solaris SPARC"),
     ("solintel", "Solaris x86"),
+    ("freebsd", "FreeBSD"),
+    ("proxmox", "Proxmox Hypervisor"),
+    ("xen", "XenServer Hypervisor"),
     ("aix", "AIX"),
     ("hpux", "HP-UX"),
 )

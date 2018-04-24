@@ -1,5 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
+from config.confinfo import getDIRFSparams
 
 
 CATALOGFS = {
@@ -36,3 +37,70 @@ def catalogfs_getall():
     for c in comps:
         data.append(catalogfs_get(c))
     return data
+
+
+def catalog_fsdata():
+    return {'FS': catalogfs_getall()}
+
+
+PROXMOXFS = {
+    'qemu': {'icon': 'fa fa-desktop', 'text': 'QEMU VM Guests'},
+    'lxc': {'icon': 'fa fa-cube', 'text': 'Container Guests'},
+}
+
+
+def proxmoxfs_get_icon(comp=None):
+    if comp is None:
+        return ''
+    data = PROXMOXFS.get(comp, None)
+    return data['icon']
+
+
+def proxmoxfs_get_text(comp=None):
+    if comp is None:
+        return ''
+    data = PROXMOXFS.get(comp, None)
+    return data['text']
+
+
+def proxmox_fsdata(jobparams=None):
+    if jobparams is not None:
+        vmsexclude = jobparams['Objsexclude']
+        if len(vmsexclude) > 0:
+            vmsexclude = ({'value': vmsexclude},)
+        else:
+            vmsexclude = None
+        if jobparams['Allobjs'] == 'True':
+            vmslist = ['All Guest VMs']
+            vmsicon = 'fa-cubes'
+        else:
+            vmsicon = 'fa-cube'
+            vmsinclude = jobparams['Objsinclude']
+            if len(vmsinclude) > 0:
+                vmsinclude = vmsinclude.split(":")
+            else:
+                vmsinclude = []
+            vmslist = []
+            for vm in vmsinclude:
+                vmslist.append(vm)
+        return {
+            'VMSicon': vmsicon,
+            'VMS': vmslist,
+            'Exclude': vmsexclude,
+        }
+    else:
+        return None
+
+
+def files_fsdata(jobparams=None):
+    if jobparams is not None:
+        fsname = jobparams.get('FileSet', None)
+        if fsname is not None:
+            (inclist, exclist, optionlist) = getDIRFSparams(name=fsname)
+            return {
+                'Include': inclist,
+                'Exclude': exclist,
+                'Options': optionlist,
+            }
+    else:
+        return None

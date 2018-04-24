@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^jobid/(?P<jobid>.*)/$', views.jobidre, name='restorejobid'),
     url(r'^jobidfiles/$', views.jobidfiles, name='restorejobidfiles_rel'),
     url(r'^jobidfiles/(?P<jobid>.*)/$', views.jobidfiles, name='restorejobidfiles'),
+    url(r'^jobidproxmox/$', views.jobidproxmox, name='restorejobidproxmox_rel'),
+    url(r'^jobidproxmox/(?P<jobid>.*)/$', views.jobidproxmox, name='restorejobidproxmox'),
     url(r'^jobidcatalog/$', views.jobidcatalog, name='restorejobidcatalog_rel'),
     url(r'^jobidcatalog/(?P<jobid>.*)/$', views.jobidcatalog, name='restorejobidcatalog'),
 
@@ -22,6 +24,9 @@ urlpatterns = [
     url(r'^tree/(?P<jobids>.*)/$', views.displaytree, name='restoretree_rel'),
     url(r'^treecatalog/(?P<jobids>.*)/(?P<pathid>.*)/$', views.displaytreecatalog, name='restoretreecatalog'),
     url(r'^treecatalog/(?P<jobids>.*)/$', views.displaytreecatalog, name='restoretreecatalog_rel'),
+    url(r'^treeproxmox/(?P<jobids>.*)/(?P<pathid>.*)/$', views.displaytreeproxmox, name='restoretreeproxmox'),
+    url(r'^treeproxmox/(?P<jobids>.*)/$', views.displaytreeproxmox, name='restoretreeproxmox_rel'),
 
-    url(r'^prepare/(?P<jobids>.*)/$', views.preparerestore, name='restoreprepare'),
+    url(r'^prepare/(?P<jobids>.*)/$', views.preparerestorefiles, name='restoreprepare'),
+    url(r'^prepareproxmox/(?P<jobids>.*)/$', views.preparerestoreproxmox, name='restoreprepareproxmox'),
 ]

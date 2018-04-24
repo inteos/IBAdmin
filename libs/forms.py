@@ -18,15 +18,15 @@ INTERVALS = (
 
 
 def leveltuple(off=False, disableincr=False, disablediff=False):
-    l = ()
+    lvl = ()
     if off:
-        l += ('off', 'Off'),
-    l += ('full', 'Full'),
+        lvl += ('off', 'Off'),
+    lvl += ('full', 'Full'),
     if not disableincr:
-        l += ('incr', 'Incremental'),
+        lvl += ('incr', 'Incremental'),
     if not disablediff:
-        l += ('diff', 'Differential'),
-    return l
+        lvl += ('diff', 'Differential'),
+    return lvl
 
 
 def level2form(level='Full'):

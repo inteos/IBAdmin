@@ -31,6 +31,8 @@
         <a href="/job/addvmw"><i class="fa fa-cube"></i><span>VMware Guest Backup</span></a></li>
         <li{% if apppath.2 == 'asd' %} class="active"{% endif %}>
         <a href="/job/addvmw"><i class="fa fa-cube"></i><span>KVM Guest Backup</span></a></li>
+        <li{% if apppath.2 == 'Proxmox Backup' %} class="active"{% endif %}>
+        <a href="{% url 'jobsaddproxmox' %}"><i class="fa fa-cube"></i><span>Proxmox Guest Backup</span></a></li>
         <li{% if apppath.2 == 'asd' %} class="active"{% endif %}>
         <a href="/job/addds"><i class="fa fa-indent"></i><span>AD/LDAP Backup</span></a></li>-->
       </ul>

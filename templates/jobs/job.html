@@ -37,11 +37,12 @@
         </tr>
       </table>
     </div>
-{% if FSData.Include or FSData.FS %}
+{% if FSData.Include or FSData.FS or FSData.VMS %}
   </div>
   <div class="box-body">
     <div class="row">
       <div class="col-lg-4 col-md-5 col-xs-12">
+
         {% if FSData.Include %}
         <p><span class="label label-success">Include</span></p>
         <ul class="row">
@@ -54,11 +55,21 @@
         {% endfor %}
         </ul>
         {% endif %}
+
         {% if FSData.FS %}
         <p><span class="label label-success">Data to backup</span></p>
         <ul class="row">
         {% for d in FSData.FS %}
           <li class="col-xs-12"><i class="{{ d.icon }}"></i> {{ d.text }}</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if FSData.VMS %}
+        <p><span class="label label-success">Guest VM to backup</span></p>
+        <ul class="row">
+        {% for vm in FSData.VMS %}
+          <li class="col-xs-12"><i class="fa {{ FSData.VMSicon }}"></i> {{ vm }}</li>
         {% endfor %}
         </ul>
         {% endif %}
@@ -77,6 +88,7 @@
         </ul>
       </div>
       {% endif %}
+
       {% if FSData.Options %}
       {% for o in FSData.Options %}
       {% if o.name == 'Dedup' %}

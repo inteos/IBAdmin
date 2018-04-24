@@ -236,7 +236,7 @@ class ibadScheduleWeekWidget(forms.widgets.MultiWidget):
                         <h4><span class="label label-{col}">{label}</span></h4>
                       </div>
                       <div class="row">
-                        <select class="select2" id="{name}" name="{name}"{disabled}>
+                        <select class="select2" id="{name}" name="{name}" style="width: 80%"{disabled}>
                           """
         for v, l in self.choices:
             shtml += self.render_level(v, l, v == value)
@@ -278,6 +278,7 @@ class ibadScheduleWeekWidget(forms.widgets.MultiWidget):
           </div><!-- /.form-group -->"""
         html = shtml.format(id_for_label=idforlabel, label=label)
         return mark_safe(html)
+
 
 MONTHHLIGHT = ('1', '28', '30', '31')
 
@@ -324,7 +325,7 @@ class ibadScheduleMonthWidget(forms.widgets.MultiWidget):
                         <h4><span class="label label-{col}">{label}</span></h4>
                       </div>
                       <div class="row">
-                        <select class="select2" id="{name}" name="{name}"{disabled}>"""
+                        <select class="select2" id="{name}" name="{name}" style="width: 80%"{disabled}>"""
         for v, l in self.choices:
             shtml += self.render_level(v, l, v == value)
         shtml += """

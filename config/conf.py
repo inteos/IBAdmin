@@ -223,7 +223,8 @@ def createDIRFileSetPlugin(dircompid=None, name='fs-default', include=None, dedu
 
 def createDIRJob(dircompid=None, name='SYS-Default', jd='jd-backup-files', descr='', client=None, pool=None,
                  storage=None, fileset=None, schedule=None, level=None, maxfullinterval=None, internal=False,
-                 scheduleparam=None, scheduletime=None, scheduleweek=None, schedulemonth=None):
+                 scheduleparam=None, scheduletime=None, scheduleweek=None, schedulemonth=None,
+                 allobjs=None, objsinclude=None, objsexclude=None):
     # create resource
     resid = createDIRresJob(dircompid=dircompid, name=name, descr=descr)
     # add parameters
@@ -252,17 +253,23 @@ def createDIRJob(dircompid=None, name='SYS-Default', jd='jd-backup-files', descr
         addparameter(resid, 'MaxFullInterval', maxfullinterval)
     if internal:
         addparameter(resid, '.InternalJob', 'Yes')
+    if allobjs is not None:
+        addparameter(resid, '.Allobjs', allobjs)
+    if objsinclude is not None:
+        addparameter(resid, '.Objsinclude', objsinclude)
+    if objsexclude is not None:
+        addparameter(resid, '.Objsexclude', objsexclude)
     addparameter(resid, 'Enabled', 'Yes')
 
 
 def createDIRJobDefs(dircompid=None, name='jd-default', descr='', btype='Backup', fileset=None, level=None, pool=None,
                      schedule=None, storage=None, client=None, priority=10, dirjob=None, beforejob=None, afterjob=None,
-                     allowduplicatejob='No', writebootstrap='/opt/bacula/bsr/%c-%n.bsr'):
+                     allowduplicatejob='No', writebootstrap='/opt/bacula/bsr/%c-%n.bsr', accurate=True):
     # create new JobDefs {} resource
     resid = createDIRresJobDefs(dircompid, name, descr)
     # add parameters
     addparameter(resid, 'Type', btype)
-    if btype == 'Backup':
+    if btype == 'Backup' and accurate:
         addparameter(resid, 'Accurate', 'Yes')
     addparameter(resid, 'AllowDuplicateJobs', allowduplicatejob)
     addparameter(resid, 'CancelQueuedDuplicates', 'Yes')
@@ -317,10 +324,69 @@ def createDIRJobDefsFiles(dircompid=None):
     createDIRJobDefs(dircompid=dircompid, name='jd-backup-files', descr='Backup Files Defs', level='Incremental')
 
 
+def createDIRJobDefsProxmox(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-proxmox', descr='Backup Proxmox Defs', level='Full',
+                     accurate=False)
+
+
+def createDIRJobDefsESX(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-esx', descr='Backup VMware ESX Defs', level='Incremental')
+
+
+def createDIRJobDefsXEN(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-xen', descr='Backup XenServer Defs', level='Full',
+                     accurate=False)
+
+
+def createDIRJobDefsPGSQL(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-pgsql', descr='Backup PostgreSQL Defs', level='Incremental')
+
+
+def createDIRJobDefsMySQL(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-mysql', descr='Backup MySQL Defs', level='Incremental')
+
+
+def createDIRJobDefsOracle(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-oracle', descr='Backup Oracle Defs', level='Incremental')
+
+
+def createDIRJobDefsMSSQL(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-mssql', descr='Backup MSSQL VDI Defs', level='Incremental')
+
+
+def createDIRAllJobDefs(dircompid=None):
+    createDIRJobDefsFiles(dircompid)
+    createDIRJobDefsProxmox(dircompid)
+    createDIRJobDefsXEN(dircompid)
+    createDIRJobDefsESX(dircompid)
+    createDIRJobDefsPGSQL(dircompid)
+    createDIRJobDefsMySQL(dircompid)
+    createDIRJobDefsOracle(dircompid)
+    createDIRJobDefsMSSQL(dircompid)
+
+
+def checkDIRProxmoxJobDef(dircompid=None):
+    if getDIRJobDefs(dircompid, 'jd-backup-proxmox') is None:
+        createDIRJobDefsProxmox(dircompid)
+
+
+def checkDIRESXJobDef(dircompid=None):
+    if getDIRJobDefs(dircompid, 'jd-backup-esx') is None:
+        createDIRJobDefsESX(dircompid)
+
+
 def createDIRSchDay(resid=None, params=None):
     if resid is None or params is None:
         return
-    sch = params['level'] + ' at ' + number2time(params['time'], 0)
+    level = getlevelname(params['level'])
+    sch = level + ' at ' + number2time(params['time'], 0)
     addparameter(resid, 'Run', sch)
 
 
@@ -335,7 +401,7 @@ def createDIRSchHours(resid=None, params=None):
     times = params['time']
     if cycle == 'r1':
         # every hour
-        addparameter(resid, 'Run', level + ' hourly at ' + times)
+        addparameter(resid, 'Run', level + ' hourly at ' + number2time(times, 0))
         return
     if cycle == 'r2':
         # every 2H, so 12 entries
@@ -455,13 +521,52 @@ def createDIRSchedule(dircompid=None, name='sch-default', cycle='Hours', params=
 
 
 schmaxfulldict = {
-        'c1': '1 Week',     # sensowny kompromis
-        'c2': '1 Week',
-        'c3': '1 Month'
+    'c1': '1 Week',
+    'c2': '1 Week',
+    'c3': '1 Month'
+}
+
+
+schcycledict = {
+    'c1': 'Hours',
+    'c2': 'Week',
+    'c3': 'Month'
+}
+
+
+def prepareJobParameters(dircompid=None, data=None, level='full'):
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = data['name'].encode('ascii', 'ignore')
+    # create Pool
+    disktype = True     # TODO zrobić weryfikację
+    poolname = 'Pool-' + data['retention'].replace(' ', '-')
+    check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=data['retention'],
+                        useduration='1 Day')
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = schcycledict[data['backupsch']]
+    starttime = str(data['starttime'])[:-3]
+    # TODO: level = data['backuplevel']
+    params = {
+        'level': level,
+        'time': starttime,
+        'scheduleweek': data['scheduleweek'],
+        'schedulemonth': data['schedulemonth'],
+        'backuprepeat': data['backuprepeat'],
     }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + data['name'])
+    # create FileSet
+    fsname = 'fs-' + jobname
+    dedup = getStorageisDedup(data['storage'])
+    # schedule form parameters (backupsch, backuprepeat, starttime, scheduleweek, schedulemonth)
+    schparam = data['backupsch'] + ':' + data['backuprepeat']
+    return dircompid, jobname, poolname, fsname, schname, schparam, starttime
 
 
-def createJobForm(dircompid=None, data=None, jd='jd-backup-files'):
+def createJobFilesForm(dircompid=None, data=None, jd='jd-backup-files'):
     """{
     'name': u'asd',
     'descr': u'',
@@ -481,6 +586,7 @@ def createJobForm(dircompid=None, data=None, jd='jd-backup-files'):
     if data is None:
         return None
     # get required data
+    # (dircompid, jobname, poolname, fsname, schname, schparam, starttime) = prepareJobParameters(dircompid, data, level=data['backuplevel'])
     if dircompid is None:
         dircompid = getDIRcompid()
     jobname = data['name'].encode('ascii', 'ignore')
@@ -490,11 +596,6 @@ def createJobForm(dircompid=None, data=None, jd='jd-backup-files'):
     check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=data['retention'],
                         useduration='1 Day')
     # create Schedule
-    schcycledict = {
-        'c1': 'Hours',
-        'c2': 'Week',
-        'c3': 'Month'
-    }
     schname = 'sch-' + jobname
     schcycle = schcycledict[data['backupsch']]
     starttime = str(data['starttime'])[:-3]
@@ -527,6 +628,96 @@ def createJobForm(dircompid=None, data=None, jd='jd-backup-files'):
                  maxfullinterval=schmaxfulldict[data['backupsch']],
                  scheduleparam=schparam, scheduletime=starttime, scheduleweek=data['scheduleweek'],
                  schedulemonth=data['schedulemonth'])
+
+
+def prepareFSProxmoxPlugin(data=None):
+    """
+
+    :param data:
+    {
+        'exclude': u'',
+        'include': u'asd',
+        'allvms': True,
+    }
+    :return:
+    """
+    if data is None:
+        return None
+    allvms = data['allvms']
+    plugin = []
+    exclude = data['exclude']
+    include = data['include'].splitlines()
+    if allvms:
+        include = []
+        if exclude:
+            plugin.append("proxmox: exclude=" + exclude + " abort on error")
+        else:
+            plugin.append("proxmox: abort on error")
+    else:
+        exclude = ''
+        for guest in include:
+            if guest.startswith('vmid='):
+                plugin.append("proxmox: vmid=" + guest.split('=')[1] + " abort_on_error")
+            else:
+                plugin.append("proxmox: vm=" + guest + " abort_on_error")
+    return plugin, ":".join(a for a in include), exclude
+
+
+def createJobProxmoxForm(dircompid=None, data=None, jd='jd-backup-proxmox'):
+    """{
+    'name': u'asd',
+    'descr': u'',
+    'storage': u'ibadmin-File1',
+    'starttime': datetime.time(18, 55),
+    'backuprepeat': u'r1',
+    'scheduleweek': u'off:off:off:off:off:off:off:off',
+    'schedulemonth': u'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:'
+                      'off:off:off:off:off:off:off:off',
+    'client': u'debian',
+    'exclude': u'',
+    'include': u'guest1\nguest2\n',
+    'backupsch': u'c1',
+    'retention': u'30 days'
+    }"""
+    if data is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = data['name'].encode('ascii', 'ignore')
+    # create Pool
+    fsname = 'fs-' + jobname
+    dedup = getStorageisDedup(data['storage'])
+    disktype = True     # TODO zrobić weryfikację
+    poolname = 'Pool-' + data['retention'].replace(' ', '-')
+    check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=data['retention'],
+                        useduration='1 Day')
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = schcycledict[data['backupsch']]
+    starttime = str(data['starttime'])[:-3]
+    params = {
+        'level': 'full',
+        'time': starttime,
+        'scheduleweek': data['scheduleweek'],
+        'schedulemonth': data['schedulemonth'],
+        'backuprepeat': data['backuprepeat'],
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + data['name'])
+
+    # create FileSet
+    plugin, include, exclude = prepareFSProxmoxPlugin(data)
+    allvms = data['allvms']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + data['name'],
+                           dedup=dedup)
+    # create Job
+    schparam = data['backupsch'] + ':' + data['backuprepeat']
+    createDIRJob(dircompid=dircompid, name=jobname, jd=jd, descr=data['descr'], client=data['client'],
+                 pool=poolname, storage=data['storage'], fileset=fsname, schedule=schname, level='full',
+                 scheduleparam=schparam, scheduletime=starttime, scheduleweek=data['scheduleweek'],
+                 schedulemonth=data['schedulemonth'], maxfullinterval=schmaxfulldict[data['backupsch']],
+                 allobjs=allvms, objsinclude=include, objsexclude=exclude)
 
 
 def createDefaultClientJob(dircompid=None, name=None, clientos=None, client=None):
@@ -805,6 +996,7 @@ def updateJobClient(dircompid=None, name=None, client='ibadmin'):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
+    print dircompid, name, client
     updateparameter(dircompid, name, 'Job', 'Client', client)
 
 
@@ -855,7 +1047,7 @@ def updateFSExclude(dircompid=None, fsname=None, exclude='', client=None):
     createFSExclude(resid=excludeid, exclude=excludelist)
 
 
-def updateFSIncludePlugin(dircompid=None, fsname=None, include=''):
+def updateFSIncludePlugin(dircompid=None, fsname=None, include=[]):
     if fsname is None:
         return None
     # get and prepare required data
@@ -879,6 +1071,17 @@ def updateJobEnabled(dircompid=None, name=None, enabled=True):
         ena = 'Yes'
     resid = getresourceid(compid=dircompid, name=name, typename='Job')
     updateparameterresid(resid=resid, name='Enabled', value=ena)
+
+
+def updateJobAllobjs(dircompid=None, name=None, allobjs=None, objsinclude=None, objsexclude=None):
+    if name is None:
+        return
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    updateparameter(compid=dircompid, resname=name, restype='Job', name='.Allobjs', value=allobjs)
+    updateparameter(compid=dircompid, resname=name, restype='Job', name='.Objsinclude', value=objsinclude)
+    updateparameter(compid=dircompid, resname=name, restype='Job', name='.Objsexclude', value=objsexclude)
 
 
 def updateJobRunBefore(dircompid=None, name=None, runbefore=''):
@@ -963,7 +1166,7 @@ def updateRetention(dircompid=None, name=None, retention=None):
 
 
 def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', starttime='', scheduleweek='',
-                   schedulemonth='', backuprepeat='', backuplevel=''):
+                   schedulemonth='', backuprepeat='', backuplevel='', forcelevel=None):
     """
 
     :param dircompid:
@@ -979,8 +1182,6 @@ def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', startt
     """
     if jobname is None and data is None:
         return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
     if data is not None:
         if jobname is None:
             jobname = data['name']
@@ -989,7 +1190,10 @@ def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', startt
         scheduleweek = data['scheduleweek']
         schedulemonth = data['schedulemonth']
         backuprepeat = data['backuprepeat']
-        backuplevel = data['backuplevel']
+        if forcelevel is None:
+            backuplevel = data['backuplevel']
+    if dircompid is None:
+        dircompid = getDIRcompid()
     schname = 'sch-' + jobname
     resid = getresourceid(compid=dircompid, name=schname, typename='Schedule')
     query = ConfParameter.objects.filter(resid=resid)
@@ -1022,6 +1226,8 @@ def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', startt
         else:
             backuplevel = 'incr'
     jresid = getresourceid(compid=dircompid, name=jobname, typename='Job')
+    if forcelevel is not None:
+        backuplevel = forcelevel
     updateparameterresid(resid=jresid, name='Level', value=getlevelname(backuplevel))
     schparam = data['backupsch'] + ':' + data['backuprepeat']
     updateparameterresid(resid=jresid, name='.Scheduleparam', value=schparam)
@@ -1527,7 +1733,7 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
     # create Catalog backup JobDefs
     createDIRJobDefsCatalog(dircompid=dircompid, storage=storname)
     # create Catalog backup JobDefs
-    createDIRJobDefsFiles(dircompid=dircompid)
+    createDIRAllJobDefs(dircompid=dircompid)
     # create Admin Job
     onceaday = 'c1:r24'     # this is en equivalent to once a day :)
     createDIRJob(dircompid=dircompid, name='SYS-Admin', jd='jd-admin', internal=True,

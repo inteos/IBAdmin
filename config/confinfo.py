@@ -201,6 +201,17 @@ def getDIRJobType(dircompid=None, name=None):
     return None
 
 
+def getDIRJobDefs(dircompid=None, name=None):
+    if name is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jd = ConfResource.objects.filter(compid_id=dircompid, name=name, type__name='JobDefs').first()
+    if jd is not None:
+        return jd
+    return None
+
+
 def getDIRClientJobsList(dircompid=None, client=None):
     if client is None:
         return None
@@ -292,6 +303,20 @@ def getDIRClientsNames(dircompid=None):
         dircompid = getDIRcompid()
     # List of the all Clients resources available
     clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client').order_by('name')
+    clientsnames = ()
+    for cr in clientsres:
+        clientsnames += (cr.name,)
+    return clientsnames
+
+
+def getDIRClientsNamesos(dircompid=None, os=None):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    # List of the all Clients resources available
+    if os is None:
+        return getDIRClientsNames(dircompid)
+    clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client', confparameter__name='.OS',
+                                             confparameter__value=os).order_by('name')
     clientsnames = ()
     for cr in clientsres:
         clientsnames += (cr.name,)

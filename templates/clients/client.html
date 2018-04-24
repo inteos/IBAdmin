@@ -41,7 +41,11 @@
     <div class="row">
       <div class="col-sm-12 center-block">
         <a class="btn btn-app" href="{% url 'clientsstatus' Client.Name %}"><i class="fa fa-external-link"></i>Status</a>
+        {% if Client.OS == 'proxmox' %}
+        <a class="btn btn-app" href="{% url 'jobsaddproxmox' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>GuestVM Backup</a>
+        {% else %}
         <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
+        {% endif %}
         <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
         <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-wrench"></i>Edit</a>
         {% if not Client.InternalClient %}

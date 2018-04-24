@@ -84,19 +84,19 @@ def jobleveltext(value, arg=None):
     :param arg: Job->Type
     :return: 
     """
-    if arg is not None and (arg == 'R' or arg == 'Restore'):
+    if arg is not None and (arg in ('R', 'Restore')):
         return "Restore"
-    if arg is not None and (arg == 'D' or arg == '' or arg == 'Admin') or value == ' ' or value == '':
+    if arg is not None and (arg in ('D', '', 'Admin')) or value == ' ' or value == '':
         return "Admin"
-    if value == 'F' or value == 'full' or value == 'Full':
+    if value in ('F', 'full', 'Full'):
         return "Full"
-    if value == 'D' or value == 'Differential' or value == 'Diff' or value == 'differential':
+    if value in ('D', 'Differential', 'Diff', 'differential'):
         return "Diff"
-    if value == 'I' or value == 'Incremental' or value == 'Incr' or value == 'incremental':
+    if value in ('I', 'Incremental', 'Incr', 'incremental'):
         return "Incr"
     if value == 'B':
         return "Base"
-    if value == 'f' or value == 'VirtualFull':
+    if value in ('f', 'VirtualFull'):
         return "VFull"
     if value == 'S':
         return "Since"
@@ -152,6 +152,10 @@ def OStext(value):
         return "AIX"
     if value == 'hpux':
         return "HP-UX"
+    if value == 'proxmox':
+        return "Proxmox"
+    if value == 'xen':
+        return "XenServer"
     return "Unknown"
 
 
@@ -163,6 +167,8 @@ def OSicon(value):
         return "fa-windows"
     if value == 'osx':
         return "fa-apple"
+    if value in ('proxmox', 'xen'):
+        return "fa-cloud"
     return ""
 
 
@@ -232,10 +238,12 @@ def charttext(value):
 @register.filter
 def jdapptext(value):
     if value is not None:
+        if value == 'jd-backup-files':
+            return 'Files backup'
+        if value == 'jd-backup-proxmox':
+            return 'Proxmox backup'
         if value == 'jd-admin':
             return 'Admin Job'
         if value == 'jd-backup-catalog':
             return 'Catalog Backup'
-        if value == 'jd-backup-files':
-            return 'Files backup'
     return 'Unknown'

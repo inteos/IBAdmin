@@ -55,14 +55,17 @@ urlpatterns = [
     url(r'^statuswidget/$', views.statuswidget, name='jobsstatuswidget'),
 
     url(r'^add/files/$', views.addfiles, name='jobsaddfiles'),
+    url(r'^add/proxmox/$', views.addproxmox, name='jobsaddproxmox'),
     url(r'^editre/$', views.edit, name='jobsedit_rel'),
     url(r'^editre/(?P<name>.*)/$', views.edit, name='jobsedit'),
     url(r'^edit/files/(?P<name>.*)/$', views.editfiles, name='jobseditfiles'),
+    url(r'^edit/proxmox/(?P<name>.*)/$', views.editproxmox, name='jobseditproxmox'),
 
     url(r'^advancedre/(?P<name>.*)/$', views.advanced, name='jobsadvanced'),
     url(r'^advanced/files/(?P<name>.*)/$', views.filesadvanced, name='jobsfilesadvanced'),
+    url(r'^advanced/proxmox/(?P<name>.*)/$', views.proxmoxadvanced, name='jobsproxmoxadvanced'),
     url(r'^advanced/admin/(?P<name>.*)/$', views.adminadvanced, name='jobsadminadvanced'),
     url(r'^advanced/catalog/(?P<name>.*)/$', views.catalogdvanced, name='jobscatalogadvanced'),
 
-    url(r'^name/$', views.name, name='jobsname'),
+    url(r'^name/$', views.jname, name='jobsname'),
 ]

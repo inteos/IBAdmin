@@ -76,6 +76,11 @@ def jobidre(request, jobid=None):
         if backurl is not None:
             response['Location'] += '?b=' + backurl
         return response
+    if jobtype == 'jd-backup-proxmox':
+        response = redirect('restorejobidproxmox', jobid)
+        if backurl is not None:
+            response['Location'] += '?b=' + backurl
+        return response
     if jobtype == 'jd-backup-catalog':
         response = redirect('restorejobidcatalog', jobid)
         if backurl is not None:
@@ -108,12 +113,45 @@ def jobidfiles(request, jobid=None):
     for c in cl:
         clients += ((c, c),)
     client = jobp['Client']
-    form = RestoreForm(clients=clients, initial={'client': client, 'restoreclient': client})
+    form = RestoreFilesForm(clients=clients, initial={'client': client, 'restoreclient': client})
     context = {'contentheader': 'Restore', 'contentheadersmall': 'JobId: ' + str(jobp['JobId']),
                'apppath': ['Restore', 'JobId', jobp['JobId']], 'Job': jobp, 'Jobidsparams': jobidsparams,
                'Jobids': jobids, 'form': form, 'JobTypeURL': reverse('restoretree', args=[jobids, 'root'])}
     updateMenuNumbers(context)
     return render(request, 'restore/jobidfiles.html', context)
+
+
+def jobidproxmox(request, jobid=None):
+    if jobid is None:
+        raise Http404()
+    jobp = getJobidinfo(jobid)
+    if jobp is None:
+        raise Http404()
+    jobids = bvfs_get_jobids(jobid)
+    if jobids is not None:
+        jobidlist = [int(j) for j in jobids.split(',')]
+        jobidsparams = []
+        for j in jobidlist:
+            jj = Job.objects.get(jobid=j)
+            jobidsparams.append({
+                'jobid': j,
+                'level': jj.level,
+            })
+    else:
+        jobids = 'unavl'
+        jobidsparams = []
+    cl = getDIRClientsNamesos(os='proxmox')
+    clients = ()
+    for c in cl:
+        clients += ((c, c),)
+    clnt = jobp['Client']
+    form = RestoreProxmoxForm(clients=clients, initial={'client': clnt, 'restoreclient': clnt,
+                                                        'where': '/tmp/bacula/restores'})
+    context = {'contentheader': 'Restore', 'contentheadersmall': 'JobId: ' + str(jobp['JobId']),
+               'apppath': ['Restore', 'JobId', jobp['JobId']], 'Job': jobp, 'Jobidsparams': jobidsparams,
+               'Jobids': jobids, 'form': form, 'JobTypeURL': reverse('restoretreeproxmox', args=[jobids, 'root'])}
+    updateMenuNumbers(context)
+    return render(request, 'restore/jobidproxmox.html', context)
 
 
 def jobidcatalog(request, jobid=None):
@@ -140,7 +178,7 @@ def jobidcatalog(request, jobid=None):
     for c in cl:
         clients += ((c, c),)
     client = jobp['Client']
-    form = RestoreForm(clients=clients, initial={'client': client, 'restoreclient': client})
+    form = RestoreFilesForm(clients=clients, initial={'client': client, 'restoreclient': client})
     context = {'contentheader': 'Restore', 'contentheadersmall': 'JobId: ' + str(jobp['JobId']),
                'apppath': ['Restore', 'JobId', jobp['JobId']], 'Job': jobp, 'Jobidsparams': jobidsparams,
                'Jobids': jobids, 'form': form, 'JobTypeURL': reverse('restoretreecatalog', args=[jobids, 'root'])}
@@ -199,20 +237,14 @@ def displayfs(request, name=None):
     if jobres is None:
         raise Http404()
     jobparams = extractjobparams(jobres)
-    context = {}
     if jobparams['JobDefs'] == 'jd-backup-catalog':
         # special hack for Catalog Backup job
-        context = {
-            'DisplayFS': {'FS': catalogfs_getall()},
-        }
+        fsdata = catalog_fsdata()
+    elif jobparams['JobDefs'] == 'jd-backup-proxmox':
+        fsdata = proxmox_fsdata(jobparams)
     else:
-        fsname = jobparams.get('FileSet', None)
-        if fsname is not None:
-            fsparams = getDIRFSparams(name=fsname)
-            context = {
-                'Include': fsparams[0],
-                'Exclude': fsparams[1],
-            }
+        fsdata = files_fsdata(jobparams)
+    context = {'FSData': fsdata}
     return render(request, 'restore/displayfs.html', context)
 
 
@@ -232,7 +264,7 @@ def displaytree(request, jobids, pathid=None):
                 if n == '.' or n == '..':
                     continue
                 context.append({
-                    'id': 'P'+f[0],
+                    'id': 'P' + f[0],
                     'icon': 'fa fa-hdd-o',
                     'text': n,
                     'state': 'closed',
@@ -259,7 +291,7 @@ def displaytree(request, jobids, pathid=None):
                 if n == '.' or n == '..':
                     continue
                 context.append({
-                    'id': 'P'+f[0],
+                    'id': 'P' + f[0],
                     'icon': 'fa fa-folder-o',
                     'text': n,
                     'state': 'closed',
@@ -278,7 +310,7 @@ def displaytree(request, jobids, pathid=None):
                     icon = filetypeicon(f[5])
                     name = f[5] + ' <span class="badge bg-green">' + bytestext(getltable_size(ltable)) + '</span>'
                 context.append({
-                    'id': 'F'+f[1],
+                    'id': 'F' + f[1],
                     'icon': icon,
                     'text': name,
                     'state': 'closed',
@@ -339,13 +371,101 @@ def displaytreecatalog(request, jobids, pathid=None):
     return JsonResponse(context, safe=False)
 
 
-def preparerestore(request, jobids):
+def displaytreeproxmox(request, jobids, pathid=None):
+    if pathid is None:
+        raise Http404()
+    context = []
+    if pathid == 'root':
+        if jobids == 'unavl':
+            qemuvms = None
+            lxcvms = None
+        else:
+            qemuvms = bvfs_lsdirs_path('/@proxmox/qm/', jobids)
+            lxcvms = bvfs_lsdirs_path('/@proxmox/lxc/', jobids)
+        if qemuvms is not None:
+            for vm in qemuvms:
+                f = vm.split('\t')
+                vmname = f[5].replace('/', '')
+                if vmname == '.' or vmname == '..':
+                    continue
+                context.append({
+                    'id': 'Q' + f[0],
+                    'icon': proxmoxfs_get_icon('qemu'),
+                    'text': vmname,
+                    'state': 'closed',
+                    'children': True,
+                })
+        if lxcvms is not None:
+            for vm in lxcvms:
+                f = vm.split('\t')
+                vmname = f[5].replace('/', '')
+                if vmname == '.' or vmname == '..':
+                    continue
+                context.append({
+                    'id': 'C' + f[0],
+                    'icon': proxmoxfs_get_icon('lxc'),
+                    'text': vmname,
+                    'state': 'closed',
+                    'children': True,
+                })
+        if qemuvms is None and lxcvms is None:
+            context.append({
+                'id': 'NO',
+                'icon': 'fa fa-calendar-times-o',
+                'text': 'No valid files found',
+                'state': 'disabled',
+                'children': False,
+            })
+    else:
+        pathpid = 0
+        pathtype = ''
+        if len(pathid) > 1:
+            pathtype = pathid[0]
+            pathpid = pathid[1:]
+        if pathtype == 'Q':
+            vms = bvfs_lsfiles_pathid(pathpid, jobids)
+            if vms is not None:
+                for vm in vms:
+                    f = vm.split('\t')
+                    lstat = f[4]
+                    ltable = decodelstat(lstat)
+                    vmid = f[5].replace('.vma', '')
+                    context.append({
+                        'id': 'q' + f[1],
+                        'icon': proxmoxfs_get_icon('qemu'),
+                        'text': vmid + ' <span class="label label-primary">' + bytestext(getltable_size(ltable)) + '</span>',
+                        'state': 'closed',
+                        'children': False,
+                    })
+        if pathtype == 'C':
+            confid = ''
+            vms = bvfs_lsfiles_pathid(pathpid, jobids)
+            if vms is not None:
+                for vm in vms:
+                    f = vm.split('\t')
+                    if f[5].endswith('.conf'):
+                        confid = f[1]
+                    if f[5].endswith('.tar'):
+                        lstat = f[4]
+                        ltable = decodelstat(lstat)
+                        vmid = f[5].replace('.tar', '')
+                        context.append({
+                            'id': 'c' + f[1] + ':' + confid,
+                            'icon': proxmoxfs_get_icon('lxc'),
+                            'text': vmid + ' <span class="label label-primary">' + bytestext(getltable_size(ltable)) + '</span>',
+                            'state': 'closed',
+                            'children': False,
+                        })
+    return JsonResponse(context, safe=False)
+
+
+def preparerestorefiles(request, jobids):
     if request.method == 'POST':
         cl = getDIRClientsNames()
         clients = ()
         for c in cl:
             clients += ((c, c),)
-        form = RestoreForm(clients=clients, data=request.POST)
+        form = RestoreFilesForm(clients=clients, data=request.POST)
         if form.is_valid():
             # print form.cleaned_data
             paths = []
@@ -368,6 +488,57 @@ def preparerestore(request, jobids):
             comment = form.cleaned_data['comment']
             # do restore job
             out = doRestore(cl, restoreclient, where=where, replace=replace, comment=comment, pathtable=pathtable)
+            if 'Job queued. JobId=' not in out[-1]:
+                # we have a problem making restore log it
+                logi = Log(jobid_id=0, logtext='Executing Restore problem: "' + '\n'.join(out))
+                logi.save()
+                return JsonResponse([False, logi.logid], safe=False)
+            rjobid = out[-1].split('=')[-1]
+            # wait a moment to job to run
+            sleep(2)
+            # TODO istnieje szansa że jak zadanie restore zostanie zakolejkowane to nie będzie już potrzebować pathtable
+            bvfs_restore_cleanup(pathtable=pathtable)
+            return JsonResponse([True, rjobid], safe=False)
+    return JsonResponse([False, 0], safe=False)
+
+
+def preparerestoreproxmox(request, jobids):
+    if request.method == 'POST':
+        cl = getDIRClientsNames()
+        clients = ()
+        for c in cl:
+            clients += ((c, c),)
+        form = RestoreProxmoxForm(clients=clients, data=request.POST)
+        if form.is_valid():
+            # print form.cleaned_data
+            paths = []
+            files = []
+            for f in form.cleaned_data['rselected'].split(','):
+                if f.startswith('C') or f.startswith('Q'):
+                    paths.append(f[1:])
+                if f.startswith('c'):
+                    vmf = f[1:].split(':')
+                    files.append(vmf[0])
+                    files.append(vmf[1])
+                if f.startswith('q'):
+                    files.append(f[1:])
+            pathids = ','.join(paths)
+            fileids = ','.join(files)
+            print "P:", pathids, "F:", fileids
+            # TODO ogarnąć dynamiczne numery tabel dla path, tak aby potem je przeczyścić, może unixtimestamp?
+            pathtable = 'b20001'
+            bvfs_restore_prepare(pathids=pathids, fileids=fileids, jobids=jobids, pathtable=pathtable)
+            cl = form.cleaned_data['client']
+            restoreclient = form.cleaned_data['restoreclient']
+            comment = form.cleaned_data['comment']
+            # TODO: Implement "Proxmox storage" and "Proxmox resource pool" plugin restore parameters
+            # do restore job
+            if form.cleaned_data['localrestore']:
+                where = form.cleaned_data['where']
+                replace = form.cleaned_data['replace']
+                out = doRestore(cl, restoreclient, where=where, replace=replace, comment=comment, pathtable=pathtable)
+            else:
+                out = doRestore(cl, restoreclient, comment=comment, pathtable=pathtable)
             if 'Job queued. JobId=' not in out[-1]:
                 # we have a problem making restore log it
                 logi = Log(jobid_id=0, logtext='Executing Restore problem: "' + '\n'.join(out))
