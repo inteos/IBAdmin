@@ -25,7 +25,7 @@ def bconsolecommand(cmd, api=False, timeout=True):
     oututf8 = safe_unicode(out)
     # .decode('utf-8')
     bconsole.wait()
-    lines = out.splitlines()
+    lines = oututf8.splitlines()
     return lines
 
 
