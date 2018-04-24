@@ -1,0 +1,32 @@
+language: python
+
+python:
+  - 2.6
+  - 2.7
+# - 3.3
+
+services: postgresql
+
+env:
+  global:
+  - DJANGO="1.10"
+  - DJANGO_SETTINGS_MODULE="ibadmin.settings"
+  - PYTHONPATH="$HOME/builds/inteos/IBAdmin"
+  - PIP_USE_MIRRORS=true
+# Last two for OS X, courtesy of stackoverflow.com/a/22697917/419005
+# - CFLAGS=-Qunused-arguments
+# - CPPFLAGS=-Qunused-arguments
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c "CREATE DATABASE bacula;" -U postgres
+
+script:
+  - python manage.py migrate --noinput
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

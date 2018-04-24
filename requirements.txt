@@ -1,0 +1,9 @@
+### Pony-Forum
+Django==1.10
+
+# Database:
+psycopg2
+
+# Other:
+python-dateutil
+pytz
