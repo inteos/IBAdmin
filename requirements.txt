@@ -7,4 +7,4 @@ psycopg2
 # Other:
 python-dateutil
 pytz
-python-crypto
+pycrypto
