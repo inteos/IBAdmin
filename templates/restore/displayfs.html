@@ -11,7 +11,7 @@
     {% endif %}
 
     {% if FSData.FS %}
-    <p><span class="label label-success">Data to backup</span></p>
+    <p><span class="label label-success">Data in archive</span></p>
     <ul>
     {% for d in FSData.FS %}
       <li><i class="{{ d.icon }}"></i> {{ d.text }}</li>
@@ -20,7 +20,7 @@
     {% endif %}
 
     {% if FSData.VMS %}
-    <p><span class="label label-success">Guest VM to backup</span></p>
+    <p><span class="label label-success">Guest VM in archive</span></p>
     <ul class="row">
     {% for vm in FSData.VMS %}
       <li><i class="fa {{ FSData.VMSicon }}"></i> {{ vm }}</li>
