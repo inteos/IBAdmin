@@ -21,6 +21,7 @@ install:
 
 before_script:
   - psql -c "CREATE DATABASE bacula;" -U postgres
+  - psql -c "CREATE user bacula;" -U postgres
 
 script:
   - python manage.py migrate --noinput
