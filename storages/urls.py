@@ -29,7 +29,12 @@ urlpatterns = [
 
     url(r'^adddisk/$', views.adddisk, name='storageadddisk'),
     url(r'^adddedup/$', views.adddedup, name='storageadddedup'),
-    url(r'^addtape/$', views.adddedup, name='storageaddtape'),
+    url(r'^addtape/$', views.addtape, name='storageaddtape'),
+
+    url(r'^tapelibdetect/$', views.adddetectlib, name='storagetapedetect_rel'),
+    url(r'^tapelibdetect/(?P<id>.*)/$', views.adddetectlib, name='storagetapedetect'),
+    url(r'^taskprogress/$', views.detectprogress, name='storagetapetaskprogress_rel'),
+    url(r'^taskprogress/(?P<taskid>.*)/$', views.detectprogress, name='storagetapetaskprogress'),
 
     url(r'^edit/(?P<name>.*)/$', views.edit, name='storageedit'),
     url(r'^editdisk/(?P<name>.*)/$', views.editdisk, name='storageeditdisk'),

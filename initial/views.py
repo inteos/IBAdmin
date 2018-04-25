@@ -108,7 +108,7 @@ def libdetect(request):
             if s == st:
                 storagename = n
                 break
-        taskid = prepareTask(name="Detecting tape library: " + st, proc=3, params=st, log='Starting...')
+        taskid = prepareTask(name="Detecting tape library: " + storagename, proc=3, params=st, log='Starting...')
         data = {
             'dirname': forminitial.cleaned_data['dirname'].encode('ascii', 'ignore'),
             'descr': forminitial.cleaned_data['descr'],

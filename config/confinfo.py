@@ -430,6 +430,7 @@ def getSDDevicesList(component=None, storage=None):
     if storage is None or component is None:
         return None
     compid = getSDcompid(component)
+    print component, compid
     devicenamelist = ConfParameter.objects.filter(resid__compid=compid, resid__type__name='Autochanger',
                                                   resid__name=storage, name='Device').order_by('value').all().values()
     if devicenamelist.count() == 0:

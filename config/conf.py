@@ -1406,13 +1406,13 @@ def createStoragefile(dircompid=None, dirname=None, storname='ibadmin', address=
 
 def createStoragetape(dircompid=None, dirname=None, storname='ibadmin', address='localhost', descr='', tapelib=None,
                       internal=False):
+    if tapelib is None:
+        return None
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
     if dirname is None:
         dirname = getDIRname()
-    if tapelib is None:
-        return None
     devtype = 'Tape'
     mediatype = devtype + getnextStorageid()
     dirstorname = storname + '-' + mediatype
@@ -1499,7 +1499,8 @@ def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None
         dirname = getDIRname()
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdcomponent)
-    mediatype = 'File' + getnextStorageid()
+    devtype = 'File'
+    mediatype = devtype + getnextStorageid()
     archdirn = os.path.abspath(archdir)
     encpass = getSDStorageEncpass(sdcompid=sdcompid, name=sdcomponent)
     password = getdecpass(comp=sdcomponent, encpass=encpass)
@@ -1520,7 +1521,42 @@ def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None
     # create new Autochanger {} resource in SD conf
     createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev='/dev/null', changercmd='', devices=devices)
     for dev in devices:
-        createSDDevice(sdcompid=sdcompid, dtype='File', device=dev)
+        createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
+
+
+def extendStoragetape(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None, tapelib=None):
+    if storname is None or (sdcomponent is None and sdcompid is None) or tapelib is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if dirname is None:
+        dirname = getDIRname()
+    if sdcompid is None:
+        sdcompid = getSDcompid(name=sdcomponent)
+    devtype = 'Tape'
+    mediatype = devtype + getnextStorageid()
+    encpass = getSDStorageEncpass(sdcompid=sdcompid, name=sdcomponent)
+    password = getdecpass(comp=sdcomponent, encpass=encpass)
+    address = getSDStorageAddress(sdcompid=sdcompid, sdname=sdcomponent)
+    # insert new Storage {} resource into Dir conf
+    createDIRStorage(dircompid=dircompid, dirname=dirname, name=storname, password=password, address=address,
+                     descr=descr, device=mediatype, mediatype=mediatype, sdcomponent=sdcomponent,
+                     sddirdevice=tapelib['Lib']['name'])
+    # TODO: extend maximumconcurrentjobs for SD
+    # create a list of archive devices
+    devices = []
+    for dev in tapelib['Devices']:
+        devices.append({
+            'name': mediatype + 'Dev' + str(dev['DriveIndex']),
+            'archdir': dev['Tape']['dev'],
+            'devindex': dev['DriveIndex'],
+            'mediatype': mediatype,
+        })
+    # create new Autochanger {} resource in SD conf
+    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=tapelib['Lib']['dev'],
+                        changercmd='/opt/bacula/scripts/mtx-changer %c %o %S %a %d', devices=devices)
+    for dev in devices:
+        createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
 
 
 def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None,
@@ -1533,7 +1569,8 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
         dirname = getDIRname()
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdcomponent)
-    mediatype = 'Dedup' + getnextStorageid()
+    devtype = 'Dedup'
+    mediatype = devtype + getnextStorageid()
     dedupdirn = os.path.abspath(dedupdir)
     dedupidxdirn = os.path.abspath(dedupidxdir)
     encpass = getSDStorageEncpass(sdcompid=sdcompid, name=sdcomponent)
@@ -1556,7 +1593,7 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
     # create new Autochanger {} resource in SD conf
     createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev='/dev/null', changercmd='', devices=devices)
     for dev in devices:
-        createSDDevice(sdcompid=sdcompid, dtype='Dedup', device=dev)
+        createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
     resid = getresourceid(sdcompid, sdcomponent, 'Storage')
     addparameterstr(resid, 'DedupDirectory', dedupdirn)
     addparameterstr(resid, 'DedupIndexDirectory', dedupidxdirn)

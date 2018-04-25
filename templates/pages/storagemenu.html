@@ -9,12 +9,12 @@
       <ul class="treeview-menu">
         <li{% if apppath.2 == 'Disk storage' %} class="active"{% endif %}>
           <a href="{% url 'storageadddisk' %}"><i class="fa fa-database"></i><span>Disk Storage</span></a></li>
+        <li{% if apppath.2 == 'Tape storage' %} class="active"{% endif %}>
+          <a href="{% url 'storageaddtape' %}"><i class="fa fa-simplybuilt"></i><span>Tape Library</span></a></li>
         {% if storagedetectdedup %}
         <li{% if apppath.2 == 'Dedup storage' %} class="active"{% endif %}>
           <a href="{% url 'storageadddedup' %}"><i class="fa fa-cubes"></i><span>Deduplication</span></a></li>
         {% endif %}
-<!--        <li{% if apppath.2 == 'xxx2' %} class="active"{% endif %}>
-          <a href="{% url 'clientsaddservice' %}"><i class="fa fa-simplybuilt"></i><span>Tape Library</span></a></li>-->
       </ul>
     </li>
     {% if storagenr %}

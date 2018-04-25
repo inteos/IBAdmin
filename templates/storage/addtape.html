@@ -1,0 +1,86 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-plus"></i>
+        <h3 class="box-title">Add New Tape Storage</h3>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="addform" method="post" action="{% url 'storageaddtape' %}">
+        {% csrf_token %}
+        <div class="box-body">
+          <!--<div class="row">
+            <div class="col-xs-12">
+              <div class="alert alert-info alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h4><i class="icon fa fa-lightbulb-o"></i>Info</h4>
+                Here <b>IBAdmin</b> will detect a {{ storage }} you selected. It will require to execute tape load/unload
+                operations which will take some time to complete. You can check the operation progress below.<br>
+                By default IBAdmin will automatically <u>initialize</u> all tapes found in library for future use.
+                If you want to make this initialization later you have to deselect the checkbox below.
+              </div>
+            </div>
+          </div>-->
+          {{ form.taskid }}
+          {{ form.name }}
+          {{ form.descr }}
+          {{ form.address }}
+          <div id="{{ form.storagelist.id_for_label }}-group" class="form-group">
+            <label for="{{ form.storagelist.id_for_label }}" class="col-sm-2 control-label">{{ form.storagelist.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.storagelist }}
+                <span class="input-group-addon"><i id="{{ form.storagelist.id_for_label }}icon" class="fa fa-database"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          <div id="{{ form.tapelist.id_for_label }}-group" class="form-group">
+            <label for="{{ form.tapelist.id_for_label }}" class="col-sm-2 control-label">{{ form.tapelist.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.tapelist }}
+                <span class="input-group-addon"><i class="fa fa-simplybuilt"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          <div id="detectbox" class="row" style="display:none;">
+            <div class="col-md-12">
+              <div id="progressbox" class="box box-warning">
+                <div class="box-header with-border">
+                  <h4 id="header"><i class="fa fa-cog fa-spin"></i> Library {{ storage }} detection in progress. Please wait...</h4>
+                </div>
+                <div class="box-body">
+                  <p><i id="operationlog">Operation log...</i></p>
+                  <div class="progress">
+                    <div class="progress active">
+                      <div id="taskprogress" class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button id="detectlibbutton" type="button" class="btn btn-app{% if not tlavl %} disabled" disabled{% else %}"{% endif %} name="next"><i class="fa fa-search"></i>Detect Library</button>
+              <button id="addbutton" type="submit" value="1" class="btn btn-app" name="add" style="display:none;"><i class="glyphicon glyphicon-plus"></i>Add</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+{% block pagejs %}
+  {% include "storage/addtape.js" %}
+{% endblock %}

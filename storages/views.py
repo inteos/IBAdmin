@@ -10,12 +10,15 @@ from libs.storage import *
 from libs.system import *
 from libs.bconsole import *
 from libs.task import prepareTask
+from libs.tapelib import detectlibs
 from config.conf import *
 from config.confinfo import *
 from .models import *
 from .forms import *
 from jobs.models import Job, Log
+from tasks.models import Tasks
 from datetime import datetime, timedelta
+import ast
 
 
 def defined(request):
@@ -470,7 +473,8 @@ def adddedup(request):
                 # create a Storage resource
                 #   TODO: and a Storage component and all required resources
                 with transaction.atomic():
-                    extendStoragededup(storname=name, descr=descr, sdcomponent=storage, dedupidxdir=dedupidxdir, dedupdir=dedupdir)
+                    extendStoragededup(storname=name, descr=descr, sdcomponent=storage, dedupidxdir=dedupidxdir,
+                                       dedupdir=dedupdir)
                 directorreload()
                 response = redirect('storageinfo', name)
                 response['Location'] += '?n=1'
@@ -480,6 +484,88 @@ def adddedup(request):
                 print form.is_valid()
                 print form.errors.as_data()
     return redirect('storagedefined')
+
+
+def addtape(request):
+    st = getStorageNames()
+    storages = ()
+    for s in st:
+        storages += ((s, s),)
+    libs = detectlibs()
+    tapelibs = ()
+    tlavl = False
+    if len(libs) > 0:
+        tlavl = True
+    for l in libs:
+        tapelibs += ((l['id'], l['name'] + l['id']),)
+    if request.method == 'GET':
+        form = StorageTapeForm(storages=storages, tapelibs=tapelibs)
+        form.fields['address'].disabled = True
+        context = {'contentheader': 'Storages', 'apppath': ['Storage', 'Add', 'Tape storage'], 'form': form,
+                   'tlavl': tlavl}
+        updateMenuNumbers(context)
+        return render(request, 'storage/addtape.html', context)
+    else:
+        # print (request.POST)
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            form = StorageTapeForm(data=request.POST, storages=storages, tapelibs=tapelibs)
+            if form.is_valid():
+                taskid = form.cleaned_data['taskid']
+                task = get_object_or_404(Tasks, taskid=taskid)
+                if task.status == 'F':
+                    storname = form.cleaned_data['name'].encode('ascii', 'ignore')
+                    descr = form.cleaned_data['descr']
+                    storage = form.cleaned_data['storagelist']
+                    # address = form.cleaned_data['address']
+                    tapelist = form.cleaned_data['tapelist']
+                    libdata = None
+                    for l in libs:
+                        if l['id'] == tapelist:
+                            libdata = l
+                    tapelib = {
+                        'Lib': libdata,
+                        'Devices': ast.literal_eval(task.output)
+                    }
+                    # create a Storage resource
+                    #   TODO: and a Storage component and all required resources
+                    with transaction.atomic():
+                        extendStoragetape(storname=storname, descr=descr, sdcomponent=storage, tapelib=tapelib)
+                    directorreload()
+                    response = redirect('storageinfo', storname)
+                    response['Location'] += '?n=1'
+                    return response
+            else:
+                # TODO zrobić obsługę błędów, albo i nie
+                print form.is_valid()
+                print form.errors.as_data()
+    return redirect('storagedefined')
+
+
+def adddetectlib(request, id):
+    libs = detectlibs()
+    tape = id
+    stname = 'Unknown'
+    for l in libs:
+        if l['id'] == id:
+            tape = 'tape' + str(id)
+            stname = l['name']
+            break
+    taskid = prepareTask(name="Detecting tape library: " + str(stname) + ' ' + str(id), proc=3, params=tape,
+                         log='Starting...')
+    context = [taskid]
+    return JsonResponse(context, safe=False)
+
+
+def detectprogress(request, taskid):
+    task = get_object_or_404(Tasks, taskid=taskid)
+    log = task.log.splitlines()
+    if len(log) > 0:
+        log = log[-1]
+    else:
+        log = '...'
+    context = [task.progress, str(task.progress) + '%', log, task.status]
+    return JsonResponse(context, safe=False)
 
 
 def makeinitialdata(name, storage):
@@ -660,7 +746,6 @@ def labeltape(request, storage):
     storageres = getDIRStorageinfo(name=storage)
     if storageres is None:
         raise Http404()
-    taskid = 0
     logi = Log(jobid_id=0, logtext='User labeled tapes in "' + storage + '"')
     logi.save()
     taskid = prepareTask(name="Label tapes", proc=4, params=storage, log="Starting...")
