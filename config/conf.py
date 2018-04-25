@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from libs.conf import *
 from libs.client import extractclientparams
 from libs.plat import getOStype
+from libs.system import getdevsymlink
 from .conflib import *
 from .confinfo import *
 from ibadmin.settings import DATABASES
@@ -1418,10 +1419,11 @@ def createStoragetape(dircompid=None, dirname=None, storname='ibadmin', address=
     dirstorname = storname + '-' + mediatype
     # generate password
     password = randomstr()
+    sddirdevice = tapelib['Lib']['name'] + tapelib['Lib']['id']
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=dirstorname, password=password, address=address,
                      descr=descr, device=mediatype, mediatype=mediatype, internal=internal, sdcomponent=storname,
-                     sddirdevice=tapelib['Lib']['name'])
+                     sddirdevice=sddirdevice)
     # create SD component
     sdcompid = createSDcomponent(name=storname)
     # insert new Director {} resource into SD conf
@@ -1435,12 +1437,12 @@ def createStoragetape(dircompid=None, dirname=None, storname='ibadmin', address=
     for dev in tapelib['Devices']:
         devices.append({
             'name': mediatype + 'Dev' + str(dev['DriveIndex']),
-            'archdir': dev['Tape']['dev'],
+            'archdir': getdevsymlink(dev['Tape']['dev']),
             'devindex': dev['DriveIndex'],
             'mediatype': mediatype,
         })
     # create new Autochanger {} resource in SD conf
-    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=tapelib['Lib']['dev'],
+    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=getdevsymlink(tapelib['Lib']['dev']),
                         changercmd='/opt/bacula/scripts/mtx-changer %c %o %S %a %d', devices=devices)
     for dev in devices:
         createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
@@ -1490,7 +1492,8 @@ def createStoragededup(dircompid=None, dirname=None, storname='ibadmin', address
     return dirstorname
 
 
-def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None, archdir='/tmp'):
+def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None,
+                      archdir='/tmp'):
     if storname is None or (sdcomponent is None and sdcompid is None):
         return None
     if dircompid is None:
@@ -1524,7 +1527,8 @@ def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None
         createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
 
 
-def extendStoragetape(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None, tapelib=None):
+def extendStoragetape(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None,
+                      tapelib=None):
     if storname is None or (sdcomponent is None and sdcompid is None) or tapelib is None:
         return None
     if dircompid is None:
@@ -1538,22 +1542,23 @@ def extendStoragetape(dircompid=None, dirname=None, sdcompid=None, storname=None
     encpass = getSDStorageEncpass(sdcompid=sdcompid, name=sdcomponent)
     password = getdecpass(comp=sdcomponent, encpass=encpass)
     address = getSDStorageAddress(sdcompid=sdcompid, sdname=sdcomponent)
+    sddirdevice = tapelib['Lib']['name'] + tapelib['Lib']['id']
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=storname, password=password, address=address,
                      descr=descr, device=mediatype, mediatype=mediatype, sdcomponent=sdcomponent,
-                     sddirdevice=tapelib['Lib']['name'])
+                     sddirdevice=sddirdevice)
     # TODO: extend maximumconcurrentjobs for SD
     # create a list of archive devices
     devices = []
     for dev in tapelib['Devices']:
         devices.append({
             'name': mediatype + 'Dev' + str(dev['DriveIndex']),
-            'archdir': dev['Tape']['dev'],
+            'archdir': getdevsymlink(dev['Tape']['dev']),
             'devindex': dev['DriveIndex'],
             'mediatype': mediatype,
         })
     # create new Autochanger {} resource in SD conf
-    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=tapelib['Lib']['dev'],
+    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=getdevsymlink(tapelib['Lib']['dev']),
                         changercmd='/opt/bacula/scripts/mtx-changer %c %o %S %a %d', devices=devices)
     for dev in devices:
         createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
