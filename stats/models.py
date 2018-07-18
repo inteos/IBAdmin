@@ -24,7 +24,7 @@ class StatParams(models.Model):
 
 class StatData(models.Model):
     id = models.AutoField(primary_key=True)
-    time = models.DateTimeField(blank=False, null=False)
+    time = models.DateTimeField(blank=False, null=False, db_index=True)
     parid = models.ForeignKey(StatParams, db_column='parid')
     nvalue = models.BigIntegerField(blank=True, null=True)
     fvalue = models.FloatField(blank=True, null=True)
