@@ -286,7 +286,10 @@ def displaytree(request, jobids, pathid=None):
         dirs = bvfs_lsdirs_pathid(pathpid, jobids)
         if dirs is not None:
             for ff in dirs:
-                f = ff.split('\t')
+                try:
+                    f = ff.split('\t')
+                except UnicodeDecodeError:
+                    f = ff.decode('utf-8').split('\t')
                 n = f[5]
                 if n == '.' or n == '..':
                     continue
@@ -300,7 +303,10 @@ def displaytree(request, jobids, pathid=None):
         files = bvfs_lsfiles_pathid(pathpid, jobids)
         if files is not None:
             for ff in files:
-                f = ff.split('\t')
+                try:
+                    f = ff.split('\t')
+                except UnicodeDecodeError:
+                    f = ff.decode('utf-8').split('\t')
                 lstat = f[4]
                 ltable = decodelstat(lstat)
                 if getltable_islink(ltable):

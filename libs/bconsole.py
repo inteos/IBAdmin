@@ -6,7 +6,7 @@ import re
 import utils
 
 
-def bconsolecommand(cmd, api=False, timeout=True):
+def bconsolecommand(cmd, api=False, timeout=True, touni=True):
     """
     *gui on
     *.api=1
@@ -22,10 +22,18 @@ def bconsolecommand(cmd, api=False, timeout=True):
     bconsole.stdin.write(bcmd.encode('utf-8'))
     bconsole.stdin.close()
     out = bconsole.stdout.read()
-    oututf8 = safe_unicode(out)
+    nlines = out.splitlines()
+    if touni:
+        lines = []
+        for line in nlines:
+            oututf8 = safe_unicode(line)
+            lines.append(oututf8)
+    else:
+        lines = nlines
+    #oututf8 = safe_unicode(out)
     # .decode('utf-8')
     bconsole.wait()
-    lines = oututf8.splitlines()
+    #lines = oututf8.splitlines()
     return lines
 
 
@@ -555,14 +563,14 @@ def bvfs_lsfiles_path(path, jobids):
 
 
 def bvfs_lsdirs_pathid(pathid, jobids):
-    out = bconsolecommand('.bvfs_lsdirs pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False)[6:]
+    out = bconsolecommand('.bvfs_lsdirs pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False, touni=False)[6:]
     if len(out) > 0:
         return out
     return None
 
 
 def bvfs_lsfiles_pathid(pathid, jobids):
-    out = bconsolecommand('.bvfs_lsfiles pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False)[6:]
+    out = bconsolecommand('.bvfs_lsfiles pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False, touni=False)[6:]
     if len(out) > 0:
         return out
     return None
