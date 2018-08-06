@@ -1717,12 +1717,31 @@ def updateDIRdefaultStorage(dircompid=None, storname=None):
         return None
     if dircompid is None:
         dircompid = getDIRcompid()
+    # get storage which is internal right now
+    curintstorres = ConfResource.objects.filter(confparameter__name='.InternalStorage')
+    curmediatype = ConfParameter.objects.get(resid=curintstorres, name='MediaType').value
     # delete current InternalStorage parameter
     query = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', name='.InternalStorage')
     query.delete()
     res = ConfResource.objects.get(compid_id=dircompid, type__name='Storage', name=storname)
+    newmediatype = ConfParameter.objects.get(resid=res, name='MediaType').value
     addparameter(res.resid, '.InternalStorage', 'Yes')
     updateparameter(dircompid, 'SYS-Backup-Catalog', 'Job', 'Storage', storname)
+    cm = curmediatype[:4]
+    if cm == 'Dedu':
+        cm = 'File'
+    nm = newmediatype[:4]
+    if nm == 'Dedu':
+        nm = 'File'
+    if cm != nm:
+        # media type has changed, update Default Pool
+        dpresid = getresourceid(dircompid, 'Default', 'Pool')
+        if nm == 'Tape':
+            deleteparameter(dpresid, 'LabelFormat')
+            deleteparameter(dpresid, 'ActionOnPurge')
+        else:
+            addparameterstr(dpresid, 'LabelFormat', 'DiskVol')
+            addparameter(dpresid, 'ActionOnPurge', 'Truncate')
 
 
 def deleteDIRJob(dircompid=None, name=None, job=None):
@@ -1853,7 +1872,8 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
                       fatal=False)
     # create Admin Schedule
     scheduletimeadmin = '05:00'
-    createDIRSchedule(dircompid=dircompid, name='sch-admin', cycle='Day', params={'level': 'full', 'time': scheduletimeadmin})
+    createDIRSchedule(dircompid=dircompid, name='sch-admin', cycle='Day', params={'level': 'full',
+                                                                                  'time': scheduletimeadmin})
     # create Catalog backup Schedule
     scheduletime = '05:05'
     createDIRSchedule(dircompid=dircompid, name='sch-backup-catalog', cycle='Day',
@@ -1875,10 +1895,11 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
                              descr='Default local storage', stortype=stortype, archdir=archdir, dedupdir=dedupdir,
                              dedupidxdir=dedupidxdir, internal=True, tapelib=tapelib)
     # create default Pool
-    createDIRPool(dircompid=dircompid, name='Default', disktype=stortype is not 'Tape', retention='2 weeks',
+    createDIRPool(dircompid=dircompid, name='Default', disktype=stortype != 'tape', retention='2 weeks',
                   useduration='1 day', descr='Default System Pool with 2W retention')
     # create Scratch Pool
-    createDIRPool(dircompid=dircompid, name='Scratch', retention='2 weeks', descr='Management Scratch Pool', cleaning=True)
+    createDIRPool(dircompid=dircompid, name='Scratch', retention='2 weeks', descr='Management Scratch Pool',
+                  cleaning=True)
     # create Admin JobDefs
     createDIRJobDefsAdmin(dircompid=dircompid, client=name, storage=storname)
     # create Restore JobDefs
