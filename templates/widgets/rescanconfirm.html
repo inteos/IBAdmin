@@ -1,0 +1,41 @@
+<div id="rescanconfirm" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Rescan tape library "<i></i>"</h4>
+      </div>
+      <div class="modal-body"><i class="fa fa-exclamation-triangle text-red"></i>
+        I'm going to rescan your tape library: <u></u> which is required if you've made any hardware changes only.
+        <b>The process will cancel all your jobs running on this library right now or automatically started during rescan.</b>
+        This operation will take some as IBAdmin has to load/unload tapes in drives.<br>
+        <i class="fa fa-info-circle text-aqua"></i> Upon successful scan IBAdmin will save new storage configuration when you push a "Save" button.
+        Do not close this window until process finish.<br>
+        Are you absolutely sure that you want to start this process?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">No! Back!</button>
+        <button id="rescanconfirmbutton" type="button" class="btn btn-success confirm" data-loading-text="Rescanning...">Yes, I'm sure. Rescan!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div id="rescanconfirmprogress" class="modal fade" data-backdrop="static" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Please Wait ...</h4>
+      </div>
+      <div class="modal-body">
+        <p id="rescancog" ><i class="fa fa-cog fa-spin"></i> Rescanning library in progress. You should not close this page.</p>
+        <p><i id="operationlog">Operation log...</i></p>
+        <div class="progress active">
+          <div id="taskprogress" class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0%</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="rescanfinishbutton" type="button" class="btn btn-success" data-dismiss="modal" disabled>OK. Thanks.</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

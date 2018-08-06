@@ -84,14 +84,15 @@ def statuswidget(request):
 
 def status(request, taskid):
     task = get_object_or_404(Tasks, taskid=taskid)
-    PROCEDURE = {
+    procdescr = {
         1: 'Deleting Job from configuration with job history',
         2: 'Deleting Client from configuration with job configuration and history',
         3: 'Detecting tape library and drives',
         4: 'Initializing tape library volumes for Bacula',
-        5: 'Lorem ipsum...',
+        5: 'Rescanning tape library for hardware changes',
+        6: 'Lorem ipsum...',
     }
-    procedure = PROCEDURE[task.proc]
+    procedure = procdescr[task.proc]
     if task.log is None:
         log = ''
     else:

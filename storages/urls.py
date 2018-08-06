@@ -31,15 +31,17 @@ urlpatterns = [
     url(r'^adddedup/$', views.adddedup, name='storageadddedup'),
     url(r'^addtape/$', views.addtape, name='storageaddtape'),
 
-    url(r'^tapelibdetect/$', views.adddetectlib, name='storagetapedetect_rel'),
-    url(r'^tapelibdetect/(?P<id>.*)/$', views.adddetectlib, name='storagetapedetect'),
+    url(r'^tapelibdetect/$', views.tapedetectlib, name='storagetapedetect_rel'),
+    url(r'^tapelibdetect/(?P<id>.*)/$', views.tapedetectlib, name='storagetapedetect'),
+    url(r'^tapelibrescan/(?P<name>.*)/(?P<id>.*)/$', views.taperescanlib, name='storagetaperescan'),
+    url(r'^tapelibrescan/(?P<name>.*)/$', views.taperescanlib, name='storagetaperescan_rel'),
     url(r'^taskprogress/$', views.detectprogress, name='storagetapetaskprogress_rel'),
     url(r'^taskprogress/(?P<taskid>.*)/$', views.detectprogress, name='storagetapetaskprogress'),
 
     url(r'^edit/(?P<name>.*)/$', views.edit, name='storageedit'),
     url(r'^editdisk/(?P<name>.*)/$', views.editdisk, name='storageeditdisk'),
     url(r'^editdedup/(?P<name>.*)/$', views.editdedup, name='storageeditdedup'),
-    url(r'^edittape/(?P<name>.*)/$', views.editdedup, name='storageedittape'),
+    url(r'^edittape/(?P<name>.*)/$', views.edittape, name='storageedittape'),
 
     url(r'^volume/$', views.volinfo, name='storagevolumeinfo_rel'),
     url(r'^volume/(?P<name>.*)/$', views.volinfo, name='storagevolumeinfo'),

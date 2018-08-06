@@ -3,13 +3,13 @@
 {% load ibadcolors %}
 {% block content %}
 {% include "widgets/jobstatus.html" %}
-{% if newstorageadded %}
+{% if storagealert %}
 <div class="row">
  <div class="col-xs-12">
   <div id="restartinfo" class="alert alert-warning alert-dismissible">
     <button type="button" class="close" data-hide="alert" aria-hidden="true">&times;</button>
-    <h4><i class="icon fa fa-check"></i>New Storage added!</h4>
-    <p>You have to <a href="{% url 'daemonindex' %}">restart the Storage service</a> if you want to use a new storage. You can't run successful job without it.</p>
+    <h4><i class="icon fa fa-check"></i>{{ storagealertheader }}</h4>
+    <p>You have to <a href="{% url 'daemonindex' %}">restart the Storage service</a> if you want to use this storage. You could be unable to run successful jobs without it.</p>
   </div>
  </div>
 </div>

@@ -5,6 +5,7 @@ import sys
 import signal
 import psycopg2
 import psycopg2.extras
+import ast
 
 
 def printhelp():
@@ -17,7 +18,7 @@ def printhelp():
 
 sys.path.append('/opt/ibadmin')
 from libs.daemon import Daemon
-from libs.bconsole import doDeleteJobid, directorreload, doUpdateslots, doLabel
+from libs.bconsole import doDeleteJobid, directorreload, doUpdateslots, doLabel, disableDevice, enableDevice
 from ibadmin.settings import DATABASES
 from libs.tapelib import *
 
@@ -341,17 +342,76 @@ def detectlib(conn=None, cur=None, tasks=None, fg=False):
         return
     # update status
     if fg:
-        print ('In procedure: detectlib')
+        print('In procedure: detectlib')
+    taskid = tasks['taskid']
+    tapeid = tasks['params']
+    log = 'Starting...\n'
+    update_status(curtask=cur, taskid=taskid, log=log)
+    log, drvconfig = detectlib_common(conn=conn, cur=cur, tasks=tasks, tapeid=tapeid, log=log, fg=fg)
+    if len(drvconfig) > 0:
+        log += 'Library detection success!'
+        update_status_finish(curtask=cur, log=log, taskid=taskid)
+    else:
+        log += 'Library detection failed.'
+        update_status_error(curtask=cur, log=log, taskid=taskid)
+
+
+def rescanlib(conn=None, cur=None, tasks=None, fg=False):
+    global cont
+    conn.autocommit = True
+    if conn is None or tasks is None or cur is None:
+        return
+    # update status
+    if fg:
+        print('In procedure: rescanlib')
     taskid = tasks['taskid']
     log = 'Starting...\n'
-    update_status(curtask=cur, taskid=taskid)
+    update_status(curtask=cur, taskid=taskid, log=log)
+    # disable all current drives
+    params = ast.literal_eval(task['params'])
+    tapeid = params['tapeid']
+    devices = params['devices']
+    storage = params['storage']
+    # disable current devices to free up the resources
+    for dev in devices:
+        log += "Disabling " + dev + "\n"
+        update_status(curtask=cur, taskid=taskid, progress=2.0, log=log)
+        out = disableDevice(storage=storage, device=dev)
+        if fg:
+            print (out)
+        if len(out) == 0:
+            # error?
+            log += out[0]
+    update_status(curtask=cur, taskid=taskid, progress=5.0, log=log)
+    log, drvconfig = detectlib_common(conn=conn, cur=cur, tasks=tasks, tapeid=tapeid, log=log, fg=fg)
+    for dev in devices:
+        log += "Enabling " + dev + "\n"
+        update_status(curtask=cur, taskid=taskid, progress=99.0, log=log)
+        out = enableDevice(storage=storage, device=dev)
+        if fg:
+            print (out)
+        if len(out) == 0:
+            if not out[0].startswith('3002'):
+                # error?
+                log += out[0]
+    if len(drvconfig) > 0:
+        log += 'Library rescan success!'
+        update_status_finish(curtask=cur, log=log, taskid=taskid)
+    else:
+        log += 'Library rescan failed.'
+        update_status_error(curtask=cur, log=log, taskid=taskid)
+
+
+def detectlib_common(conn=None, cur=None, tasks=None, progress=0, tapeid=None, log='', fg=False):
+    global cont
+    if fg:
+        print ('In procedure: detectlib_common')
+    taskid = tasks['taskid']
     # prepare required variables
-    progress = 0
-    tapeid = tasks['params']
     if tapeid is None or not tapeid.startswith('tape['):
         if fg:
             print ('No valid library to detect!')
-        log = 'No valid library to detect! All I found: ' + str(tapeid)
+        log = 'No valid library to detect! All I found: ' + str(tapeid) + "\n"
         update_status_error(curtask=cur, taskid=taskid, log=log)
     else:
         step = 12.5
@@ -367,10 +427,11 @@ def detectlib(conn=None, cur=None, tasks=None, fg=False):
         if os.path.exists(dev):
             # 1
             log += 'Unloading all tapes\n'
-            update_status(curtask=cur, taskid=taskid, log=log)
+            progress += 5.0
+            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
             lib = mtx_statusinfo(dev)
             log += 'mtx_statusinfo executed\n'
-            progress += step
+            progress = step
             update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
             # 2
             drvstep = len(lib['Drives'])
@@ -457,17 +518,14 @@ def detectlib(conn=None, cur=None, tasks=None, fg=False):
                 if fg:
                     print (drvconfig)
                 update_status_out(curtask=cur, outlog=str(drvconfig), taskid=taskid)
-                if len(drvconfig) > 0:
-                    log += 'Library detection success!'
-                else:
-                    log += 'Library detection failed.'
-                update_status_finish(curtask=cur, log=log, taskid=taskid)
+                return log, drvconfig
         else:
             if fg:
                 print('No valid device for library found!')
             log = 'No valid device for library found! dev=' + str(dev)
             update_status_error(curtask=cur, taskid=taskid, log=log)
     conn.commit()
+    return log, []
 
 
 def labeltapes(conn=None, cur=None, tasks=None, fg=False):
@@ -554,6 +612,10 @@ def mainloop(fg=False):
         print(' > Proc label tapes')
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         labeltapes(conn=conn, cur=cur, tasks=task, fg=fg)
+    if task['proc'] == 5:
+        print(' > Proc rescan library')
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        rescanlib(conn=conn, cur=cur, tasks=task, fg=fg)
     conn.close()
     sys.exit(0)
 
@@ -588,7 +650,6 @@ if __name__ == "__main__":
                 sys.exit(2)
             task = maininit(taskid=taskid, fg=True)
             if task is not None:
-                print (task)
                 mainloop(fg=True)
             else:
                 print ('taskid finished or not found!')

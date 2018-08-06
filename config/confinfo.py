@@ -471,6 +471,7 @@ def getDIRFSoptions(dircompid=None, name=None):
 def getDefaultStorage(dircompid=None):
     if dircompid is None:
         dircompid = getDIRcompid()
+    # TODO: rewrite to single query
     storages = ConfResource.objects.filter(compid_id=dircompid, type__name='Storage').all()
     stor = ConfParameter.objects.get(resid__in=storages, name='.InternalStorage')
     return stor.resid.name

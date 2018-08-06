@@ -40,9 +40,19 @@ def info(request, name):
     if storageres is None:
         raise Http404()
     storage = extractstorageparams(storageres)
-    newstorage = request.GET.get('n')
+    storagealert = request.GET.get('n')
+    storagealertheader = "Restart required!"
+    try:
+        if int(storagealert) == 1:
+            # new storage added
+            storagealertheader = "New Storage added!"
+        if int(storagealert) == 2:
+            # new storage added
+            storagealertheader = "Storage hardware configuration changed!"
+    except:
+        storagealert = None
     context = {'contentheader': 'Storage', 'apppath': ['Storage', 'Info', name], 'Storage': storage,
-               'newstorageadded': newstorage, 'storagestatusdisplay': 1}
+               'storagealert': storagealert, 'storagealertheader': storagealertheader, 'storagestatusdisplay': 1}
     updateMenuNumbers(context)
     return render(request, 'storage/storage.html', context)
 
@@ -542,7 +552,7 @@ def addtape(request):
     return redirect('storagedefined')
 
 
-def adddetectlib(request, id):
+def tapedetectlib(request, id):
     libs = detectlibs()
     tape = id
     stname = 'Unknown'
@@ -553,7 +563,28 @@ def adddetectlib(request, id):
             break
     taskid = prepareTask(name="Detecting tape library: " + str(stname) + ' ' + str(id), proc=3, params=tape,
                          log='Starting...')
+    # TODO: change into {'taskid': taskid}
     context = [taskid]
+    return JsonResponse(context, safe=False)
+
+
+def taperescanlib(request, name, id):
+    storageres = getDIRStorageinfo(name=name)
+    if storageres is None:
+        raise Http404()
+    storage = extractstorageparams(storageres)
+    devices = getSDDevicesList(component=storage['StorageComponent'], storage=storage['Device'])
+    print storage
+    print devices
+    params = {
+        'tapeid': 'tape' + id,
+        'storage': storage['Name'],
+        'devices': devices,
+    }
+    taskid = prepareTask(name="Rescan tape library: " + storage['StorageDirDevice'], proc=5, params=params,
+                         log='Starting...')
+    context = {'taskid': taskid}
+    print params
     return JsonResponse(context, safe=False)
 
 
@@ -601,7 +632,7 @@ def edit(request, name):
             response['Location'] += '?b=' + backurl
         return response
     if mediatype.startswith('Tape'):
-        response = redirect('storageedit', name)
+        response = redirect('storageedittape', name)
         if backurl is not None:
             response['Location'] += '?b=' + backurl
         return response
@@ -639,18 +670,97 @@ def editdisk(request, name):
             post['storagelist'] = storage['StorageComponent']
             data = makeinitialdata(name, storage)
             form = StorageDiskForm(data=post, storages=storages, initial=data)
-            if form.is_valid() and form.has_changed():
-                # print "form valid and changed ... "
-                if 'descr' in form.changed_data:
-                    # update description
-                    with transaction.atomic():
-                        updateDIRStorageDescr(name=name, descr=form.cleaned_data['descr'])
-                if 'archivedir' in form.changed_data:
-                    # update archivedir
-                    with transaction.atomic():
-                        updateStorageArchdir(storname=name, archdir=form.cleaned_data['archivedir'])
-                directorreload()
+            if form.is_valid():
+                if form.has_changed():
+                    # print "form valid and changed ... "
+                    if 'descr' in form.changed_data:
+                        # update description
+                        with transaction.atomic():
+                            updateDIRStorageDescr(name=name, descr=form.cleaned_data['descr'])
+                    if 'archivedir' in form.changed_data:
+                        # update archivedir
+                        with transaction.atomic():
+                            updateStorageArchdir(storname=name, archdir=form.cleaned_data['archivedir'])
+                    directorreload()
                 return redirect('storageinfo', name)
+            else:
+                # TODO zrobić obsługę błędów, albo i nie
+                print form.is_valid()
+                print form.errors.as_data()
+    return redirect('storagedefined')
+
+
+def edittape(request, name):
+    storageres = getDIRStorageinfo(name=name)
+    if storageres is None:
+        raise Http404()
+    storage = extractstorageparams(storageres)
+    # if storage.get('InternalStorage'):
+    #    return redirect('storagedefined')
+    storageid = storage.get("StorageDirTapeid")
+    if storageid is None:
+        return redirect('storagedefined')
+    st = getStorageNames()
+    storages = ()
+    for s in st:
+        storages += ((s, s),)
+    libs = detectlibs()
+    tapelibs = ()
+    tlavl = False
+    if len(libs) > 0:
+        tlavl = True
+    for l in libs:
+        tapelibs += ((l['id'], l['name'] + l['id']),)
+    data = makeinitialdata(name, storage)
+    data['taskid'] = 0
+    data['tapelist'] = storageid
+    if request.method == 'GET':
+        form = StorageTapeForm(storages=storages, tapelibs=tapelibs, initial=data)
+        form.fields['name'].disabled = True
+        form.fields['address'].disabled = True
+        form.fields['storagelist'].disabled = True
+        form.fields['tapelist'].disabled = True
+        context = {'contentheader': 'Storages', 'apppath': ['Storage', 'Edit', 'Tape storage'], 'form': form,
+                   'Storage': storage, 'tlavl': tlavl, 'StorageId': storageid}
+        updateMenuNumbers(context)
+        return render(request, 'storage/edittape.html', context)
+    else:
+        # print request.POST
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            post = request.POST.copy()
+            post['name'] = name
+            post['address'] = storage['Address']
+            post['storagelist'] = storage['StorageComponent']
+            post['tapelist'] = storageid
+            form = StorageTapeForm(data=post, storages=storages, initial=data, tapelibs=tapelibs)
+            if form.is_valid():
+                print form.changed_data
+                response = redirect('storageinfo', name)
+                if form.has_changed():
+                    # print "form valid and changed ... "
+                    if 'descr' in form.changed_data:
+                        # update description
+                        with transaction.atomic():
+                            updateDIRStorageDescr(name=name, descr=form.cleaned_data['descr'])
+                    if 'taskid' in form.changed_data:
+                        # rescan was performed
+                        taskid = form.cleaned_data['taskid']
+                        task = get_object_or_404(Tasks, taskid=taskid)
+                        if task.status == 'F':
+                            libdata = None
+                            for l in libs:
+                                if l['id'] == storageid:
+                                    libdata = l
+                            tapelib = {
+                                'Lib': libdata,
+                                'Devices': ast.literal_eval(task.output)
+                            }
+                            with transaction.atomic():
+                                updateStorageTapelib(storname=name, tapelib=tapelib)
+                                response['Location'] += '?n=2'
+                    directorreload()
+                return response
             else:
                 # TODO zrobić obsługę błędów, albo i nie
                 print form.is_valid()
@@ -689,21 +799,22 @@ def editdedup(request, name):
             post['storagelist'] = storage['StorageComponent']
             data = makeinitialdata(name, storage)
             form = StorageDedupForm(data=post, storages=storages, initial=data)
-            if form.is_valid() and form.has_changed():
-                # print "form valid and changed ... "
-                if 'descr' in form.changed_data:
-                    # update description
-                    with transaction.atomic():
-                        updateDIRStorageDescr(name=name, descr=form.cleaned_data['descr'])
-                if 'dedupidxdir' in form.changed_data:
-                    # update archivedir
-                    with transaction.atomic():
-                        updateStorageDedupidxdir(storname=name, dedupidxdir=form.cleaned_data['dedupidxdir'])
-                if 'dedupdir' in form.changed_data:
-                    # update archivedir
-                    with transaction.atomic():
-                        updateStorageDedupdir(storname=name, dedupdir=form.cleaned_data['dedupdir'])
-                directorreload()
+            if form.is_valid():
+                if form.has_changed():
+                    # print "form valid and changed ... "
+                    if 'descr' in form.changed_data:
+                        # update description
+                        with transaction.atomic():
+                            updateDIRStorageDescr(name=name, descr=form.cleaned_data['descr'])
+                    if 'dedupidxdir' in form.changed_data:
+                        # update archivedir
+                        with transaction.atomic():
+                            updateStorageDedupidxdir(storname=name, dedupidxdir=form.cleaned_data['dedupidxdir'])
+                    if 'dedupdir' in form.changed_data:
+                        # update archivedir
+                        with transaction.atomic():
+                            updateStorageDedupdir(storname=name, dedupdir=form.cleaned_data['dedupdir'])
+                    directorreload()
                 return redirect('storageinfo', name)
             else:
                 # TODO zrobić obsługę błędów, albo i nie

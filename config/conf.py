@@ -1266,7 +1266,7 @@ def deleteDIRSchedule(dircompid=None, schname=None):
 
 def createDIRStorage(dircompid=None, dirname=None, name='ibadmin', password='ibadminpassword', address='localhost',
                      device='ibadmin-File1', mediatype='File', descr='', internal=False, sdcomponent='ibadmin',
-                     encpass=None, sddirdevice=None, sddirdedupidx=None):
+                     encpass=None, sddirdevice=None, sddirdedupidx=None, sddirtapeid=None):
     # create resource
     resid = createDIRresStorage(dircompid=dircompid, name=name, descr=descr)
     # add parameters
@@ -1287,6 +1287,8 @@ def createDIRStorage(dircompid=None, dirname=None, name='ibadmin', password='iba
         addparameter(resid, '.StorageDirDevice', sddirdevice)
     if sddirdedupidx is not None:
         addparameter(resid, '.StorageDirDedupidx', sddirdedupidx)
+    if sddirtapeid is not None:
+        addparameter(resid, '.StorageDirTapeid', sddirtapeid)
 
 
 def createSDStorage(sdcompid=None, name='ibadmin', address='localhost', dedupdir=None, dedupindx=None, descr=''):
@@ -1420,10 +1422,11 @@ def createStoragetape(dircompid=None, dirname=None, storname='ibadmin', address=
     # generate password
     password = randomstr()
     sddirdevice = tapelib['Lib']['name'] + tapelib['Lib']['id']
+    sddirtapeid = tapelib['Lib']['id']
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=dirstorname, password=password, address=address,
                      descr=descr, device=mediatype, mediatype=mediatype, internal=internal, sdcomponent=storname,
-                     sddirdevice=sddirdevice)
+                     sddirdevice=sddirdevice, sddirtapeid=sddirtapeid)
     # create SD component
     sdcompid = createSDcomponent(name=storname)
     # insert new Director {} resource into SD conf
@@ -1543,10 +1546,11 @@ def extendStoragetape(dircompid=None, dirname=None, sdcompid=None, storname=None
     password = getdecpass(comp=sdcomponent, encpass=encpass)
     address = getSDStorageAddress(sdcompid=sdcompid, sdname=sdcomponent)
     sddirdevice = tapelib['Lib']['name'] + tapelib['Lib']['id']
+    sddirtapeid = tapelib['Lib']['id']
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=storname, password=password, address=address,
                      descr=descr, device=mediatype, mediatype=mediatype, sdcomponent=sdcomponent,
-                     sddirdevice=sddirdevice)
+                     sddirdevice=sddirdevice, sddirtapeid=sddirtapeid)
     # TODO: extend maximumconcurrentjobs for SD
     # create a list of archive devices
     devices = []
@@ -1602,6 +1606,38 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
     resid = getresourceid(sdcompid, sdcomponent, 'Storage')
     addparameterstr(resid, 'DedupDirectory', dedupdirn)
     addparameterstr(resid, 'DedupIndexDirectory', dedupidxdirn)
+
+
+def updateStorageTapelib(dircompid=None, sdcompid=None, sdcomponent=None, storname=None, tapelib=None):
+    if storname is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if sdcomponent is None:
+        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
+                                         name='.StorageComponent')
+        sdcomponent = data.value
+    if sdcompid is None:
+        sdcompid = getSDcompid(name=sdcomponent)
+    mediatype = getDIRStorageMediatype(name=storname)
+    devtype = 'Tape'
+    # delete Autochanger and Devices
+    deleteSDAutochanger(sdcompid=sdcompid, autoname=mediatype)
+    deleteSDDevices(sdcompid=sdcompid, mediatype=mediatype)
+    # create a list of archive devices
+    devices = []
+    for dev in tapelib['Devices']:
+        devices.append({
+            'name': mediatype + 'Dev' + str(dev['DriveIndex']),
+            'archdir': getdevsymlink(dev['Tape']['dev']),
+            'devindex': dev['DriveIndex'],
+            'mediatype': mediatype,
+        })
+    # create new Autochanger {} resource in SD conf
+    createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev=getdevsymlink(tapelib['Lib']['dev']),
+                        changercmd='/opt/bacula/scripts/mtx-changer %c %o %S %a %d', devices=devices)
+    for dev in devices:
+        createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
 
 
 def updateStorageArchdir(dircompid=None, sdcompid=None, sdcomponent=None, storname=None, archdir='/tmp'):
@@ -1746,7 +1782,6 @@ def deleteDIRClient(dircompid=None, name=None, client=None):
     if dircompid is None:
         dircompid = getDIRcompid()
     if client is not None:
-        name = client.name
         resid = client.resid
     else:
         resid = getresourceid(compid=dircompid, name=name, typename='Client')
@@ -1767,6 +1802,33 @@ def deleteFDClient(name=None):
     fdres.delete()
     fdcomp = ConfComponent.objects.filter(compid=fdcompid)
     fdcomp.delete()
+
+
+def deleteSDAutochanger(sdcompid=None, sdname=None, autoname=None):
+    if sdname is None and sdcompid is None:
+        return None
+    if autoname is None:
+        return None
+    if sdcompid is None:
+        sdcompid = getSDcompid(sdname)
+    resid = getresourceid(compid=sdcompid, name=autoname, typename='Autochanger')
+    # delete Autochanger resource and parameters
+    deleteresource(resid)
+
+
+def deleteSDDevices(sdcompid=None, sdname=None, mediatype=None):
+    if sdname is None and sdcompid is None:
+        return None
+    if mediatype is None:
+        return None
+    if sdcompid is None:
+        sdcompid = getSDcompid(sdname)
+    devices = ConfResource.objects.filter(compid_id=sdcompid, type__name='Device', confparameter__name='MediaType',
+                                          confparameter__value=mediatype)
+    for dev in devices:
+        resid = dev.resid
+        # delete Autochanger resource and parameters
+        deleteresource(resid)
 
 
 def initialize(name='ibadmin', descr='', email='root@localhost', password=None, stortype='File',
