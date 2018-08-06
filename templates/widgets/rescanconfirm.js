@@ -13,11 +13,15 @@ $('#rescanconfirmbutton').on('click', function () {
       $('#taskprogress').html("0%");
       $('#rescanconfirmprogress').removeClass('modal-success').removeClass('modal-danger');
       $('#rescanfinishbutton').attr('disabled', true);
-      $('#rescanconfirmprogress').find('.modal-header').find('h4').html('Please Wait ...');
+      $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-cog fa-spin"></i> Rescanning library in progress.');
       $('#rescancog').show();
     });
   };
-
+    function finishProcess(){
+        $('#rescanmsg').hide();
+        $('#rescanfinishbutton').removeAttr('disabled');
+        clearInterval(rpintervalId);
+    };
   function refreshProgress(){
     $.ajax({
       url: "{% url 'storagetapetaskprogress_rel' %}" + taskid + '/',
@@ -30,25 +34,19 @@ $('#rescanconfirmbutton').on('click', function () {
         $('#operationlog').html(data[2]);
         var status = data[3]
         if (status == 'E'){
-          $('#rescanconfirmprogress').addClass('modal-danger');
-          $('#rescancog').hide();
-          $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-times-circle"></i> Library {{ storage }} detection failed.');
-          $('#rescanfinishbutton').removeAttr('disabled');
-          clearInterval(rpintervalId);
+            $('#rescanconfirmprogress').addClass('modal-danger');
+            $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-times-circle"></i> Library {{ storage }} detection failed.');
+            finishProcess();
         } else
         if (status == 'S'){
-          $('#rescanconfirmprogress').addClass('modal-success');
-          $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} hardware did not changed.');
-          $('#rescancog').hide();
-          $('#rescanfinishbutton').removeAttr('disabled');
-          clearInterval(rpintervalId);
+            $('#rescanconfirmprogress').addClass('modal-success');
+            $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} hardware did not changed.');
+            finishProcess();
         } else
         if (progress == 100){
           $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} detection done.');
-          $('#rescancog').hide();
-          $('#rescanfinishbutton').removeAttr('disabled');
           $('#{{ form.taskid.id_for_label }}').val(taskid);
-          clearInterval(rpintervalId);
+          finishProcess();
         }
       },
     });
