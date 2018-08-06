@@ -193,6 +193,12 @@ def dedupdata(request, name):
     return JsonResponse(context)
 
 
+def storagevolumesnr(request):
+    context = {}
+    updateStorageVolumesnr(context)
+    return JsonResponse(context, safe=False)
+
+
 def volumes(request):
     context = {'contentheader': 'Volumes list', 'apppath': ['Storage', 'Volumes']}
     updateMenuNumbers(context)

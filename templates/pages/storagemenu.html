@@ -25,10 +25,10 @@
     {% if storagestatusdisplay %}
       {% include "pages/storageinfomenu.html" %}
     {% endif %}
-    {% if storagevolumesnr %}
     <li {% if apppath.1 == 'Volumes' %} class="active"{% endif %}>
-      <a href="{% url 'storagevolumes' %}"><i class="fa fa-database"></i><span>Volumes</span><span class="pull-right-container">
-        <small class="label pull-right bg-primary">{{ storagevolumesnr }}</small></span></a></li>
+      <a href="{% url 'storagevolumes' %}"><i class="fa fa-database"></i><span>Volumes</span>
+        <span id="storagevolumesnr" class="pull-right-container" {% if not storagevolumesnr %}style="display: none;"{% endif %}>
+        <small id="storagevolumesnrval" class="label pull-right bg-primary">{{ storagevolumesnr|default:0 }}</small></span></a></li>
       {% if apppath.1 == 'Volume' and apppath.2 == 'Info' %}
       <li class="active">
         <a href="{% url 'storagevolumeinfo' Volume.volumename %}"><i class="fa fa-info-circle"></i><span>{{ Volume.volumename }}</span>
@@ -36,6 +36,5 @@
         </a>
       </li>
       {% endif %}
-    {% endif %}
   </ul>
 </li>

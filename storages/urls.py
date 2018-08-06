@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^volume/(?P<name>.*)/$', views.volinfo, name='storagevolumeinfo'),
     url(r'^volumes/$', views.volumes, name='storagevolumes'),
     url(r'^volumesdata/$', views.volumesdata, name='storagevolumesdata'),
+    url(r'^volumesnumber/$', views.storagevolumesnr, name='storagevolumesnr'),
 
     url(r'^vol/makeused/$', views.makeused, name='storagemakeused_rel'),
     url(r'^vol/makeused/(?P<name>.*)/$', views.makeused, name='storagemakeused'),

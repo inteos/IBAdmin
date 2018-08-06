@@ -12,6 +12,18 @@
         $('#taskprogress').html("0%");
         $('#labelconfirmprogress').removeClass('modal-danger');
       });
+      $.ajax({
+        url: "{% url 'storagevolumesnr' %}",
+        type: "GET",
+        dataType: "json",
+        success: function(data){
+            var nr = data['storagevolumesnr'];
+            if (nr > 0){
+                $('#storagevolumesnr').show();
+                $('#storagevolumesnrval').html(nr);
+            }
+        },
+      });
     };
     function refreshProgress(){
       $.ajax({
