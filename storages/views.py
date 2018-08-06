@@ -504,10 +504,11 @@ def addtape(request):
     libs = detectlibs()
     tapelibs = ()
     tlavl = False
-    if len(libs) > 0:
-        tlavl = True
+    stortapeids = getDIRStorageTapeids()
     for l in libs:
-        tapelibs += ((l['id'], l['name'] + l['id']),)
+        if l['id'] not in stortapeids:
+            tapelibs += ((l['id'], l['name'] + l['id']),)
+            tlavl = True
     if request.method == 'GET':
         form = StorageTapeForm(storages=storages, tapelibs=tapelibs)
         form.fields['address'].disabled = True

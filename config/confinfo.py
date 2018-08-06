@@ -441,6 +441,13 @@ def getSDDevicesList(component=None, storage=None):
     return devicelist
 
 
+def getDIRStorageTapeids(dircompid=None):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    return ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Storage',
+                                        name='.StorageDirTapeid').values_list('value', flat=True)
+
+
 def getDIRFSparams(dircompid=None, name=None):
     if dircompid is None:
         dircompid = getDIRcompid()
