@@ -31,7 +31,7 @@
         <small id="storagevolumesnrval" class="label pull-right bg-primary">{{ storagevolumesnr|default:0 }}</small></span></a></li>
       {% if apppath.1 == 'Volume' and apppath.2 == 'Info' %}
       <li class="active">
-        <a href="{% url 'storagevolumeinfo' Volume.volumename %}"><i class="fa fa-info-circle"></i><span>{{ Volume.volumename }}</span>
+        <a href="{% url 'storagevolumeinfo' Volume.volumename %}"><i class="fa fa-archive"></i><span>{{ Volume.volumename }}</span>
           <!--<span class="pull-right-container"><small class="label pull-right bg-green"><i class="fa {{ Volume.mediatype|mediaicon }}"></i></small></span>-->
         </a>
       </li>
