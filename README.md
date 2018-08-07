@@ -9,5 +9,5 @@ IBAdmin is a simple but powerful Bacula Enterprise WebGUI. It is primary dedicat
 * Here you can read an IBAdmin [Wiki](https://github.com/inteos/IBAdmin/wiki).
 
 [![latest](https://img.shields.io/github/release/inteos/IBadmin.svg)](https://github.com/inteos/IBAdmin/releases/latest)
-
+[![license](https://img.shields.io/github/license/inteos/IBAdmin.svg)](https://github.com/inteos/IBAdmin/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/inteos/IBAdmin.svg?branch=master)](https://travis-ci.org/inteos/IBAdmin)
