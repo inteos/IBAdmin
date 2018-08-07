@@ -51,6 +51,23 @@ $(function () {
     };
   });
 });
+// check for updates
+function updateRelease(data){
+  var version = data['tag_name']
+  var url = data['html_url']
+  var text = 'Update available&nbsp; <a href="' + url + '"><i class="fa fa-external-link"></i></a>';
+  if (version != "{{ ibadminver }}"){
+    $('#updatebadge').removeClass('label-success').addClass('label-warning').html(text);
+  };
+};
+$(function () {
+  $.ajax({
+    url: "https://api.github.com/repos/inteos/IBAdmin/releases/latest",
+    type: "GET",
+    dataType: "json",
+    success: updateRelease,
+  });
+});
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
 {% include 'widgets/helpbutton.js' with helppage='system.config' %}
