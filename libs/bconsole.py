@@ -1,12 +1,11 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 from subprocess import Popen, PIPE
-from .utils import safe_unicode
 import re
 import utils
 
 
-def bconsolecommand(cmd, api=False, timeout=True, touni=True):
+def bconsolecommand(cmd, api=False, timeout=True):
     """
     *gui on
     *.api=1
@@ -21,19 +20,9 @@ def bconsolecommand(cmd, api=False, timeout=True, touni=True):
     bcmd = cmd + '\n'
     bconsole.stdin.write(bcmd.encode('utf-8'))
     bconsole.stdin.close()
-    out = bconsole.stdout.read()
-    nlines = out.splitlines()
-    if touni:
-        lines = []
-        for line in nlines:
-            oututf8 = safe_unicode(line)
-            lines.append(oututf8)
-    else:
-        lines = nlines
-    #oututf8 = safe_unicode(out)
-    # .decode('utf-8')
+    out = bconsole.stdout.read().decode('utf-8')
     bconsole.wait()
-    #lines = oututf8.splitlines()
+    lines = out.splitlines()
     return lines
 
 
@@ -357,7 +346,8 @@ def getStorageStatusDedup(storage='ibadmin'):
     """
     bconsole = bconsolecommand(".status storage=\"" + storage + "\" dedupengine", timeout=False)[7:-2]
     outengine = bconsole[:9]
-    outcontainers = bconsole[9:]
+    outcontainers = bconsole[10:]
+    print (outcontainers)
     dedupengine = {}
     for dep in outengine:
         scan_data = re.search(r'disk_space_allocated=(.*) (..) disk_space_used=(.*) (..) containers_errors=(.*)', dep)
@@ -563,14 +553,14 @@ def bvfs_lsfiles_path(path, jobids):
 
 
 def bvfs_lsdirs_pathid(pathid, jobids):
-    out = bconsolecommand('.bvfs_lsdirs pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False, touni=False)[6:]
+    out = bconsolecommand('.bvfs_lsdirs pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False)[6:]
     if len(out) > 0:
         return out
     return None
 
 
 def bvfs_lsfiles_pathid(pathid, jobids):
-    out = bconsolecommand('.bvfs_lsfiles pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False, touni=False)[6:]
+    out = bconsolecommand('.bvfs_lsfiles pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False)[6:]
     if len(out) > 0:
         return out
     return None
