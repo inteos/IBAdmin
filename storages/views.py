@@ -158,7 +158,6 @@ def statusdevices(request, name):
             params['Name'] = dev
             for job in runningjobs:
                 if job['Device'] == dev:
-                    print (job, dev)
                     params['Status'] = 'Running'
                     break
             status.append(params)

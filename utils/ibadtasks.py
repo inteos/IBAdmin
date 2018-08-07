@@ -18,7 +18,8 @@ def printhelp():
 
 sys.path.append('/opt/ibadmin')
 from libs.daemon import Daemon
-from libs.bconsole import doDeleteJobid, directorreload, doUpdateslots, doLabel, disableDevice, enableDevice
+from libs.bconsole import doDeleteJobid, directorreload, doUpdateslots, doLabel, disableDevice, enableDevice, \
+    getStorageIdleDevice, umountDevice
 from ibadmin.settings import DATABASES
 from libs.tapelib import *
 
@@ -560,9 +561,10 @@ def labeltapes(conn=None, cur=None, tasks=None, fg=False):
                 volname = vol['name']
                 if not volname.startswith('CLN'):
                     volslot = vol['slot']
-                    log += 'Label volume: ' + str(volname) + ' slot: ' + str(volslot) + '\n'
+                    drive = getStorageIdleDevice(storage=storage)
+                    log += 'Label volume: ' + str(volname) + ' drive: ' + str(drive) + ' slot: ' + str(volslot) + '\n'
                     update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-                    (status, out) = doLabel(storage=storage, volume=volname, slot=volslot)
+                    (status, out) = doLabel(storage=storage, volume=volname, drive=drive, slot=volslot)
                     if fg:
                         print (status, out)
                     if status:
@@ -571,6 +573,7 @@ def labeltapes(conn=None, cur=None, tasks=None, fg=False):
                         log += 'Label ERROR!\n' + str(out) + '\n'
                         update_status_error(curtask=cur, taskid=taskid, log=log)
                         return
+                    umountDevice(storage=storage, drive=drive, slot=volslot)
                 else:
                     if fg:
                         print ("cleaning tape...")

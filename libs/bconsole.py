@@ -241,15 +241,19 @@ def enableDevice(storage='ibadmin', device='File0'):
     return out
 
 
-def umountDevice(storage='ibadmin', device=None, slot=0):
+def umountDevice(storage='ibadmin', device=None, drive=None, slot=0):
     """
     *disable storage=devel1-File1 device=File1Dev1 drive=0
     3002 Device ""File1Dev1" (/home/backup)" disabled.
     """
-    if storage is None or device is None or slot == 0:
-        return []
-    out = getbconsolefilter("release storage=\"" + storage + "\" device=\"" + device + "\" slot=\"" + str(slot) +
-                            "\" drive=0", 'released')
+    out = []
+    if storage is not None and slot != 0:
+        if device is not None:
+            out = getbconsolefilter("release storage=\"" + storage + "\" device=\"" + device + "\" slot=\"" +
+                                    str(slot) + "\" drive=0", 'released')
+        if drive is not None:
+            out = getbconsolefilter("release storage=\"" + storage + "\" slot=\"" + str(slot) +
+                                    "\" drive=" + str(drive), 'released')
     return out
 
 
@@ -316,6 +320,12 @@ def getStorageStatusDevice(storage='ibadmin', device=None):
         Total Bytes Read=0 Blocks Read=0 Bytes/block=0
         Positioned at File=0 Block=0
        Slot 1 is loaded in drive 0.
+
+    Device Tape: "Tape14Dev0" (/dev/tape/by-id/scsi-350223344ab000100-nst) is not open.
+       Device is BLOCKED waiting to create a volume for:
+           Pool:        Default
+           Media type:  Tape14
+       Drive 0 is not loaded.
     """
     out = {'Status': 'Idle'}
     if device is not None:
@@ -478,6 +488,15 @@ def getStorageStatusDedup(storage='ibadmin'):
                 'fsm': scan_data.group(5),
             })
     return dedupengine, dedupcontainers
+
+
+def getStorageIdleDevice(storage=None):
+    drive = 0
+    if storage is not None:
+        bconsole = getbconsolefilter(".status storage=\"" + storage + "\" devices", 'is not loaded.')
+        if len(bconsole) > 0:
+            drive = bconsole[-1].split(',')[1]
+    return drive
 
 
 def getClientJobiddata(client, jobid):
@@ -668,7 +687,8 @@ def bvfs_restore_prepare(pathids, fileids, jobids, pathtable):      # OK
     fileidstr = ''
     if fileids is not None and fileids != '':
         fileidstr = ' fileid=' + str(fileids)
-    out = bconsolecommand('.bvfs_restore' + fileidstr + pathidstr + ' jobid=' + str(jobids) + ' path=' + str(pathtable), timeout=False)[-1]
+    out = bconsolecommand('.bvfs_restore' + fileidstr + pathidstr + ' jobid=' + str(jobids) + ' path=' + str(pathtable),
+                          timeout=False)[-1]
     if out != 'OK':
         return out
     return True
@@ -688,8 +708,8 @@ def doRestore(client, restoreclient, where=None, replace='always', comment=None,
     commentstr = ''
     if comment is not None and comment != '':
         commentstr = ' comment="' + comment + '"'
-    cmd = 'restore client=\"' + str(client) + '\" restoreclient=\"' + str(restoreclient) + '\" file=?' + str(pathtable) + \
-          ' replace=' + replace + wherestr + commentstr + ' yes'
+    cmd = 'restore client=\"' + str(client) + '\" restoreclient=\"' + str(restoreclient) + '\" file=?' + \
+          str(pathtable) + ' replace=' + replace + wherestr + commentstr + ' yes'
     out = bconsolecommand(cmd, timeout=False)
     return out
 
@@ -698,10 +718,11 @@ def getBackupVersion():
     return getbconsolefilter('version', 'bacula-enterprise')
 
 
-def doUpdateslots(storage=None):
+def doUpdateslots(storage=None, drive=0):
     volumes = []
     if storage is not None:
-        out = getbconsolefilter("update slots drive=0 storage=\"" + str(storage) + "\"", 'not found in catalog')
+        out = getbconsolefilter("update slots drive=" + str(drive) + " storage=\"" + str(storage) +
+                                "\"", 'not found in catalog')
         for vol in out:
             data = vol.split(',')
             # print data
@@ -714,7 +735,7 @@ def doUpdateslots(storage=None):
     return volumes
 
 
-def doLabel(storage=None, volume=None, slot=0):
+def doLabel(storage=None, volume=None, drive=0, slot=0):
     """
     *label drive=0 storage=devel1-Tape1 volume=F01037L5 slot=37 pool=Scratch
     Connecting to Storage daemon devel1-Tape1 at 192.168.0.215:9103 ...
@@ -730,7 +751,8 @@ def doLabel(storage=None, volume=None, slot=0):
     """
     bconsole = []
     if storage is not None and volume is not None and slot != 0:
-        bconsole = bconsolecommand("label drive=0 pool=Scratch storage=\"" + str(storage) + "\" volume=\"" + str(volume) + "\" slot=" + str(slot))
+        bconsole = bconsolecommand("label drive=" + str(drive) + " pool=Scratch storage=\"" + str(storage) +
+                                   "\" volume=\"" + str(volume) + "\" slot=" + str(slot))
         for line in bconsole:
             if '3000 OK label.' in line:
                 # it is an expected return value
