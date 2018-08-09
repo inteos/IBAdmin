@@ -1717,9 +1717,13 @@ def updateDIRdefaultStorage(dircompid=None, storname=None):
         if nm == 'Tape':
             deleteparameter(dpresid, 'LabelFormat')
             deleteparameter(dpresid, 'ActionOnPurge')
+            deleteparameter(dpresid, 'VolumeUseDuration')
+            addparameterstr(dpresid, 'CleaningPrefix', 'CLN')
         else:
             addparameterstr(dpresid, 'LabelFormat', 'DiskVol')
             addparameter(dpresid, 'ActionOnPurge', 'Truncate')
+            addparameter(dpresid, 'VolumeUseDuration', '1 day')
+            deleteparameter(dpresid, 'CleaningPrefix')
 
 
 def deleteDIRJob(dircompid=None, name=None, job=None):
