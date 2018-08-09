@@ -791,12 +791,12 @@ def updatejobparams(name=None, form=None, forcelevel=None):
         # update Schedule
         # print "Update schedule"
         with transaction.atomic():
-            updateSchedule(jobname=name, data=form.cleaned_data, forcelevel=forcelevel)
+            updateJobSchedule(jobname=name, data=form.cleaned_data, forcelevel=forcelevel)
     if 'retention' in form.changed_data:
         # update retention
         # print "update retention"
         with transaction.atomic():
-            updateRetention(name=name, retention=form.cleaned_data['retention'])
+            updateJobRetention(name=name, retention=form.cleaned_data['retention'])
 
 
 def editfiles(request, name):

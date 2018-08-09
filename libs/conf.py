@@ -83,23 +83,22 @@ def getscheduletext(data=None):
     return schcycledict[backupsch]
 
 
+def getretentionform(pool):
+    if pool is None or pool == '' or pool == 'Default' or pool == 'Scratch':
+        return '2 weeks'
+    data = pool.split('-')
+    try:
+        nr = data[1]
+        inter = data[2]
+    except IndexError:
+        nr = '2'
+        inter = 'weeks'
+    return nr + ' ' + inter
+
+
 def getretentiontext(pool):
     if pool is None or pool == '':
         return 'N/A'
-    if pool != 'Default' or pool != 'Scratch':
-        try:
-            (p, nr, inter) = pool.split('-')
-        except:
-            return pool
-        return nr + ' ' + inter
-    return pool
-
-
-def getretentionform(pool):
-    if pool is None or pool == '' or pool == 'Default':
-        return '2 weeks'
-    try:
-        (p, nr, inter) = pool.split('-')
-    except:
+    if pool == 'Default' or pool == 'Scratch':
         return pool
-    return nr + ' ' + inter
+    return getretentionform(pool)

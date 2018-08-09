@@ -605,3 +605,26 @@ def getStorageisDedup(storname=None):
     if storname is None:
         return False
     return ConfParameter.objects.filter(resid__name=storname, name='.StorageDirDedupidx').count() > 0
+
+
+def getDIRStorageType(dircompid=None, storname=None):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if storname is not None:
+        mtype = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__name=storname,
+                                             resid__type__name='Storage', name='MediaType')
+        if len(mtype) > 0:
+            if mtype[0].value.startswith('Tape'):
+                return 'tape'
+    return 'disk'
+
+
+def getDIRJobStorage(dircompid=None, name=None):
+    if name is not None:
+        if dircompid is None:
+            dircompid = getDIRcompid()
+        storname = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__name=name, resid__type__name='Job',
+                                                name='Storage')
+        if len(storname) > 0:
+            return storname[0].value;
+    return None

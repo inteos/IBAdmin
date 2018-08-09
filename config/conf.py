@@ -155,6 +155,8 @@ def createDIRClient(dircompid=None, dirname=None, name='ibadmin', password='ibad
 
 def createDIRPool(dircompid=None, name='Default', disktype=False, retention=None, useduration=None, nextpool=None,
                   storage=None, descr='', cleaning=False):
+    if dircompid is None:
+        dircompid = getDIRcompid()
     # create resource
     resid = createDIRresPool(dircompid=dircompid, name=name, descr=descr)
     # add parameters
@@ -171,16 +173,27 @@ def createDIRPool(dircompid=None, name='Default', disktype=False, retention=None
         addparameterstr(resid, 'NextPool', nextpool)
     if storage is not None:
         addparameterstr(resid, 'Storage', storage)
-    if cleaning:
+    if cleaning or not disktype:
         addparameterstr(resid, 'CleaningPrefix', "CLN")
 
 
-def check_or_createPool(dircompid=None, name='Default', disktype=False, retention=None, useduration=None):
-    poolid = getDIRPoolid(dircompid=dircompid, name=name)
+def check_or_createPool(dircompid=None, storage=None, retention=None):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if retention is None or storage is None:
+        return 'Default'
+    ptype = getDIRStorageType(dircompid, storage)
+    poolname = 'Pool-' + retention.replace(' ', '-') + '-' + ptype
+    poolid = getDIRPoolid(dircompid=dircompid, name=poolname)
+    disktype = ptype == 'disk'
+    useduration = None
+    if disktype:
+        useduration = '1 Day'
     if poolid is None:
         # Pool does not exist, create it
-        createDIRPool(dircompid=dircompid, name=name, disktype=disktype, retention=retention, useduration=useduration,
-                      descr='Pool for ' + retention + ' retention')
+        createDIRPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=retention,
+                      useduration=useduration, descr='Pool for ' + retention + ' retention')
+    return poolname
 
 
 def createFSIncludeFile(resid, include):
@@ -538,38 +551,6 @@ schcycledict = {
 }
 
 
-def prepareJobParameters(dircompid=None, data=None, level='full'):
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    jobname = data['name'].encode('ascii', 'ignore')
-    # create Pool
-    disktype = True     # TODO zrobić weryfikację
-    poolname = 'Pool-' + data['retention'].replace(' ', '-')
-    check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=data['retention'],
-                        useduration='1 Day')
-    # create Schedule
-    schname = 'sch-' + jobname
-    schcycle = schcycledict[data['backupsch']]
-    starttime = str(data['starttime'])[:-3]
-    # TODO: level = data['backuplevel']
-    params = {
-        'level': level,
-        'time': starttime,
-        'scheduleweek': data['scheduleweek'],
-        'schedulemonth': data['schedulemonth'],
-        'backuprepeat': data['backuprepeat'],
-    }
-    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
-                      descr='Schedule for Job: ' + data['name'])
-    # create FileSet
-    fsname = 'fs-' + jobname
-    dedup = getStorageisDedup(data['storage'])
-    # schedule form parameters (backupsch, backuprepeat, starttime, scheduleweek, schedulemonth)
-    schparam = data['backupsch'] + ':' + data['backuprepeat']
-    return dircompid, jobname, poolname, fsname, schname, schparam, starttime
-
-
 def createJobFilesForm(dircompid=None, data=None, jd='jd-backup-files'):
     """{
     'name': u'asd',
@@ -590,15 +571,11 @@ def createJobFilesForm(dircompid=None, data=None, jd='jd-backup-files'):
     if data is None:
         return None
     # get required data
-    # (dircompid, jobname, poolname, fsname, schname, schparam, starttime) = prepareJobParameters(dircompid, data, level=data['backuplevel'])
     if dircompid is None:
         dircompid = getDIRcompid()
     jobname = data['name'].encode('ascii', 'ignore')
     # create Pool
-    disktype = True     # TODO zrobić weryfikację
-    poolname = 'Pool-' + data['retention'].replace(' ', '-')
-    check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=data['retention'],
-                        useduration='1 Day')
+    poolname = check_or_createPool(dircompid=dircompid, storage=data['storage'], retention=data['retention'])
     # create Schedule
     schname = 'sch-' + jobname
     schcycle = schcycledict[data['backupsch']]
@@ -690,12 +667,7 @@ def createJobProxmoxForm(dircompid=None, data=None, jd='jd-backup-proxmox'):
         dircompid = getDIRcompid()
     jobname = data['name'].encode('ascii', 'ignore')
     # create Pool
-    fsname = 'fs-' + jobname
-    dedup = getStorageisDedup(data['storage'])
-    disktype = True     # TODO zrobić weryfikację
-    poolname = 'Pool-' + data['retention'].replace(' ', '-')
-    check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=data['retention'],
-                        useduration='1 Day')
+    poolname = check_or_createPool(dircompid=dircompid, storage=data['storage'], retention=data['retention'])
     # create Schedule
     schname = 'sch-' + jobname
     schcycle = schcycledict[data['backupsch']]
@@ -711,6 +683,8 @@ def createJobProxmoxForm(dircompid=None, data=None, jd='jd-backup-proxmox'):
                       descr='Schedule for Job: ' + data['name'])
 
     # create FileSet
+    fsname = 'fs-' + jobname
+    dedup = getStorageisDedup(data['storage'])
     plugin, include, exclude = prepareFSProxmoxPlugin(data)
     allvms = data['allvms']
     createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + data['name'],
@@ -992,6 +966,12 @@ def updateJobStorage(dircompid=None, name=None, storage='ibadmin'):
     dedup = getStorageisDedup(storage)
     fsname = 'fs-' + name
     updateFSOptionsDedup(dircompid=dircompid, fsname=fsname, dedup=dedup)
+    jobresid = getresourceid(dircompid, name, 'Job')
+    cpool = getparameter(jobresid, 'Pool')
+    cpooldata = cpool.split('-')
+    retention = cpooldata[1] + ' ' + cpooldata[2]
+    poolname = check_or_createPool(dircompid=dircompid, storage=storage, retention=retention)
+    updateparameter(dircompid, name, 'Job', 'Pool', poolname)
 
 
 def updateJobClient(dircompid=None, name=None, client='ibadmin'):
@@ -1155,21 +1135,19 @@ def deleteDIRFileSet(dircompid=None, fsname=None):
     deleteresource(resid)
 
 
-def updateRetention(dircompid=None, name=None, retention=None):
+def updateJobRetention(dircompid=None, name=None, retention=None):
     # get required data
     if name is None or retention is None:
         return None
     if dircompid is None:
         dircompid = getDIRcompid()
     # create Pool
-    disktype = True  # TODO zrobić weryfikację
-    poolname = 'Pool-' + retention.replace(' ', '-')
-    check_or_createPool(dircompid=dircompid, name=poolname, disktype=disktype, retention=retention,
-                        useduration='1 Day')
+    storname = getDIRJobStorage(dircompid, name)
+    poolname = check_or_createPool(dircompid=dircompid, storage=storname, retention=retention)
     updateparameter(compid=dircompid, resname=name, restype='Job', name='Pool', value=poolname)
 
 
-def updateSchedule(dircompid=None, jobname=None, data=None, backupsch='', starttime='', scheduleweek='',
+def updateJobSchedule(dircompid=None, jobname=None, data=None, backupsch='', starttime='', scheduleweek='',
                    schedulemonth='', backuprepeat='', backuplevel='', forcelevel=None):
     """
 
