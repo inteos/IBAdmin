@@ -18,7 +18,7 @@
           {{ form.name }}
           {{ form.descr }}
           {{ form.address }}
-          <div id="clusterlist-group" class="form-group">
+          <div id="{{ form.storagelist.id_for_label }}-group" class="form-group">
             <label for="{{ form.storagelist.id_for_label }}" class="col-sm-2 control-label">{{ form.storagelist.label }}</label>
             <div class="col-sm-10">
               <div class="input-group">
@@ -49,11 +49,11 @@
         <h4 class="modal-title">Archive Directory change</h4>
       </div>
       <div class="modal-body">You are about to change a current Archive directory for your Storage.<br>
-        <i class="fa fa-warning"></i> <b>If you've made backups on this Storage you need to move your existing volumes
+        <i class="fa fa-warning text-yellow"></i> <b>If you've made backups on this Storage you need to move your existing volumes
         to this new directory else your current backups will be unavailable</b>.<br>
         You need to have a very serious cause to change your existing archive directory. I hope you know what you are
         doing and if something goes wrong don't blame me.<br>
-        <p class="text-aqua">It is required to restart Storage Service to make this change a real effect.</p>
+        <p class="text-primary">It is required to restart Storage Service to make this change a real effect.</p>
       </div>
       <div class="modal-footer">
         <button id="archdirconfirmbutton" type="button" class="btn btn-success pull-left">No! Back!</button>
