@@ -306,6 +306,41 @@ def warningdata(request):
     return JsonResponse(context)
 
 
+def jobslast(request):
+    """ Finished Jobs table """
+    context = {'contentheader': 'Latest Jobs', 'apppath': ['Jobs', 'Last']}
+    updateMenuNumbers(context)
+    return render(request, 'jobs/last.html', context)
+
+
+def jobslastdata(request):
+    """ JSON for error jobs datatable """
+    cols = ['jobid', 'name', 'clientid__name', 'starttime', 'endtime', 'level', 'jobfiles', 'jobbytes', 'joberrors', '']
+    draw = request.GET['draw']
+    offset = int(request.GET['start'])
+    limit = int(request.GET['length'])
+    order_col = cols[int(request.GET['order[0][column]'])]
+    order_dir = '-' if 'desc' == request.GET['order[0][dir]'] else ''
+    search = request.GET['search[value]']
+    total = Job.objects.filter(jobstatus__in=['E', 'f', 'A']).all().count()
+    orderstr = order_dir + order_col
+    if search != '':
+        f = Q(jobid__contains=search) | Q(name__icontains=search) | Q(clientid__name__icontains=search)
+        filtered = Job.objects.filter(f).exclude(jobstatus__in=['R', 'C']).count()
+        query = Job.objects.select_related('clientid').filter(f).exclude(jobstatus__in=['R', 'C']).order_by(orderstr, '-jobid')[offset:offset + limit]
+    else:
+        filtered = total
+        query = Job.objects.select_related('clientid').exclude(jobstatus__in=['R', 'C']).all().order_by(orderstr, '-jobid')[offset:offset + limit]
+    data = []
+    for j in query:
+        data.append([j.jobid, j.name, j.clientid.name,
+                     j.starttime.strftime('%Y-%m-%d %H:%M:%S'), j.endtime.strftime('%Y-%m-%d %H:%M:%S'),
+                     [j.level, j.type], j.jobfiles, j.jobbytes, [j.jobstatus, j.joberrors],
+                     [j.jobid, j.name, j.type]])
+    context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
+    return JsonResponse(context)
+
+
 def log(request, jobid):
     """ Info about JobID """
     job = getJobidinfo(jobid)

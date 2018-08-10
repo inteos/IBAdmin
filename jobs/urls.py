@@ -15,6 +15,8 @@ urlpatterns = [
     url(r'^warningdata/$', views.warningdata, name='jobswarningdata'),
     url(r'^queued/$', views.queued, name='jobsqueued'),
     url(r'^queueddata/$', views.queueddata, name='jobsqueueddata'),
+    url(r'^last/$', views.jobslast, name='jobslast'),
+    url(r'^lastdata/$', views.jobslastdata, name='jobslastdata'),
 
     url(r'^log/$', views.log, name='jobslog_rel'),
     url(r'^log/(?P<jobid>\d+)/$', views.log, name='jobslog'),

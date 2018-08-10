@@ -47,24 +47,29 @@
       {% include "pages/jobinfomenu.html" %}
     {% endif %}
     <li id="jobsmenurunning"{% if apppath.1 == 'Running' %} class="active"{% endif %}{% if jobsrunning < 1 %} style="display: none"{% endif %}>
-      <a href="/jobs/running"><i class="fa fa-circle-o text-aqua"></i> <span>Running</span><span class="pull-right-container">
+      <a href="{% url 'jobsrunning' %}"><i class="fa fa-circle-o text-aqua"></i> <span>Running</span><span class="pull-right-container">
         <small id="jobsmenurunningnr" class="label pull-right bg-primary">{{ jobsrunning }}</small></span>
       </a></li>
     <li id="jobsmenuqueued" {% if apppath.1 == 'Queued' %} class="active"{% endif %}{% if jobsqueued < 1 %} style="display: none"{% endif %}>
-      <a href="/jobs/queued"><i class="fa fa-circle-o text-orange"></i><span>Queued</span><span class="pull-right-container">
+      <a href="{% url 'jobsqueued' %}"><i class="fa fa-circle-o text-orange"></i><span>Queued</span><span class="pull-right-container">
         <small id="jobsmenuqueuednr" class="label pull-right bg-orange">{{ jobsqueued }}</small></span>
       </a></li>
     <li{% if apppath.1 == 'Finished' %} class="active"{% endif %}>
-      <a href="/jobs/finished"><i class="fa fa-circle-o text-green"></i><span>Finished</span><span class="pull-right-container">
+      <a href="{% url 'jobsfinished' %}"><i class="fa fa-circle-o text-green"></i><span>Success</span><span class="pull-right-container">
         <small id="jobsmenusuccess" class="label pull-right bg-green" {% if jobssuccess < 1 %}style="display: none"{% endif %}>{{ jobssuccess }}</small></span>
       </a></li>
     <li{% if apppath.1 == 'Errors' %} class="active"{% endif %}>
-      <a href="/jobs/errors"><i class="fa fa-circle-o text-red"></i><span>Errors</span><span class="pull-right-container">
+      <a href="{% url 'jobserrors' %}"><i class="fa fa-circle-o text-red"></i><span>Errors</span><span class="pull-right-container">
         <small id="jobsmenuerror" class="label pull-right bg-red" {% if jobserror < 1 %}style="display: none"{% endif %}>{{ jobserror }}</small></span>
       </a></li>
     <li{% if apppath.1 == 'Warning' %} class="active"{% endif %}>
-      <a href="/jobs/warning"><i class="fa fa-circle-o text-yellow"></i><span>Warning</span><span class="pull-right-container">
+      <a href="{% url 'jobswarning' %}"><i class="fa fa-circle-o text-yellow"></i><span>Warning</span><span class="pull-right-container">
         <small id="jobsmenuwarning" class="label pull-right bg-yellow" {% if jobswarning < 1 %}style="display: none"{% endif %}>{{ jobswarning }}</small></span>
+      </a></li>
+    <li{% if apppath.1 == 'Last' %} class="active"{% endif %}>
+      <a href="{% url 'jobslast' %}"><i class="fa fa-circle-o"></i><span>Last</span>
+        <!-- <span class="pull-right-container">
+        <small id="jobsmenulast" class="label pull-right bg-yellow" {% if jobslastnr < 1 %}style="display: none"{% endif %}>{{ jobslastnr }}</small></span>-->
       </a></li>
   </ul>
 </li>

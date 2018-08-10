@@ -1,0 +1,32 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-cubes"></i>
+    <h4 class="box-title">Latest Backup Jobs</h4>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="jobslast" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "jobs/last.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "jobs/last.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/deletejobidconfirm.html" %}
+{% include "widgets/restartfailedconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "jobs/last.js" %}
+{% endblock %}
