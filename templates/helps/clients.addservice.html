@@ -1,7 +1,12 @@
 {% load staticfiles %}
 <h4>New Cluster Service Backup Client</h4>
-<p>Here you can define a new cluster service backup client. Cluster service backup client is always associated with a cluster service floating IP address.
-    All Cluster Node clients and Cluster Service clients of the same cluster name share some of its properities.</p>
+<p>Here you can define a new cluster service backup client. Cluster service backup client is always associated with
+    a cluster service floating IP address. All Cluster Node clients and Cluster Service clients of the same cluster name
+    share some of its properties. To define a new cluster service backup client you have to input its name which should
+    be unique in the system (you will get an error if it is not), description (optional), address which could be an IP
+    or DNS name associated with the cluster service (if application cannot resolve DNS name you cannot add this client)
+    and select an existing cluster name from the list. Then optionally check for creating a default backup Job for this
+    client.</p>
 <p><b>Service name</b> - name of your new backup client - Cluster Service. It has to be unique in your system.</p>
 <p><b>Description</b> - any description of your backup client.</p>
 <p><b>Cluster name</b> - name of the existing cluster component for a cluster service client.</p>

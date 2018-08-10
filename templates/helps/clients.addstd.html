@@ -1,6 +1,10 @@
 {% load staticfiles %}
 <h4>New Standalone Backup Client</h4>
-<p>Here you can define a new standalone backup client. Standalone backup client is a standard single Bacula File Daemon.</p>
+<p>Here you can define a new standalone backup client. Standalone backup client is a standard single Bacula File Daemon.
+    To define a new backup client you have to input its name which should be unique in the system (you will get an error
+    if it is not), description (optional), address which could be an IP or DNS name (if application cannot resolve DNS
+    name you cannot add this client), select a server OS from a list and optionally check for creating a default backup
+    Job for this client.</p>
 <p><b>Client name</b> - name of your new backup client. It has to be unique in your system.</p>
 <p><b>Description</b> - any description of your backup client.</p>
 <p><b>Address</b> - IP address or FQDN of your backup client. It has to be a valid (resolved) address.</p>

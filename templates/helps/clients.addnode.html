@@ -1,6 +1,13 @@
 {% load staticfiles %}
 <h4>New Cluster Node Backup Client</h4>
-<p>Here you can define a new cluster node backup client. Cluster node backup client is a Bacula File Daemon which shares some properities across all nodes in the cluster.</p>
+<p>Here you can define a new cluster node backup client. Cluster node backup client is a Bacula File Daemon which shares
+    some properties across all nodes in the cluster. You should add all nodes of your cluster to avoid any problems.
+    All cluster node clients share the same access credentials allowing a Cluster service client to access any of
+    the cluster node backup agents. It will simplify the cluster operations. To define a new cluster node backup client
+    you have to input its name which should be unique in the system (you will get an error if it is not),
+    description (optional), address which could be an IP or DNS name (if application cannot resolve DNS name you cannot
+    add this client), select a server OS from a list, define a new cluster name or select an existing cluster name from
+    the list. Then optionally check for creating a default backup Job for this client.</p>
 <p><b>Client name</b> - name of your new backup client. It has to be unique in your system.</p>
 <p><b>Description</b> - any description of your backup client.</p>
 <p><b>New Cluster name</b> - name of the new cluster component for a node client. It has to be unique in your system.</p>
