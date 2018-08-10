@@ -336,7 +336,7 @@ def jobslastdata(request):
         data.append([j.jobid, j.name, j.clientid.name,
                      j.starttime.strftime('%Y-%m-%d %H:%M:%S'), j.endtime.strftime('%Y-%m-%d %H:%M:%S'),
                      [j.level, j.type], j.jobfiles, j.jobbytes, [j.jobstatus, j.joberrors],
-                     [j.jobid, j.name, j.type]])
+                     [j.jobid, j.name, j.type, j.jobstatus]])
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 

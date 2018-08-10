@@ -37,7 +37,12 @@ $(function () {
             ret += bstp;
           } else if (data[3] != 'C') {
             if (data[2] == 'B'){
-              var bres = btn + 'onclick="location.href=\'{% url 'restorejobid_rel' %}'+data[0]+'\';"><i class="fa fa-cloud-upload"></i></button>\n';
+              var bres = btn;
+              if (data[3] == 'T' || data[3] == 'I'){
+                  bres += 'onclick="location.href=\'{% url 'restorejobid_rel' %}'+data[0]+'\';"><i class="fa fa-cloud-upload"></i></button>\n';
+                } else {
+                  bres += 'data-toggle="modal" data-target="#restartjobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh" data-toggle="tooltip" data-original-title="Restart"></i></button>\n';
+                }
               ret += bres;
             }
             var bdel = btn + 'data-toggle="modal" data-target="#deletejobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash"></i></button>\n';
