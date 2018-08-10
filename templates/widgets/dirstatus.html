@@ -3,6 +3,6 @@
         <div class="info-box-content">
           <span class="info-box-number">Master Daemon</span>
           <span id="DIRStatussuccess" class="info-box-text label label-success" {% if not DIRStatus %}style="display: none;"{% endif %}>Running</span>
-          <span id="DIRStatusfailed" class="info-box-text label label-danger" {% if DIRStatus %}style="display: none;"{% endif %}><a href="#" class="text-white">Offline</a></span>
+          <span id="DIRStatusfailed" class="info-box-text label label-danger" {% if DIRStatus %}style="display: none;"{% endif %}><a href="{% url 'daemonindex' %}" class="text-white">Offline</a></span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->

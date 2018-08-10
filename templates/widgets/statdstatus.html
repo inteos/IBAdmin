@@ -3,6 +3,6 @@
         <div class="info-box-content">
           <span class="info-box-number">Colector Daemon</span>
           <span id="IBADStatussuccess" class="info-box-text label label-success" {% if not IBADStatus %}style="display: none;"{% endif %}>Running</span>
-          <span id="IBADStatusfailed" class="info-box-text label label-danger" {% if IBADStatus %}style="display: none;"{% endif %}><a href="#" class="text-white">Offline</a></span>
+          <span id="IBADStatusfailed" class="info-box-text label label-danger" {% if IBADStatus %}style="display: none;"{% endif %}><a href="{% url 'daemonindex' %}" class="text-white">Offline</a></span>
         </div><!-- /.info-box-content -->
       </div><!-- /.info-box -->
