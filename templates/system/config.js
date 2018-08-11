@@ -56,7 +56,7 @@ function updateRelease(data){
   var version = data['tag_name']
   var url = data['html_url']
   var text = 'Update available&nbsp; <a href="' + url + '"><i class="fa fa-external-link"></i></a>';
-  if (version != "{{ ibadminver }}"){
+  if (version > "{{ ibadminver }}"){
     $('#updatebadge').removeClass('label-success').addClass('label-warning').html(text);
   };
 };
