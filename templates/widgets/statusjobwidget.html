@@ -11,7 +11,9 @@
     <th>Start</th>
     <th>Client</th>
     {% if Job.Type != 'D' %}
+    {% if Job.Type != 'R' %}
     <th class="text-center">Level</th>
+    {% endif %}
     <th>Job Bytes</th>
     {% if JobClient.FilesExamined %}
     <th>Speed</th>
@@ -28,7 +30,9 @@
     <td class="vertical-align">{{ Job.Start|date:'Y-m-d H:i:s' }}</td>
     <td class="vertical-align"><a href="{% url 'clientsinfo' Job.Client %}">{{ Job.Client }}</a></td>
     {% if Job.Type != 'D' %}
+    {% if Job.Type != 'R' %}
     <td class="vertical-align text-center"><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext }}</span></td>
+    {% endif %}
     <td class="vertical-align">{{ JobClient.JobBytes|bytestext }}</td>
     {% if JobClient.FilesExamined %}
     <td class="vertical-align">{{ JobClient.Bytessec|bytestext }}/s</td>
