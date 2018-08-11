@@ -47,7 +47,7 @@ def backupsizewidget(request):
     npoints = 60
     # data = generate_series_stats(parname='bacula.size.jobs.bytes', npoints=npoints, hours=hours, div=1073741824.0)   # , allownull=False
     data = generate_series_nvalue_fast(parname='bacula.size.jobs.bytes', npoints=npoints, div=1073741824.0)
-    barwidth = 10000000 / npoints
+    barwidth = 2500000 / npoints
     context = {'color': '#39cccc', 'label': 'GBytes', 'barWidth': barwidth, 'data': data}
     return JsonResponse(context)
 
@@ -55,7 +55,7 @@ def backupsizewidget(request):
 def runningjobswidget(request):
     npoints = 30
     data = generate_series_nvalue_fast(parname='bacula.jobs.running', npoints=npoints)
-    barwidth = 8000000 / npoints
+    barwidth = 1500000 / npoints
     context = {'color': '#5f5aad', 'label': 'Jobs', 'barWidth': barwidth, 'data': data}
     return JsonResponse(context)
 
