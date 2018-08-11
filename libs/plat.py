@@ -7,7 +7,7 @@ import platform
 SUDOCMD = "/usr/bin/sudo"
 SYSTEMCTL = "/usr/bin/systemctl"
 # App Version
-IBADVERSION = 'Community.2018.1'
+IBADVERSION = 'Community.2018.2'
 # Bacula Enterprise 8.4.x - 1017
 # Bacula Enterprise 8.6.x - 1018
 # Bacula Enterprise 8.8.x - 1019
