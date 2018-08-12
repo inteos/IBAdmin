@@ -33,7 +33,7 @@ $('#rescanconfirmbutton').on('click', function () {
         $('#taskprogress').html(data[1]);
         $('#operationlog').html(data[2]);
         var status = data[3]
-        if (status == 'E'){
+        if (status == 'E' || status == 'C'){
             $('#rescanconfirmprogress').addClass('modal-danger');
             $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-times-circle"></i> Library {{ storage }} detection failed.');
             finishProcess();

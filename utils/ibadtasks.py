@@ -657,7 +657,7 @@ if __name__ == "__main__":
                 sys.exit(2)
             task = maininit(taskid=taskid)
             if task is not None:
-                daemon = IBTasksd('/tmp/ibadtasksd' + str(taskid) + '.pid')
+                daemon = IBTasksd('/tmp/ibadtasksd.' + str(taskid) + '.pid')
                 daemon.start()
     elif len(sys.argv) == 3:
         if '-f' == sys.argv[1]:

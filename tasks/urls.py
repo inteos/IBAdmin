@@ -15,4 +15,6 @@ urlpatterns = [
     url(r'^statusdata/(?P<taskid>[0-9]+)/$', views.statusdata, name='tasksstatusdata'),
     url(r'^delete/$', views.delete, name='tasksdelete_rel'),
     url(r'^delete/(?P<taskid>[0-9]+)/$', views.delete, name='tasksdelete'),
+    url(r'^cancel/$', views.cancel, name='taskscancel_rel'),
+    url(r'^cancel/(?P<taskid>[0-9]+)/$', views.cancel, name='taskscancel'),
 ]

@@ -202,6 +202,8 @@ def taskstatustext(value):
         return "Failed"
     if value == 'F':
         return "Success"
+    if value == 'C':
+        return "Canceled"
     return "Running"
 
 

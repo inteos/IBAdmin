@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.db import transaction
 from libs.task import *
 from libs.menu import updateMenuNumbers
+import signal
 
 
 # Create your views here.
@@ -43,7 +44,7 @@ def historydata(request):
             estr = '-'
         else:
             estr = t.endtime.strftime('%Y-%m-%d %H:%M:%S')
-        data.append([t.taskid, t.name, sstr, estr, t.progress, t.status, [t.status, t.taskid]])
+        data.append([t.taskid, t.name, sstr, estr, t.progress, t.status, [t.status, t.taskid, t.name]])
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 
@@ -59,6 +60,20 @@ def clearall(request):
 def delete(request, taskid):
     task = get_object_or_404(Tasks, taskid=taskid)
     task.delete()
+    return JsonResponse(True, safe=False)
+
+
+@transaction.atomic
+def cancel(request, taskid):
+    task = get_object_or_404(Tasks, taskid=taskid)
+    if task.tpid > 0:
+        print "sendigng kill to:", task.tpid
+        try:
+            os.kill(task.tpid, signal.SIGKILL)
+        except OSError:
+            pass
+        task.status = 'C'
+        task.save()
     return JsonResponse(True, safe=False)
 
 

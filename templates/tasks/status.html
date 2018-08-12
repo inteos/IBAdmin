@@ -57,11 +57,12 @@
       </div>
     </div>
   </div><!-- /.box-body -->
-  <div id="taskdeletebutton" class="box-footer"{% if Task.status == 'N' or Task.status == 'R' %} style="display: none"{% endif %}>
-      <a class="btn btn-app" onclick='location.href="{% url 'tasksdelete' Task.taskid %}";'><i class="fa fa-trash"></i>Delete</a>
+  <div class="box-footer">
+      <a id="taskdeletebutton" class="btn btn-app" {% if Task.status == 'N' or Task.status == 'R' %} style="display: none"{% endif %}><i class="fa fa-trash"></i>Delete</a>
+      <a id="taskcancelbutton" class="btn btn-app" data-toggle="modal" data-target="#cancelconfirm" data-taskid="{{ Task.taskid }}" data-name="{{ Task.name }}" data-url="{% url 'taskscancel_rel' %}" {% if Task.status != 'N' and Task.status != 'R' %} style="display: none"{% endif %}><i class="fa fa-minus-circle"></i>Cancel</a>
   </div>
 </div><!-- /.box -->
-
+{% include "widgets/canceltaskconfirm.html" %}
 {% endblock %}
 
 {% block pagejs %}

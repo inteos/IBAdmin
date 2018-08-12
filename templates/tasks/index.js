@@ -21,11 +21,12 @@ $(function () {
           var btn = '<button class="btn btn-sm btn-default" type="button" ';
           var surl = '{% url 'tasksstatus_rel' %}';
           var taskid = data[1]
-          var binf = btn + 'onclick="location.href=\''+surl+taskid+'\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
+          var binf = btn + 'onclick="location.href=\''+surl+taskid+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
           var ret = binf;
-          var bcan = btn + 'data-toggle="modal" data-target="#cancelconfirm" data-taskid="'+taskid+'"><i class="fa fa-minus-circle"></i></button>\n';
+          var tname = data[2];
+          var bcan = btn + 'data-toggle="modal" data-target="#cancelconfirm" data-taskid="'+taskid+'" data-name="'+tname+'" data-url="{% url 'taskscancel_rel' %}"><i class="fa fa-minus-circle"></i></button>\n';
           var bdel = btn + 'data-task="delete"  data-taskid="'+taskid+'" data-url="{% url 'tasksdelete_rel' %}"><i class="fa fa-trash"></i></button>\n';
-          if (data[0] == 'F' || data[0] == 'E'){
+          if (data[0] != 'N' && data[0] != 'R'){
             ret += bdel;
           } else {
             ret += bcan;
@@ -78,7 +79,9 @@ $(function () {
       success: onDataReceived,
     });
   });
+{% include "widgets/confirmbutton.js" with selector='#cancelconfirmbutton' %}
 });
+{% include "widgets/confirmmodal2t.js" with selector='#cancelconfirm' %}
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
 {% include 'widgets/helpbutton.js' with helppage='tasks.list' %}

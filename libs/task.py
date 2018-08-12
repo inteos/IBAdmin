@@ -5,12 +5,12 @@ import os
 
 
 def getTasksInfo():
-    tasks = Tasks.objects.filter(status__in=['R', 'N', 'E']).order_by('-taskid').all().values()
+    tasks = Tasks.objects.exclude(status='F').order_by('-taskid').all().values()
     return tasks
 
 
 def getTasksrunningnr():
-    return Tasks.objects.filter(status__in=['R', 'N', 'E']).count()
+    return Tasks.objects.exclude(status='F').count()
 
 
 def updateTasksrunningnr(context):

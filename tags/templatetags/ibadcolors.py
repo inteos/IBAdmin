@@ -273,6 +273,8 @@ def tasksbgcolor(value):
         return "bg-red"
     if value == 'F':
         return "bg-green"
+    if value == 'C':
+        return "bg-orange"
     return "bg-aqua"
 
 
@@ -284,6 +286,8 @@ def tasksprogresscolor(value):
         return "progress-bar-danger"
     if value == 'F':
         return "progress-bar-success"
+    if value == 'C':
+        return "progress-bar-yellow"
     return "progress-bar-aqua"
 
 

@@ -480,6 +480,10 @@ function rendertaskstatusbadge(status, klass){
     color = "bg-green";
     text = "Success";
   };
+  if (status == 'C'){
+    color = "bg-orange";
+    text = "Canceled";
+  };
   return '<span class="'+klass+' '+color+'">'+text+'</span>'
 };
 

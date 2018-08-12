@@ -13,10 +13,11 @@
         $('#taskendtime').html(data[2]);
         $('#tasklog').html(data[3]);
         $('#taskstatus').html(rendertaskstatusbadge(data[4], 'label'));
-        if (data[4] == 'F' || data[4] == 'E'){
+        if (data[4] != 'N' && data[4] != 'R'){
           clearInterval(rpintervalId);
           $('#listrefresh').hide()
           $('#taskdivprogress').hide()
+          $('#taskcancelbutton').hide()
           $('#taskdeletebutton').show()
         }
       },
@@ -28,7 +29,35 @@
   $(function(){
     rpintervalId = setInterval(refreshStatus, 60000);
   });
+  {% include "widgets/confirmmodal2t.js" with selector='#cancelconfirm' %}
+  $('#cancelconfirmbutton').on('click', function () {
+    var button = $(this);
+    button.button('loading');
+    var url = button.data('url');
+    function onDataReceived(data) {
+        button.button('Done...');
+        var modal = button.closest('.modal')
+        modal.modal('hide');
+        refreshStatus();
+    };
+    $.ajax({
+        url: url,
+        type: "GET",
+        dataType: "json",
+        success: onDataReceived,
+    });
+  });
 {% endif %}
+  $('#taskdeletebutton').on('click', function () {
+    $.ajax({
+        url: "{% url 'tasksdelete' Task.taskid %}",
+        type: "GET",
+        dataType: "json",
+        success: function(){
+            location.href="{% url 'taskslist' %}";
+        },
+    });
+  });
   //SLIMSCROLL FOR log box
   $('#tasklog').slimScroll({
     height: '250px'
