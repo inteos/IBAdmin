@@ -8,6 +8,7 @@ TASKSSTATUS = (
         ('R', 'Running task'),
         ('F', 'Finished succesfully task'),
         ('E', 'Finished with errors task'),
+        ('C', 'Task canceled'),
     )
 
 TASKSPROCS = (
