@@ -19,7 +19,7 @@ def printhelp():
 sys.path.append('/opt/ibadmin')
 from libs.daemon import Daemon
 from libs.bconsole import doDeleteJobid, directorreload, doUpdateslots, doLabel, disableDevice, enableDevice, \
-    getStorageIdleDevice, umountDevice
+    getStorageIdleDevice, umountDevice, getStorageStatusDevice
 from ibadmin.settings import DATABASES
 from libs.tapelib import *
 
@@ -374,18 +374,29 @@ def rescanlib(conn=None, cur=None, tasks=None, fg=False):
     devices = params['devices']
     storage = params['storage']
     # disable current devices to free up the resources
-    for dev in devices:
-        log += "Disabling " + dev + "\n"
+    for devres in devices:
+        dev = devres['name']
+        devindx = devres['driveindex']
+        log += "Disabling and unmounting " + dev + "\n"
         update_status(curtask=cur, taskid=taskid, progress=2.0, log=log)
+        statdevice = getStorageStatusDevice(storage=storage, device=dev)
         out = disableDevice(storage=storage, device=dev)
         if fg:
-            print (out)
+            print(out)
         if len(out) == 0:
             # error?
             log += out[0]
+
+        slot = statdevice.get('Slot', None)
+        if slot is not None:
+            # we have to enable device for unmount
+            enableDevice(storage=storage, device=dev)
+            umountDevice(storage=storage, drive=devindx, slot=slot)
+            disableDevice(storage=storage, device=dev)
     update_status(curtask=cur, taskid=taskid, progress=5.0, log=log)
     log, drvconfig = detectlib_common(conn=conn, cur=cur, tasks=tasks, tapeid=tapeid, log=log, fg=fg)
-    for dev in devices:
+    for devres in devices:
+        dev = devres['name']
         log += "Enabling " + dev + "\n"
         update_status(curtask=cur, taskid=taskid, progress=99.0, log=log)
         out = enableDevice(storage=storage, device=dev)
@@ -592,32 +603,37 @@ def labeltapes(conn=None, cur=None, tasks=None, fg=False):
 def mainloop(fg=False):
     if fg:
         print ('Entering the mainloop...')
-    conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
+    conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost +
+                            " port=" + dbport)
+    # prepare cursors
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    curtask = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    # update task tpid
+    tpid = os.getpid()
+    cur.execute("update tasks_tasks set tpid=%s where taskid=%s", (tpid, task['taskid'],))
+    conn.commit()
     # we support a following tasks
     if task['proc'] == 1:
         if fg:
             print (' > Proc delete Job')
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        curtask = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         delete_job(conn=conn, cur=cur, curtask=curtask, tasks=task)
         directorreload()
     if task['proc'] == 2:
-        print(' > Proc delete Client')
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        curtask = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if fg:
+            print(' > Proc delete Client')
         delete_client(conn=conn, cur=cur, curtask=curtask, tasks=task)
         directorreload()
     if task['proc'] == 3:
-        print(' > Proc detect library')
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if fg:
+            print(' > Proc detect library')
         detectlib(conn=conn, cur=cur, tasks=task, fg=fg)
     if task['proc'] == 4:
-        print(' > Proc label tapes')
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if fg:
+            print(' > Proc label tapes')
         labeltapes(conn=conn, cur=cur, tasks=task, fg=fg)
     if task['proc'] == 5:
-        print(' > Proc rescan library')
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        if fg:
+            print(' > Proc rescan library')
         rescanlib(conn=conn, cur=cur, tasks=task, fg=fg)
     conn.close()
     sys.exit(0)
@@ -641,7 +657,7 @@ if __name__ == "__main__":
                 sys.exit(2)
             task = maininit(taskid=taskid)
             if task is not None:
-                daemon = IBTasksd('/tmp/ibadtasksd.pid')
+                daemon = IBTasksd('/tmp/ibadtasksd' + str(taskid) + '.pid')
                 daemon.start()
     elif len(sys.argv) == 3:
         if '-f' == sys.argv[1]:

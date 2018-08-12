@@ -579,9 +579,7 @@ def taperescanlib(request, name, id):
     if storageres is None:
         raise Http404()
     storage = extractstorageparams(storageres)
-    devices = getSDDevicesList(component=storage['StorageComponent'], storage=storage['Device'])
-    print storage
-    print devices
+    devices = getSDDevicesListex(component=storage['StorageComponent'], storage=storage['Device'])
     params = {
         'tapeid': 'tape' + id,
         'storage': storage['Name'],
@@ -590,7 +588,6 @@ def taperescanlib(request, name, id):
     taskid = prepareTask(name="Rescan tape library: " + storage['StorageDirDevice'], proc=5, params=params,
                          log='Starting...')
     context = {'taskid': taskid}
-    print params
     return JsonResponse(context, safe=False)
 
 

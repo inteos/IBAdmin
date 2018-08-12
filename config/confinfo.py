@@ -440,6 +440,27 @@ def getSDDevicesList(component=None, storage=None):
     return devicelist
 
 
+def getSDDevicesListex(component=None, storage=None):
+    """
+
+    :param component: this is a storage SD name (component)
+    :param storage: this is a name of the Autochanger device from DIR->Storge->Device
+    :return:
+    """
+    if storage is None or component is None:
+        return None
+    compid = getSDcompid(component)
+    devicenamelist = ConfParameter.objects.filter(resid__compid=compid, resid__type__name='Autochanger',
+                                                  resid__name=storage, name='Device').order_by('value').all()
+    if devicenamelist.count() == 0:
+        return []
+    devicelist = []
+    for dev in devicenamelist:
+        drvindx = ConfParameter.objects.get(resid__name=dev.value, name='DriveIndex').value
+        devicelist.append({'name': dev.value, 'driveindex': drvindx})
+    return devicelist
+
+
 def getDIRStorageTapeids(dircompid=None):
     if dircompid is None:
         dircompid = getDIRcompid()
