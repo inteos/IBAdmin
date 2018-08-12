@@ -72,8 +72,8 @@ def cancel(request, taskid):
             os.kill(task.tpid, signal.SIGKILL)
         except OSError:
             pass
-        task.status = 'C'
-        task.save()
+    task.status = 'C'
+    task.save()
     return JsonResponse(True, safe=False)
 
 
