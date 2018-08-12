@@ -69,7 +69,7 @@ $(function () {
             closeProgress();
             $('#deletejobconfirmprogress').modal('hide');
           };
-          if (data[2] == 'E'){
+          if (data[2] == 'E' || data[2] == 'C'){
             $('#deletejobconfirmprogress').addClass('modal-danger');
             $('#deletejobconfirmprogress').find('.modal-header').find('h4').html('Failed...')
             closeProgress();

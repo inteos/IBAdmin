@@ -65,7 +65,7 @@ $(function () {
             closeProgress();
             $('#deleteclientconfirmprogress').modal('hide');
           };
-          if (data[2] == 'E'){
+          if (data[2] == 'E' || data[2] == 'C'){
             $('#deleteclientconfirmprogress').addClass('modal-danger');
             $('#deleteclientconfirmprogress').find('.modal-header').find('h4').html('Failed...')
             closeProgress();

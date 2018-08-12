@@ -127,7 +127,7 @@ $(function () {
           if (data[0] == 100){
             $('#deletejobconfirmprogress').modal('hide');
           }
-          if (data[2] == 'E'){
+          if (data[2] == 'E' || data[2] == 'C'){
             $('#deletejobconfirmprogress').addClass('modal-danger');
             $('#deletejobconfirmprogress').find('.modal-header').find('h4').html('Failed...')
             closeProgress();
@@ -183,7 +183,7 @@ $(function () {
           if (data[0] == 100){
             $('#deleteclientconfirmprogress').modal('hide');
           };
-          if (data[2] == 'E'){
+          if (data[2] == 'E' || data[2] == 'C'){
             $('#deleteclientconfirmprogress').addClass('modal-danger');
             $('#deleteclientconfirmprogress').find('.modal-header').find('h4').html('Failed...')
             closeProgress();

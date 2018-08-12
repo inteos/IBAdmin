@@ -36,7 +36,7 @@
           if (data[0] == 100){
             $('#labelconfirmprogress').modal('hide');
           };
-          if (data[2] == 'E'){
+          if (data[2] == 'E' || data[2] == 'C'){
             $('#labelconfirmprogress').addClass('modal-danger');
             $('#labelconfirmprogress').find('.modal-header').find('h4').html('Failed...')
             closeProgress();
