@@ -91,7 +91,7 @@ DATABASES = {
         'NAME': 'bacula',
         'USER': 'bacula',
         # This needs to be updated during installation
-        'PASSWORD': '36d96b24594af4c57a1048555cb4ce07',
+        'PASSWORD': 'bacula123',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
