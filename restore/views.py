@@ -316,7 +316,7 @@ def displaytree(request, jobids, pathid=None):
                     icon = filetypeicon(f[5])
                     name = f[5] + ' <span class="badge bg-green">' + bytestext(getltable_size(ltable)) + '</span>'
                 context.append({
-                    'id': 'F' + f[1],
+                    'id': 'F' + f[2],
                     'icon': icon,
                     'text': name,
                     'state': 'closed',
@@ -339,7 +339,7 @@ def displaytreecatalog(request, jobids, pathid=None):
             lstat = f[4]
             ltable = decodelstat(lstat)
             context.append({
-                'id': 'F' + f[1],
+                'id': 'F' + f[2],
                 'icon': catalogfs_get_icon('catsql'),
                 'text': catalogfs_get_text('catsql') + ' <span class="label label-primary">' + bytestext(getltable_size(ltable)) + '</span>',
                 'state': 'closed',
@@ -450,13 +450,13 @@ def displaytreeproxmox(request, jobids, pathid=None):
                 for vm in vms:
                     f = vm.split('\t')
                     if f[5].endswith('.conf'):
-                        confid = f[1]
+                        confid = f[2]
                     if f[5].endswith('.tar'):
                         lstat = f[4]
                         ltable = decodelstat(lstat)
                         vmid = f[5].replace('.tar', '')
                         context.append({
-                            'id': 'c' + f[1] + ':' + confid,
+                            'id': 'c' + f[2] + ':' + confid,
                             'icon': proxmoxfs_get_icon('lxc'),
                             'text': vmid + ' <span class="label label-primary">' + bytestext(getltable_size(ltable)) + '</span>',
                             'state': 'closed',
