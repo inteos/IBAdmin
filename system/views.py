@@ -32,10 +32,7 @@ def config(request):
     osver = getOSVersion()
     # TODO: when Director is unavailable then we can't verify backup version
     out = getBackupVersion()
-    if len(out) > 0:
-        backupver = 'Bacula Enterprise ' + out[0].split(',')[2]
-    else:
-        backupver = 'Unknown'
+    backupver = out['edition'] + ' ' + out['version']
     ip = detectipall()
     ipall = [(a, a) for a in ip]
     sip = getSDStorageAddress(sdname=name)

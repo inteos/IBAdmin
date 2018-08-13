@@ -726,7 +726,28 @@ def doRestore(client, restoreclient, where=None, replace='always', comment=None,
 
 
 def getBackupVersion():
-    return getbconsolefilter('version', 'bacula-enterprise')
+    out = getbconsolefilter('version', 'Version:')
+    if len(out) > 0:
+        if len(out) > 1:
+            v = out[1].split(',')[2]
+        else:
+            v = out[0].split(',')[5]
+        m = v.split('.')
+        e = 'Bacula Enterprise'
+        if int(m[0]) & 1:
+            e = 'Bacula Community'
+    else:
+        v = ''
+        e = 'Unknown'
+        m = [0,0,0]
+    verres = {
+        'edition': e,
+        'version': v,
+        'major': int(m[0]),
+        'minor': int(m[1]),
+        'patch': int(m[2]),
+    }
+    return verres
 
 
 def doUpdateslots(storage=None, drive=0):

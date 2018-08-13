@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from clients.models import Client
+from libs.plat import BACULACOMMUNITY
 
 
 class Fileset(models.Model):
@@ -122,17 +123,42 @@ class Path(models.Model):
         db_table = 'path'
 
 
-class File(models.Model):
-    fileid = models.BigAutoField(primary_key=True)
-    fileindex = models.IntegerField(blank=True, null=True, default=0)
-    jobid = models.ForeignKey(Job, db_column='jobid')
-    pathid = models.ForeignKey(Path, db_column='pathid')
-    filename = models.TextField(blank=True, null=True)
-    deltaseq = models.SmallIntegerField(blank=True, null=True)
-    markid = models.IntegerField(blank=True, null=True)
-    lstat = models.TextField(blank=True, null=True)
-    md5 = models.TextField(blank=True, null=True)
+if not BACULACOMMUNITY:
+    class File(models.Model):
+        fileid = models.BigAutoField(primary_key=True)
+        fileindex = models.IntegerField(blank=True, null=True, default=0)
+        jobid = models.ForeignKey(Job, db_column='jobid')
+        pathid = models.ForeignKey(Path, db_column='pathid')
+        filename = models.TextField(blank=True, null=True)
+        deltaseq = models.SmallIntegerField(blank=True, null=True)
+        markid = models.IntegerField(blank=True, null=True)
+        lstat = models.TextField(blank=True, null=True)
+        md5 = models.TextField(blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'file'
+        class Meta:
+            managed = False
+            db_table = 'file'
+else:
+    class Filename(models.Model):
+        filenameid = models.BigAutoField(primary_key=True)
+        name = models.TextField(blank=True, null=True)
+
+        class Meta:
+            managed = False
+            db_table = 'filename'
+
+
+    class File(models.Model):
+        fileid = models.BigAutoField(primary_key=True)
+        fileindex = models.IntegerField(blank=True, null=True, default=0)
+        jobid = models.ForeignKey(Job, db_column='jobid')
+        pathid = models.ForeignKey(Path, db_column='pathid')
+        filenameid = models.ForeignKey(Filename, db_column='filenameid')
+        deltaseq = models.SmallIntegerField(blank=True, null=True)
+        markid = models.IntegerField(blank=True, null=True)
+        lstat = models.TextField(blank=True, null=True)
+        md5 = models.TextField(blank=True, null=True)
+
+        class Meta:
+            managed = False
+            db_table = 'file'

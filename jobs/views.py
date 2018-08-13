@@ -14,6 +14,7 @@ from config.conf import *
 from tasks.models import *
 from tags.templatetags.ibadtexts import bytestext
 from libs.restore import *
+from libs.plat import BACULACOMMUNITY
 import time
 import os
 import re
@@ -395,11 +396,16 @@ def backupfilesdata(request, jobid):
     total = File.objects.filter(jobid=jobid).count()
     orderstr1 = 'pathid__path'
     orderstr2 = 'filename'
+    if BACULACOMMUNITY:
+        orderstr2 = 'filenameid__name'
     if request.GET['order[0][dir]'] == 'desc':
         orderstr1 = '-pathid__path'
         orderstr2 = '-filename'
     if search != '':
-        f = Q(filename__icontains=search) | Q(pathid__path__icontains=search)
+        if BACULACOMMUNITY:
+            f = Q(filenameid__name__icontains=search) | Q(pathid__path__icontains=search)
+        else:
+            f = Q(filename__icontains=search) | Q(pathid__path__icontains=search)
         filtered = File.objects.filter(Q(jobid=jobid), f).count()
         query = File.objects.filter(Q(jobid=jobid), f).order_by(orderstr1, orderstr2)[offset:offset + limit]
     else:
@@ -407,7 +413,10 @@ def backupfilesdata(request, jobid):
         query = File.objects.filter(jobid=jobid).all().order_by(orderstr1, orderstr2)[offset:offset + limit]
     data = []
     for file in query:
-        filename = file.pathid.path + file.filename
+        if BACULACOMMUNITY:
+            filename = file.pathid.path + file.filenameid.name
+        else:
+            filename = file.pathid.path + file.filename
         lstat = file.lstat
         ltable = decodelstat(lstat)
         size = getltable_size(ltable)
