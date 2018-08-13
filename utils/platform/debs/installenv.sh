@@ -19,7 +19,7 @@ su - postgres -c "/opt/bacula/scripts/create_postgresql_database"
 su - postgres -c "/opt/bacula/scripts/make_postgresql_tables"
 su - postgres -c "/opt/bacula/scripts/grant_postgresql_privileges"
 PWGEN=`ip addr | md5sum | awk '{print $1}'`
-sed -i "s/'PASSWORD': 'bacula123',/'PASSWORD': '$PWGEN',/" /opt/ibadmin/ibadmin/settings.py
+sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$PWGEN',/" /opt/ibadmin/ibadmin/settings.py
 su - postgres -c "psql -c \"alter user bacula with password '$PWGEN';\" bacula"
 # create virtualenv for ibadmin application
 virtualenv --system-site-packages /opt/ibadengine
