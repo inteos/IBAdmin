@@ -427,7 +427,7 @@ def backupfilesdata(request, jobid):
     return JsonResponse(context)
 
 
-def status(request, jobid):
+def status(request, jobid=None):
     """ Jobs Log + Media/Volumes + Files """
     job = getJobidinfo(jobid)
     if job is None:

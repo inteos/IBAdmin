@@ -66,7 +66,9 @@ def updateJobsnr(context):
 
 
 # TODO: trzeba zastanowić się nad podejściem, czy wybierać konkretne pola tak jak poniżej, czy dawać wszystko jak leci
-def getJobidinfo(jobid):
+def getJobidinfo(jobid=None):
+    if jobid is None:
+        return None
     try:
         j = Job.objects.select_related('clientid').get(jobid=jobid)
     except:
