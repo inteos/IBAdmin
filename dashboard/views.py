@@ -21,6 +21,10 @@ def goeswrong(request):
     return HttpResponseServerError()
 
 
+def nodbavailable(request):
+    return render(request, "pages/nodbavailable.html")
+
+
 def lastjobswidget(request):
     """ Last Jobs widget """
     jdis = [a['name'] for a in ConfResource.objects.filter(compid__type='D', type__name='Job',

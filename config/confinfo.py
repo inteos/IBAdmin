@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
 from django.db.models import Max, Q
+from django.db import OperationalError
+from django.core.exceptions import ObjectDoesNotExist
 from .models import *
 from storages.models import Storage
 
@@ -9,8 +11,10 @@ def getDIRcompid():
     """ Returns None when no configuration available """
     try:
         component = ConfComponent.objects.get(type='D')
-    except:
+    except OperationalError:
         return None
+    except ObjectDoesNotExist:
+        return -1
     return component.compid
 
 
@@ -28,12 +32,6 @@ def getDIRdescr(dircompid=None):
         dircompid = getDIRcompid()
     dirres = ConfResource.objects.get(compid_id=dircompid, type__name='Director')
     return dirres.description
-
-
-def isConfigured():
-    if getDIRcompid() is None:
-        return False
-    return True
 
 
 def getDIRCatalog():
