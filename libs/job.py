@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 from django.db.models import Max
 from jobs.models import *
-from config.models import *
 from storages.models import *
+from config.confinfo import *
 import re
 
 
@@ -214,3 +214,21 @@ def getleveltext(level=None, jtype=None):
         return "Incremental"
     return level
 
+
+def updatejobparamsfs(dircompid=None, name=None, jobparams=(), fsname=None):
+    if name is None:
+        return
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if fsname is None:
+        fsname = 'fs-' + name
+    fsoptions = getDIRFSoptions(dircompid=dircompid, name=fsname)
+    dedup = False
+    compression = None
+    for param in fsoptions:
+        if param['name'] == 'Dedup':
+            dedup = True
+        if param['name'] == 'Compression':
+            compression = param['value'].lower()
+    jobparams['Dedup'] = dedup
+    jobparams['Compression'] = compression

@@ -40,7 +40,11 @@ def catalogfs_getall():
 
 
 def catalog_fsdata():
-    return {'FS': catalogfs_getall()}
+    (inclist, exclist, optionlist) = getDIRFSparams(name='fs-catalog-backup')
+    return {
+        'FS': catalogfs_getall(),
+        'Options': optionlist,
+    }
 
 
 PROXMOXFS = {
@@ -65,6 +69,10 @@ def proxmoxfs_get_text(comp=None):
 
 def proxmox_fsdata(jobparams=None):
     if jobparams is not None:
+        fsname = jobparams.get('FileSet', None)
+        optionlist = None
+        if fsname is not None:
+            (inclist, exclist, optionlist) = getDIRFSparams(name=fsname)
         vmsexclude = jobparams['Objsexclude']
         if len(vmsexclude) > 0:
             vmsexclude = ({'value': vmsexclude},)
@@ -87,6 +95,7 @@ def proxmox_fsdata(jobparams=None):
             'VMSicon': vmsicon,
             'VMS': vmslist,
             'Exclude': vmsexclude,
+            'Options': optionlist,
         }
     else:
         return None

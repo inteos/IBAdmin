@@ -968,8 +968,11 @@ def updateJobStorage(dircompid=None, name=None, storage='ibadmin'):
     updateFSOptionsDedup(dircompid=dircompid, fsname=fsname, dedup=dedup)
     jobresid = getresourceid(dircompid, name, 'Job')
     cpool = getparameter(jobresid, 'Pool')
-    cpooldata = cpool.split('-')
-    retention = cpooldata[1] + ' ' + cpooldata[2]
+    if cpool == 'Default':
+        retention = "2 weeks"
+    else:
+        cpooldata = cpool.split('-')
+        retention = cpooldata[1] + ' ' + cpooldata[2]
     poolname = check_or_createPool(dircompid=dircompid, storage=storage, retention=retention)
     updateparameter(dircompid, name, 'Job', 'Pool', poolname)
 
@@ -999,6 +1002,28 @@ def updateFSOptionsDedup(dircompid=None, fsname=None, includeid=None, dedup=Fals
         addparameter(optionid, 'Dedup', 'BothSides')
     elif dedup is False and dedupparam is True:
         deleteparameter(optionid, 'Dedup')
+
+
+def updateFSOptionsCompression(dircompid=None, fsname=None, includeid=None, compression=None):
+    if fsname is None:
+        return
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if includeid is None:
+        resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
+        includeid = getsubresourceid(resid=resid, typename='Include')
+    optionid = getsubresourceid(resid=includeid, typename='Options')
+    comprparam = ConfParameter.objects.filter(resid=optionid, name='Compression').count() > 0
+    if compression == 'no' or compression is None or compression == '':
+        if comprparam is True:
+            deleteparameter(optionid, 'Compression')
+    else:
+        compr = compression.upper()
+        if comprparam is False:
+            addparameter(optionid, 'Compression', compr)
+        else:
+            updateparameterresid(optionid, 'Compression', compr)
 
 
 def updateFSIncludeFile(dircompid=None, fsname=None, include=''):

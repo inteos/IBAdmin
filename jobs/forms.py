@@ -20,6 +20,14 @@ BACKUPRPT = (
     ('r24', 'Once a day (Every 24 hours)'),
 )
 
+BACKUPCOMP = (
+    ('no', 'None'),
+    ('lzo', 'LZO'),
+    ('gzip1', 'GZIP1'),
+    ('gzip4', 'GZIP4'),
+    ('gzip9', 'GZIP9'),
+)
+
 
 class JobFilesForm(forms.Form):
     def __init__(self, storages=(), clients=(), *args, **kwargs):
@@ -69,12 +77,14 @@ class JobFilesAdvancedForm(forms.Form):
     runbefore = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Run Before Job', 'icon': 'fa fa-hourglass-start', 'placeholder': '...'}))
     runafter = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Run After Job', 'icon': 'fa fa-hourglass-end', 'placeholder': '...'}))
     dedup = forms.BooleanField(label='Client deduplication', required=False, widget=ibadToggleWidget(attrs={'label': 'Client deduplication'}))
+    compr = forms.ChoiceField(label='Client compresion', required=False, choices=BACKUPCOMP, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
 
 
 class JobProxmoxAdvancedForm(forms.Form):
     name = forms.CharField(required=True, widget=forms.HiddenInput())
     enabled = forms.BooleanField(label='Job enabled', required=False, widget=ibadToggleWidget(attrs={'label': 'Job enabled'}))
     dedup = forms.BooleanField(label='Client deduplication', required=False, widget=ibadToggleWidget(attrs={'label': 'Client deduplication'}))
+    compr = forms.ChoiceField(label='Client compresion', required=False, choices=BACKUPCOMP, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
 
 
 class JobAdminAdvancedForm(forms.Form):
@@ -87,4 +97,4 @@ class JobCatalogAdvancedForm(forms.Form):
     name = forms.CharField(required=True, widget=forms.HiddenInput())
     enabled = forms.BooleanField(label='Job enabled', required=False, widget=ibadToggleWidget(attrs={'label': 'Job enabled'}))
     starttime = forms.TimeField(label='Start Backup Time', required=True, widget=forms.TextInput(attrs={'class': 'form-control timepicker'}))
-
+    compr = forms.ChoiceField(label='Client compresion', required=False, choices=BACKUPCOMP, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))

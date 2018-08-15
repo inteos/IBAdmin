@@ -1,4 +1,8 @@
 <script>
+$(function () {
+  // Initialize Select2 Elements
+  $(".select2").select2();
+});
 $(".timepicker").timepicker({
     showInputs: false,
     minuteStep: 1,

@@ -1,0 +1,14 @@
+{% if FSData.Options %}
+{% for o in FSData.Options %}
+{% if o.name == 'Dedup' %}
+<div class="col-xs-12">
+  <p><span class="label bg-maroon"><i class="fa fa-cubes"></i> Client deduplication</span></p>
+</div>
+{% endif %}
+{% if o.name == 'Compression' %}
+<div class="col-xs-12">
+  <p><span class="label bg-purple"><i class="fa fa-archive"></i> Client compression {{ o.value }}</span></p>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}

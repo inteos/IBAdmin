@@ -953,6 +953,7 @@ def makefilesadvanceddata(name, job):
         'runbefore': job.get('ClientRunBeforeJob', ''),
         'runafter': job.get('ClientRunAfterJob', ''),
         'dedup': job.get('Dedup'),
+        'compr': job.get('Compression') or 'no',
     }
     return data
 
@@ -962,6 +963,7 @@ def makeproxmoxadvanceddata(name, job):
         'name': name,
         'enabled': job['Enabled'] == 'Yes',
         'dedup': job.get('Dedup'),
+        'compr': job.get('Compression') or 'no',
     }
     return data
 
@@ -975,6 +977,16 @@ def makeadminadvanceddata(name, job):
     return data
 
 
+def makecatalogadvanceddata(name, job):
+    data = {
+        'name': name,
+        'enabled': job['Enabled'] == 'Yes',
+        'starttime': datetime.strptime(job['Scheduletime'], '%H:%M').time(),
+        'compr': job.get('Compression') or 'no',
+    }
+    return data
+
+
 def filesadvanced(request, name):
     dircompid = getDIRcompid()
     jobres = getDIRJobinfo(dircompid=dircompid, name=name)
@@ -982,17 +994,12 @@ def filesadvanced(request, name):
         raise Http404()
     job = extractjobparams(jobres)
     storagededup = getStorageisDedup(job.get('Storage'))
-    fsname = 'fs-' + name
-    fsoptions = getDIRFSoptions(dircompid=dircompid, name=fsname)
-    dedup = False
-    for param in fsoptions:
-        if param['name'] == 'Dedup':
-            dedup = True
-    job['Dedup'] = dedup
+    updatejobparamsfs(dircompid=dircompid, name=name, jobparams=job)
     if request.method == 'GET':
         data = makefilesadvanceddata(name, job)
         form = JobFilesAdvancedForm(initial=data)
         # form.fields['enabled'].disabled = True
+        form.fields['compr'].disabled = data['dedup']
         context = {'contentheader': 'Advanced properities', 'apppath': ['Jobs', 'Advanced', name], 'form': form,
                    'jobstatusdisplay': 1, 'Job': job, 'Storagededup': storagededup}
         updateMenuNumbers(context)
@@ -1016,10 +1023,15 @@ def filesadvanced(request, name):
                     # update runafter parameter
                     with transaction.atomic():
                         updateJobRunAfter(dircompid=dircompid, name=name, runafter=form.cleaned_data['runafter'])
+                fsname = 'fs-' + name
                 if 'dedup' in form.changed_data:
-                    # update job enabled
+                    # update job deduplication
                     with transaction.atomic():
-                        updateFSOptionsDedup(dircompid=dircompid, fsname=fsname, dedup=form.cleaned_data['dedup'])
+                        updateFSOptionsDedup(fsname=fsname, dedup=form.cleaned_data['dedup'])
+                if 'compr' in form.changed_data:
+                    # update job compression
+                    with transaction.atomic():
+                        updateFSOptionsCompression(fsname=fsname, compression=form.cleaned_data['compr'])
                 directorreload()
     return redirect('jobsinfo', name)
 
@@ -1068,10 +1080,13 @@ def catalogdvanced(request, name):
     if jobres is None:
         raise Http404()
     job = extractjobparams(jobres)
+    updatejobparamsfs(dircompid=dircompid, name=name, jobparams=job, fsname='fs-catalog-backup')
+    storagededup = getStorageisDedup(job.get('Storage'))
     if request.method == 'GET':
-        data = makeadminadvanceddata(name, job)
+        data = makecatalogadvanceddata(name, job)
         form = JobCatalogAdvancedForm(initial=data)
         # form.fields['enabled'].disabled = True
+        form.fields['compr'].disabled = storagededup
         jobcontext = {
             'Name': name,
             'InternalJob': 'Yes',
@@ -1084,7 +1099,7 @@ def catalogdvanced(request, name):
         # print request.POST
         cancel = request.POST.get('cancel', 0)
         if not cancel:
-            data = makeadminadvanceddata(name, job)
+            data = makecatalogadvanceddata(name, job)
             form = JobCatalogAdvancedForm(initial=data, data=request.POST)
             if form.is_valid() and form.has_changed():
                 if 'enabled' in form.changed_data:
@@ -1096,6 +1111,10 @@ def catalogdvanced(request, name):
                     with transaction.atomic():
                         updateScheduletime(dircompid=dircompid, name='sch-backup-catalog', jobname=name,
                                            starttime=form.cleaned_data['starttime'])
+                if 'compr' in form.changed_data:
+                    # update job compression
+                    with transaction.atomic():
+                        updateFSOptionsCompression(fsname='fs-catalog-backup', compression=form.cleaned_data['compr'])
                 directorreload()
     return redirect('jobsinfo', name)
 
@@ -1107,17 +1126,12 @@ def proxmoxadvanced(request, name):
         raise Http404()
     job = extractjobparams(jobres)
     storagededup = getStorageisDedup(job.get('Storage'))
-    fsname = 'fs-' + name
-    fsoptions = getDIRFSoptions(dircompid=dircompid, name=fsname)
-    dedup = False
-    for param in fsoptions:
-        if param['name'] == 'Dedup':
-            dedup = True
-    job['Dedup'] = dedup
+    updatejobparamsfs(dircompid=dircompid, name=name, jobparams=job)
     if request.method == 'GET':
         data = makeproxmoxadvanceddata(name, job)
         form = JobProxmoxAdvancedForm(initial=data)
         # form.fields['enabled'].disabled = True
+        form.fields['compr'].disabled = data['dedup']
         context = {'contentheader': 'Advanced properities', 'apppath': ['Jobs', 'Advanced', name], 'form': form,
                    'jobstatusdisplay': 1, 'Job': job, 'Storagededup': storagededup}
         updateMenuNumbers(context)
@@ -1133,10 +1147,15 @@ def proxmoxadvanced(request, name):
                     # update job enabled
                     with transaction.atomic():
                         updateJobEnabled(name=name, enabled=form.cleaned_data['enabled'])
+                fsname = 'fs-' + name
                 if 'dedup' in form.changed_data:
-                    # update job enabled
+                    # update job deduplication
                     with transaction.atomic():
                         updateFSOptionsDedup(fsname=fsname, dedup=form.cleaned_data['dedup'])
+                if 'compr' in form.changed_data:
+                    # update job compression
+                    with transaction.atomic():
+                        updateFSOptionsCompression(fsname=fsname, compression=form.cleaned_data['compr'])
                 directorreload()
     return redirect('jobsinfo', name)
 
