@@ -37,8 +37,8 @@ def bconsolecommand(cmd, api=False, timeout=True, touni=True):
     return lines
 
 
-def getbconsolecommand(cmd, api=False):
-    bconsole = bconsolecommand(cmd, api)
+def getbconsolecommand(cmd, api=False, timeout=True):
+    bconsole = bconsolecommand(cmd, api, timeout)
     out = []
     for line in bconsole:
         line.replace(',', '')
@@ -47,8 +47,8 @@ def getbconsolecommand(cmd, api=False):
     return out
 
 
-def getbconsolefilter(cmd, pattern, api=False):
-    bconsole = bconsolecommand(cmd, api)
+def getbconsolefilter(cmd, pattern, api=False, timeout=True):
+    bconsole = bconsolecommand(cmd, api, timeout)
     out = []
     for line in bconsole:
         if pattern in line:
@@ -565,13 +565,13 @@ def doUpdateVolumeAppend(name):
 
 
 def doPurgeVolume(name):
-    out = getbconsolefilter("purge volume=\"" + name + "\"", 'Marking it purged.')
-    out2 = getbconsolefilter("truncate volume=\"" + name + "\" allpools", 'has been truncated')
+    out = getbconsolefilter("purge volume=\"" + name + "\"", 'Marking it purged.', timeout=False)
+    out2 = getbconsolefilter("truncate volume=\"" + name + "\" allpools", 'has been truncated', timeout=False)
     return out + out2
 
 
 def doDeleteVolume(name):
-    out = getbconsolefilter("delete volume=\"" + name + "\" yes", 'This command will delete volume')
+    out = getbconsolefilter("delete volume=\"" + name + "\" yes", 'This command will delete volume', timeout=False)
     return out
 
 
@@ -581,7 +581,7 @@ def doDeleteJobid(jobid):
     :param jobid: jobid to delete by Director
     :return: string from bconsole output
     """
-    out = getbconsolefilter("delete jobid=" + str(jobid) + " yes", 'records deleted from the catalog.')
+    out = getbconsolefilter("delete jobid=" + str(jobid) + " yes", 'records deleted from the catalog.', timeout=False)
     return out
 
 
