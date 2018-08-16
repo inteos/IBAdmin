@@ -241,7 +241,14 @@ def delete_job(conn=None, cur=None, curtask=None, tasks=None):
                 update_status(curtask=curtask, progress=progress, log=log, taskid=taskid)
                 # give feedback to application server
                 conn.commit()
-
+    except Exception as detail:
+        conn.autocommit = True
+        enableJob(cur, name)
+        log += 'Error: job history deleting problem. Err=' + str(detail) + ' [lineno:' + \
+               str(sys.exc_info()[-1].tb_lineno) + ']'
+        update_status_error(curtask=curtask, log=log, taskid=taskid)
+        return
+    try:
         # start a transaction
         conn.autocommit = False
         dodeleteJob(conn=conn, cur=cur, name=name)
@@ -275,6 +282,7 @@ def delete_client(conn=None, cur=None, curtask=None, tasks=None):
     step = 100
     jobs = []
     try:
+        # TODO: change from: femove history, remove jobs, remove client into: remove jobs with history, remove client
         cur.execute("select R.name from config_confresource R, config_confparameter P where R.resid=P.resid and P.name='Client' "
                     "and P.value=%s;", (name,))
         jobs = cur.fetchall()
@@ -317,6 +325,16 @@ def delete_client(conn=None, cur=None, curtask=None, tasks=None):
                 progress += step
                 log += 'Delete Job: "' + j[0] + '" from configuration.\n'
                 update_status(curtask=curtask, progress=progress, log=log, taskid=taskid)
+    except Exception as detail:
+        conn.autocommit = True
+        for j in jobs:
+            enableJob(cur, j[0])
+        enableClient(cur, name)
+        log += 'Error: history and job deleting problem. Err=' + str(detail) + ' [lineno:' + \
+               str(sys.exc_info()[-1].tb_lineno) + ']'
+        update_status_error(curtask=curtask, log=log, taskid=taskid)
+        return
+    try:
         dodeleteClient(conn=conn, cur=cur, name=name)
         # print ('deleteing client:', name)
     except Exception as detail:
