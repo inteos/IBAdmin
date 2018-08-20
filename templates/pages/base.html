@@ -46,6 +46,7 @@
     <![endif]-->
     <script src="{% static 'plugins/pace/pace.js' %}"></script>
     <link href="{% static 'plugins/pace/pace.css' %}" rel="stylesheet" />
+    {% block pagecss %}{% endblock pagecss %}
   </head>
 {% endblock head %}
 {% block body %}
