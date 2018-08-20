@@ -25,6 +25,7 @@ before_script:
 
 script:
   - python manage.py migrate --noinput
+  - python manage.py check --fail-level ERROR
 
 notifications:
   email:
