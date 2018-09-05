@@ -457,7 +457,7 @@ def getStorageStatusDedup(storage='ibadmin'):
 
     outengine = bconsole[:9]
     outcontainers = bconsole[10:]
-    print (outcontainers)
+    # print (outcontainers)
     dedupengine = {}
     for dep in outengine:
         scan_data = re.search(r'disk_space_allocated=(.*) (..) disk_space_used=(.*) (..) containers_errors=(.*)', dep)
@@ -517,11 +517,11 @@ def getClientJobiddata(client, jobid):
     nextjob = 1
     for line in bconsole:
         if line != '':
-            # print ":"+line+":"
+            # print ":" + line + ":"
             line = line.replace(' ', '')
             line = line.replace('Bytes/sec', 'Bytessec')
             # print ":" + line + ":"
-            (name, value) = line.split('=')
+            (name, value) = line.split('=', 1)
             jobparams[name] = value
             nextjob = 0
         elif nextjob == 0:
