@@ -39,7 +39,7 @@ def detectip():
                 insection = True
                 continue
         if insection and 'inet ' in data:
-            [inet, a] = data.split('/')
+            [inet, a] = data.split('/', 1)
             inet = inet.lstrip()
             return inet.replace('inet ', '', 1)
 
@@ -57,7 +57,7 @@ def detectipall():
                 insection = True
                 continue
         if insection and 'inet ' in data:
-            [inet, a] = data.split('/')
+            [inet, a] = data.split('/', 1)
             inet = inet.lstrip()
             ipall.append(inet.replace('inet ', '', 1))
             insection = False

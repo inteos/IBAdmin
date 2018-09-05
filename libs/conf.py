@@ -52,7 +52,7 @@ def getlevelname(level):
 
 
 def number2time(times='0:0', offset=0):
-    (hours, minutes) = times.split(':')
+    (hours, minutes) = times.split(':', 1)
     hours = int(hours) + offset
     minutes = int(minutes)
     if hours > 23:
@@ -63,7 +63,7 @@ def number2time(times='0:0', offset=0):
 def getscheduletext(data=None):
     if data is None:
         return ''
-    (backupsch, backuprepeat) = data.split(':')
+    (backupsch, backuprepeat) = data.split(':', 1)
     schrepeatdict = {
         'r1': 'Every Hour',
         'r2': 'Every 2 Hours',

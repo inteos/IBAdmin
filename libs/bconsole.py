@@ -190,7 +190,7 @@ def getClientrunningJobs(client):
         if line != '':
             # line = line.replace(' ', '')
             line = line.replace('Bytes/sec', 'Bytessec')
-            (name, value) = line.split('=')
+            (name, value) = line.split('=', 1)
             name = name.replace(' ', '')
             if name == 'Type':
                 name = 'JobType'
@@ -227,7 +227,7 @@ def getClientStatus(client='ibadmin'):
         for data in bconsole:
             if data == '':
                 continue
-            (name, value) = data.split('=')
+            (name, value) = data.split('=', 1)
             out[name] = value
         return out
     else:
@@ -289,7 +289,7 @@ def getStorageStatus(storage='ibadmin'):
         for data in bconsole:
             if data == '':
                 continue
-            (name, value) = data.split('=')
+            (name, value) = data.split('=', 1)
             out[name] = value
         return out
     else:
