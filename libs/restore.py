@@ -6,15 +6,18 @@ import stat
 
 FILETYPES = {
     'txt': 'fa fa-file-text-o',
+    'log': 'fa fa-file-text-o',
     'pdf': 'fa fa-file-pdf-o',
     'zip': 'fa fa-file-archive-o',
     'gz': 'fa fa-file-archive-o',
+    'tgz': 'fa fa-file-archive-o',
     'bz2': 'fa fa-file-archive-o',
     'jpg': 'fa fa-file-image-o',
     'jpeg': 'fa fa-file-image-o',
     'png': 'fa fa-file-image-o',
     'gif': 'fa fa-file-image-o',
     'ico': 'fa fa-file-image-o',
+    'svg': 'fa fa-file-image-o',
     'c': 'fa fa-file-code-o',
     'cc': 'fa fa-file-code-o',
     'py': 'fa fa-file-code-o',
@@ -29,10 +32,34 @@ FILETYPES = {
     'xlsx': 'fa fa-file-excel-o',
     'doc': 'fa fa-file-word-o',
     'docx': 'fa fa-file-word-o',
+    'sxw': 'fa fa-file-word-o',
+    'odt': 'fa fa-file-word-o',
     'ppt': 'fa fa-file-powerpoint-o',
     'pptx': 'fa fa-file-powerpoint-o',
+    'ods': 'fa fa-file-powerpoint-o',
     'bsr': 'fa fa-map-o',
     'html': 'fa fa-file-text',
+    'git': 'fa fa-git-square',
+    'forward': 'fa fa-forward',
+    'iso': 'fa fa-floppy-o',
+    'mp4': 'fa fa-file-video-o',
+    'mov': 'fa fa-file-video-o',
+    'avi': 'fa fa-file-video-o',
+    'mp3': 'fa fa-file-audio-o',
+    'wav': 'fa fa-file-audio-o',
+    'core': 'fa fa-bomb',
+    'patch': 'fa fa-object-ungroup',
+    'diff': 'fa fa-object-ungroup',
+}
+
+
+DIRTYPES = {
+    'git': 'fa fa-git-square',
+    'desktop': 'fa fa-desktop',
+    'movies': 'fa fa-film',
+    'music': 'fa fa-music',
+    'pictures': 'fa fa-picture-o',
+    'downloads': 'fa fa-download',
 }
 
 
@@ -41,6 +68,13 @@ def filetypeicon(name=None):
         return 'fa fa-file-o'
     ext = name.lower().split('.')[-1]
     return FILETYPES.get(ext, 'fa fa-file-o')
+
+
+def dirtypeicon(name=None):
+    if name is None:
+        return 'fa fa-folder-o'
+    ext = name.lower().split('.')[-1].replace('/','')
+    return DIRTYPES.get(ext, 'fa fa-folder-o')
 
 
 def fromb64(token=''):

@@ -295,7 +295,7 @@ def displaytree(request, jobids, pathid=None):
                     continue
                 context.append({
                     'id': 'P' + f[0],
-                    'icon': 'fa fa-folder-o',
+                    'icon': dirtypeicon(n),
                     'text': n,
                     'state': 'closed',
                     'children': True,
@@ -311,14 +311,15 @@ def displaytree(request, jobids, pathid=None):
                 ltable = decodelstat(lstat)
                 if getltable_islink(ltable):
                     icon = 'fa fa-external-link'
-                    name = f[5]
+                    n = f[5]
                 else:
-                    icon = filetypeicon(f[5])
-                    name = f[5] + ' <span class="badge bg-green">' + bytestext(getltable_size(ltable)) + '</span>'
+                    n = f[5]
+                    icon = filetypeicon(n)
+                    n = n + ' <span class="badge bg-green">' + bytestext(getltable_size(ltable)) + '</span>'
                 context.append({
                     'id': 'F' + f[2],
                     'icon': icon,
-                    'text': name,
+                    'text': n,
                     'state': 'closed',
                     'children': False,
                 })
