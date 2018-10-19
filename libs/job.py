@@ -86,7 +86,8 @@ def getJobidinfo(jobid=None):
         'Errors': j.joberrors,
         'Status': j.jobstatus,
         'Type': j.type,
-        'Comment': j.comment
+        'Comment': j.comment,
+        'priorjobid': j.priorjobid
     }
     return job
 

@@ -353,6 +353,8 @@ def log(request, jobid):
     if getJobDisabledfordelete(name=jobname):
         return redirect('jobsdefined')
     job['InternalJob'] = getJobInternal(name=jobname)
+    hascopies = Job.objects.filter(priorjobid=jobid)
+    job['hascopies'] = hascopies
     context = {'contentheader': 'Job log', 'apppath': ['Jobs', jobname, 'Log', job['JobId']],
                'jobstatusdisplay': 1, 'Job': job}
     updateJobidLogtext(context, jobid)

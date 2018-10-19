@@ -18,11 +18,11 @@
         <tr>
           <th class="text-center" style="width: 60px">JobId</th><!--  style="width: 10px" -->
           <th>Job Name</th>
-          <th class="text-center" style="width: 60px">Type</th>
+	  <th class="text-center" style="width: 60px">Type</th>
           <th>Client</th>
           <th>Start</th>
           <th>End</th>
-          {% if Job.Type != 'D' and Job.Type != 'R' %}
+          {% if Job.Type != 'D' and Job.Type != 'R' and Job.Type != 'c' %}
           <th>Level</th>
           <th>Files</th>
           <th>Size</th>
@@ -36,7 +36,7 @@
           <td><a href="{% url 'clientsinfo' Job.Client %}">{{ Job.Client }}</a></td>
           <td>{{ Job.Start|date:'Y-m-d H:i:s' }}</td>
           <td>{{ Job.End|date:'Y-m-d H:i:s' }}</td>
-          {% if Job.Type != 'D' and Job.Type != 'R' %}
+          {% if Job.Type != 'D' and Job.Type != 'R' and Job.Type != 'c' %}
           <td><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext:Job.Type }}</span></td>
           <td>{{ Job.Files }}</td>
           <td>{{ Job.Bytes|bytestext }}</td>
@@ -45,6 +45,17 @@
         </tr>
       </table>
     </div>
+    {% if Job.priorjobid %}
+    <div class="col-lg-1 col-xs-12"><span class="badge bg-purple">Copy of: <a href="{% url 'jobslog' Job.priorjobid %}">{{ Job.priorjobid }}</a></span></div>
+    <br>
+    {% endif %}
+    {% if Job.hascopies.count %}
+    <div class="col-lg-2 col-xs-12"><span class="badge bg-navy">Has copies:
+    {% for j in Job.hascopies %}
+      <a href="{% url 'jobslog' j.jobid %}">{{ j.jobid }}</a>
+    {% endfor %}
+    </span></div><br>
+    {% endif %}
     <hr>
     {% include "widgets/commentwidget.html" %}
     <div class="row">
@@ -92,7 +103,7 @@
           </div>
         </div>
       {% endif %}
-      {% if Job.Type != 'D' and Job.Type != 'R' %}
+      {% if Job.Type != 'D' and Job.Type != 'R' and Job.Type != 'c' %}
       <div class="panel box box-primary">
         <div class="box-header with-border">
           <h2 class="box-title">

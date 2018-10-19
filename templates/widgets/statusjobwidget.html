@@ -9,8 +9,10 @@
     <th>Job Name</th>
     <th class="text-center" style="width: 60px">Type</th>
     <th>Start</th>
+    {% if Job.Type != 'c' %}
     <th>Client</th>
-    {% if Job.Type != 'D' %}
+    {% endif %}
+    {% if Job.Type != 'D' and Job.Type != 'c' %}
     {% if Job.Type != 'R' %}
     <th class="text-center">Level</th>
     {% endif %}
@@ -28,8 +30,10 @@
     <td class="vertical-align"><a href="{% url 'jobsinfo' Job.Name %}">{{ Job.Name }}</a></td>
     <td class="vertical-align text-center"><span class="badge {{ Job.Type|jobtypebgcolor }}">{{ Job.Type|jobtypetext }}</span></td>
     <td class="vertical-align">{{ Job.Start|date:'Y-m-d H:i:s' }}</td>
+    {% if Job.Type != 'c' %}
     <td class="vertical-align"><a href="{% url 'clientsinfo' Job.Client %}">{{ Job.Client }}</a></td>
-    {% if Job.Type != 'D' %}
+    {% endif %}
+    {% if Job.Type != 'D' and Job.Type != 'c' %}
     {% if Job.Type != 'R' %}
     <td class="vertical-align text-center"><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext }}</span></td>
     {% endif %}
