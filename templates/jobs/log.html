@@ -46,13 +46,13 @@
       </table>
     </div>
     {% if Job.priorjobid %}
-    <div class="col-lg-1 col-xs-12"><span class="badge bg-purple">Copy of: <a href="{% url 'jobslog' Job.priorjobid %}">{{ Job.priorjobid }}</a></span></div>
+    <div class="col-lg-1 col-xs-12"><span class="badge bg-purple">Copy of: <a href="{% url 'jobslog' Job.priorjobid %}" class="text-white">{{ Job.priorjobid }}</a></span></div>
     <br>
     {% endif %}
     {% if Job.hascopies.count %}
     <div class="col-lg-2 col-xs-12"><span class="badge bg-navy">Has copies:
     {% for j in Job.hascopies %}
-      <a href="{% url 'jobslog' j.jobid %}">{{ j.jobid }}</a>
+      <a href="{% url 'jobslog' j.jobid %}" class="text-white">{{ j.jobid }}</a>
     {% endfor %}
     </span></div><br>
     {% endif %}

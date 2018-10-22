@@ -470,7 +470,11 @@ def statusheader(request, jobid):
     jobprogress = -1
     if len(jobclient):
         jobclient = jobclient[0]
-        maxfiles = getJobmaxfiles(jobname)
+        mf = jobclient.get('ExpectedFiles', None)
+        if mf is None:
+            maxfiles = getJobmaxfiles(jobname)
+        else:
+            maxfiles = int(mf)
         if maxfiles > 0:
             filesexamined = int(jobclient['FilesExamined'])
             jobprogress = int(filesexamined * 100 / maxfiles)
