@@ -31,9 +31,9 @@ class StorageDedupForm(StorageForm):
     dedupdir = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Dedup engine directory', 'icon': 'fa fa-cubes', 'placeholder': 'available folder'}))
 
 
-class StorageAlias(StorageForm):
+class StorageAliasForm(StorageForm):
     def __init__(self, storageips=(), *args, **kwargs):
-        super(StorageAlias, self).__init__(*args, **kwargs)
+        super(StorageAliasForm, self).__init__(*args, **kwargs)
         self.fields['storageip'].choices = storageips
 
     storageip = forms.ChoiceField(label='Storage IP', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))

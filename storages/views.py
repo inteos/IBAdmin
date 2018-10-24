@@ -509,7 +509,7 @@ def addalias(request):
     for s in st:
         storages += ((s, s),)
     if request.method == 'GET':
-        form = StorageAlias(storages=storages, storageips=ipall)
+        form = StorageAliasForm(storages=storages, storageips=ipall)
         form.fields['address'].disabled = True
         context = {'contentheader': 'Storages', 'apppath': ['Storage', 'Add', 'Alias'], 'form': form}
         updateMenuNumbers(context)
@@ -518,14 +518,13 @@ def addalias(request):
         # print request.POST
         cancel = request.POST.get('cancel', 0)
         if not cancel:
-            form = StorageDedupForm(data=request.POST, storages=storages)
+            form = StorageAliasForm(data=request.POST, storages=storages, storageips=ipall)
             if form.is_valid():
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
                 storage = form.cleaned_data['storagelist']
                 # address = form.cleaned_data['address']
-                dedupidxdir = form.cleaned_data['dedupidxdir']
-                dedupdir = form.cleaned_data['dedupdir']
+                storageip = form.cleaned_data['storageip']
                 # create a Storage resource
                 #   TODO: and a Storage component and all required resources
                 with transaction.atomic():

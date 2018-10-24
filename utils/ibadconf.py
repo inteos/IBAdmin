@@ -167,24 +167,32 @@ if __name__ == "__main__":
         if row['description'] is not None and len(row['description']) > 0:
             print ("  Description = \"" + row['description'] + "\"")
         get_parameters(conn, resid, 1, component)
+        # Now find any subresource
         cur2.execute(
-            "select R.resid, T.name as resource from config_confrtype T, config_confresource R where T.typeid=R.type and sub=%s order by R.type",
+            "select R.resid, T.name as resource, T.equ from config_confrtype T, config_confresource R where T.typeid=R.type and sub=%s order by R.type",
             (resid,))
         while 1:
             row2 = cur2.fetchone()
             if row2 is None:
                 break
             resid1 = row2['resid']
-            print ("  " + row2['resource'] + " {")
+            equ = " {"
+            if row2['equ']:
+                equ = " = {"
+            print ("  " + row2['resource'] + equ)
+            # now any subsequent subresource - we support 2 nested subresources only
             cur3.execute(
-                "select R.resid, T.name as resource from config_confrtype T,config_confresource R where T.typeid=R.type and sub=%s order by R.resid",
+                "select R.resid, T.name as resource, T.equ from config_confrtype T,config_confresource R where T.typeid=R.type and sub=%s order by R.resid",
                 (resid1,))
             while 1:
                 row3 = cur3.fetchone()
                 if row3 is None:
                     break
                 resid2 = row3['resid']
-                print ("    " + row3['resource'] + " {")
+                equ = " {"
+                if row3['equ']:
+                    equ = " = {"
+                print ("    " + row3['resource'] + equ)
                 get_parameters(conn, resid2, 3, component)
                 print ("    }")
             get_parameters(conn, resid1, 2, component)

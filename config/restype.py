@@ -19,4 +19,6 @@ RESTYPE = {
     'Include': 14,
     'Exclude': 15,
     'Options': 16,
+    'SDAddresses': 17,
+    'IP': 18,
 }

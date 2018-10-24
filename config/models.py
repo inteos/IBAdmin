@@ -18,6 +18,7 @@ class ConfComponent(models.Model):
 class ConfRtype(models.Model):
     typeid = models.IntegerField(primary_key=True)
     name = models.CharField(unique=True, max_length=255)
+    equ = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
