@@ -18,7 +18,7 @@
           {{ form.name }}
           {{ form.descr }}
           {{ form.address }}
-          <div id="clusterlist-group" class="form-group">
+          <div id="{{ form.storagelist.id_for_label }}-group" class="form-group">
             <label for="{{ form.storagelist.id_for_label }}" class="col-sm-2 control-label">{{ form.storagelist.label }}</label>
             <div class="col-sm-10">
               <div class="input-group">

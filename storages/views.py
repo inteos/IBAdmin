@@ -501,6 +501,47 @@ def adddedup(request):
     return redirect('storagedefined')
 
 
+def addalias(request):
+    st = getStorageNames()
+    storages = ()
+    ip = detectipall()
+    ipall = [(a, a) for a in ip]
+    for s in st:
+        storages += ((s, s),)
+    if request.method == 'GET':
+        form = StorageAlias(storages=storages, storageips=ipall)
+        form.fields['address'].disabled = True
+        context = {'contentheader': 'Storages', 'apppath': ['Storage', 'Add', 'Alias'], 'form': form}
+        updateMenuNumbers(context)
+        return render(request, 'storage/addalias.html', context)
+    else:
+        # print request.POST
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            form = StorageDedupForm(data=request.POST, storages=storages)
+            if form.is_valid():
+                name = form.cleaned_data['name'].encode('ascii', 'ignore')
+                descr = form.cleaned_data['descr']
+                storage = form.cleaned_data['storagelist']
+                # address = form.cleaned_data['address']
+                dedupidxdir = form.cleaned_data['dedupidxdir']
+                dedupdir = form.cleaned_data['dedupdir']
+                # create a Storage resource
+                #   TODO: and a Storage component and all required resources
+                with transaction.atomic():
+                    extendStoragededup(storname=name, descr=descr, sdcomponent=storage, dedupidxdir=dedupidxdir,
+                                       dedupdir=dedupdir)
+                directorreload()
+                response = redirect('storageinfo', name)
+                response['Location'] += '?n=1'
+                return response
+            else:
+                # TODO zrobić obsługę błędów, albo i nie
+                print form.is_valid()
+                print form.errors.as_data()
+    return redirect('storagedefined')
+
+
 def addtape(request):
     st = getStorageNames()
     storages = ()

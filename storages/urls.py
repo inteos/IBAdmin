@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^adddisk/$', views.adddisk, name='storageadddisk'),
     url(r'^adddedup/$', views.adddedup, name='storageadddedup'),
     url(r'^addtape/$', views.addtape, name='storageaddtape'),
+    url(r'^addalias/$', views.addalias, name='storageaddalias'),
 
     url(r'^tapelibdetect/$', views.tapedetectlib, name='storagetapedetect_rel'),
     url(r'^tapelibdetect/(?P<id>.*)/$', views.tapedetectlib, name='storagetapedetect'),

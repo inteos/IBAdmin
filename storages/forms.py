@@ -14,17 +14,12 @@ class StorageForm(forms.Form):
 
 
 class StorageDiskForm(StorageForm):
-    def __init__(self, storages=(), *args, **kwargs):
-        super(StorageDiskForm, self).__init__(*args, **kwargs)
-        self.fields['storagelist'].choices = storages
-
     archivedir = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Archive directory', 'icon': 'glyphicon glyphicon-folder-close', 'placeholder': 'available folder'}))
 
 
 class StorageTapeForm(StorageForm):
-    def __init__(self, storages=(), tapelibs=(), *args, **kwargs):
+    def __init__(self, tapelibs=(), *args, **kwargs):
         super(StorageTapeForm, self).__init__(*args, **kwargs)
-        self.fields['storagelist'].choices = storages
         self.fields['tapelist'].choices = tapelibs
 
     tapelist = forms.ChoiceField(label='Available Libraries', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
@@ -32,9 +27,13 @@ class StorageTapeForm(StorageForm):
 
 
 class StorageDedupForm(StorageForm):
-    def __init__(self, storages=(), *args, **kwargs):
-        super(StorageDedupForm, self).__init__(*args, **kwargs)
-        self.fields['storagelist'].choices = storages
-
     dedupidxdir = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Dedup index directory', 'icon': 'fa fa-indent', 'placeholder': 'available folder'}))
     dedupdir = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Dedup engine directory', 'icon': 'fa fa-cubes', 'placeholder': 'available folder'}))
+
+
+class StorageAlias(StorageForm):
+    def __init__(self, storageips=(), *args, **kwargs):
+        super(StorageAlias, self).__init__(*args, **kwargs)
+        self.fields['storageip'].choices = storageips
+
+    storageip = forms.ChoiceField(label='Storage IP', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
