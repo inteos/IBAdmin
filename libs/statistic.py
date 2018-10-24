@@ -111,3 +111,32 @@ def generate_series_jobavg(name=None, level='F', npoints=0, div=1):
             avg = 0
         data.append([i, avg / div])
     return data
+
+
+def generate_series_nvalue_fast_auto(parname=None, npoints=0):
+    if parname is None or npoints == 0:
+        return None
+    prefix = ''
+    div = 1.0
+    maxquery = StatData.objects.filter(parid__name=parname).order_by('-time')[:npoints].aggregate(Max('nvalue'))
+    maxval = maxquery['nvalue__max']
+    if maxval > 1125899906842624:   # PB
+        div = 1125899906842624.0
+        prefix = 'P'
+    elif maxval > 1099511627776:    # TB
+        div = 1099511627776.0
+        prefix = 'T'
+    elif maxval > 1073741824:       # GB
+        div = 1073741824.0
+        prefix = 'G'
+    elif maxval > 1048576:          # MB
+        div = 1048576.0
+        prefix = 'M'
+    query = StatData.objects.filter(parid__name=parname).order_by('-time')[:npoints]
+    rev = reversed(query)
+    data = []
+    for i in rev:
+        timestamp = int((i.time - datetime(1970, 1, 1)).total_seconds() * 1000)
+        data.append([timestamp, i.nvalue / div])
+    return data, prefix
+
