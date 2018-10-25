@@ -28,7 +28,7 @@ source /opt/ibadengine/bin/activate
 # install required python packages
 pip install --upgrade django==1.10
 pip install --upgrade python-dateutil==2.7.2
-pip install --upgrade pytz=2018.4
+pip install --upgrade pytz==2018.4
 /opt/ibadmin/manage.py migrate
 # initialize required system configuration and scripts
 cp /opt/ibadmin/utils/ibadmin.conf /etc/httpd/conf.d/

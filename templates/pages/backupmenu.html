@@ -2,8 +2,8 @@
 <li class="treeview {% if apppath.0 == 'Backup' %}active{% endif %}">
   <a href="#"><i class="fa fa-building"></i> <span>Backup</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
   <ul class="treeview-menu">
-    {% if apppath.1 == 'System' %}<li class="active">{% else %}<li>{% endif %}
-      <a href="{% url 'systemconfig' %}"><i class="fa fa-gears"></i> <span>System</span></a>
+    {% if apppath.1 == 'Config' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'systemconfig' %}"><i class="fa fa-gears"></i> <span>Config</span></a>
     </li>
     {% if apppath.1 == 'Daemons' %}<li class="active">{% else %}<li>{% endif %}
       <a href="{% url 'daemonindex' %}"><i class="fa fa-sellsy"></i> <span>Daemons</span></a>

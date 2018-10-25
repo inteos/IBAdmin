@@ -551,6 +551,14 @@ def getDIRStorageAddress(dircompid=None, name=None):
     return address.value
 
 
+def getDIRInternalStorageAddress(dircompid=None):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    resid = ConfResource.objects.get(compid_id=dircompid, confparameter__name='.InternalStorage')
+    address = ConfParameter.objects.get(resid=resid, resid__type__name='Storage', name='Address')
+    return address.value
+
+
 def getDIRStorageMediatype(dircompid=None, name=None):
     if name is None:
         return None
@@ -566,7 +574,7 @@ def getSDStorageAddress(sdcompid=None, sdname=None):
         return None
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdname)
-    address = ConfParameter.objects.get(resid__compid_id=sdcompid, resid__type__name='Storage', name='SDAddress')
+    address = ConfParameter.objects.get(resid__compid_id=sdcompid, resid__type__name='Storage', name='.SDAddress')
     return address.value
 
 

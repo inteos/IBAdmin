@@ -35,7 +35,7 @@ def config(request):
     backupver = out['edition'] + ' ' + out['version']
     ip = detectipall()
     ipall = [(a, a) for a in ip]
-    sip = getSDStorageAddress(sdname=name)
+    sip = getDIRInternalStorageAddress()
     cip = getFDClientAddress(name=name)
     descr = getDIRdescr()
     email = getDIRadminemail()
@@ -61,7 +61,7 @@ def config(request):
     if len(ip) < 2:
         form.fields['storageip'].disabled = True
         form.fields['clientip'].disabled = True
-    context = {'contentheader': 'System', 'contentheadersmall': 'Config', 'apppath': ['Backup', 'System'], 'form': form,
+    context = {'contentheader': 'System', 'contentheadersmall': 'Config', 'apppath': ['Backup', 'Config'], 'form': form,
                'ibadminver': IBADVERSION, 'backupver': backupver, 'osver': osver, 'platform': platform}
     updateMenuNumbers(context)
     updateservicestatus(context)
@@ -74,7 +74,7 @@ def configsave(request):
         name = getDIRname()
         ip = detectipall()
         ipall = [(a, a) for a in ip]
-        sip = getSDStorageAddress(sdname=name)
+        sip = getDIRInternalStorageAddress()
         cip = getFDClientAddress(name=name)
         descr = getDIRdescr()
         email = getDIRadminemail()
@@ -103,20 +103,20 @@ def configsave(request):
                 # print "Update descr!"
                 with transaction.atomic():
                     updateDIRDescr(descr=form.cleaned_data['descr'])
-            if 'storageip' in form.changed_data:
-                # print "Update Storage"
-                with transaction.atomic():
-                    restartinfo = True
-                    updateStorageAddress(sdcomponent=name, address=form.cleaned_data['storageip'])
-            if 'clientip' in form.changed_data:
-                # print "Update Client"
-                with transaction.atomic():
-                    restartinfo = True
-                    updateClientAddress(name=name, address=form.cleaned_data['clientip'])
             if 'defstorage' in form.changed_data:
                 # print "Update defstorage"
                 with transaction.atomic():
                     updateDIRdefaultStorage(storname=form.cleaned_data['defstorage'])
+            if 'storageip' in form.changed_data:
+                # print "Update Storage IP"
+                with transaction.atomic():
+                    restartinfo = True
+                    updateStorageAddress(sdcomponent=name, address=form.cleaned_data['storageip'])
+            if 'clientip' in form.changed_data:
+                # print "Update Client IP"
+                with transaction.atomic():
+                    restartinfo = True
+                    updateClientAddress(name=name, address=form.cleaned_data['clientip'])
             if 'email' in form.changed_data:
                 # print "Update email"
                 with transaction.atomic():

@@ -527,9 +527,9 @@ def addalias(request):
                 storageip = form.cleaned_data['storageip']
                 # create a Storage resource
                 #   TODO: and a Storage component and all required resources
-                with transaction.atomic():
-                    extendStoragededup(storname=name, descr=descr, sdcomponent=storage, dedupidxdir=dedupidxdir,
-                                       dedupdir=dedupdir)
+                #with transaction.atomic():
+                #    extendStoragededup(storname=name, descr=descr, sdcomponent=storage, dedupidxdir=dedupidxdir,
+                #                       dedupdir=dedupdir)
                 directorreload()
                 response = redirect('storageinfo', name)
                 response['Location'] += '?n=1'

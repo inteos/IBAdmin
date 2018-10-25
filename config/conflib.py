@@ -220,6 +220,14 @@ def createSDresDirector(sdcompid=None, dirname=None, descr=''):
     return createresource(compid=sdcompid, name=dirname, rtype=RESTYPE['Director'], descr=descr)
 
 
+def createSDsubresource(sdcompid=None, resid=None, name='', rtype=None, descr=''):
+    if sdcompid is None:
+        return None
+    if resid is None:
+        return None
+    return createsubresource(compid=sdcompid, name=name, subres=resid, rtype=rtype, descr=descr)
+
+
 def createSDresMessages(sdcompid=None, name='Standard', descr=''):
     if sdcompid is None:
         return None

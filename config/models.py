@@ -33,7 +33,7 @@ class ConfResource(models.Model):
     description = models.CharField(max_length=1000)
 
     def __str__(self):
-        return str(self.type) + "(" + str(self.name) + ") >> "
+        return str(self.type) + " " + str(self.name) + "(ID:" + str(self.resid) + ") >> "
 
 
 class ConfParameter(models.Model):
