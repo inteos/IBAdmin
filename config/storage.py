@@ -28,9 +28,13 @@ def addSDStorageAddress(sdcompid=None, resid=None, address='localhost'):
         return
     if resid is None:
         resid = getresourceid(sdcompid, '', 'SDAddresses')
-    ipresid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=RESTYPE['IP'])
-    addparameter(ipresid, 'Port', 9103)
-    addparameter(ipresid, 'Addr', address)
+    # check if already defined
+    isdef = ConfResource.objects.filter(sub=resid, type__name='IP', confparameter__value=address).count()
+    if isdef == 0:
+        # ok, not available, create
+        ipresid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=RESTYPE['IP'])
+        addparameter(ipresid, 'Port', 9103)
+        addparameter(ipresid, 'Addr', address)
 
 
 def deleteSDStorageAddress(sdcompid=None, address='localhost'):
