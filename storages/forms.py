@@ -10,7 +10,7 @@ class StorageForm(forms.Form):
     name = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Storage name', 'icon': 'fa fa-paw', 'placeholder': 'Name'}))
     descr = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Description', 'icon': 'fa fa-commenting-o', 'placeholder': '...'}))
     address = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Remote address', 'icon': 'fa fa-envelope-o', 'placeholder': 'Address'}))
-    storagelist = forms.ChoiceField(label='Existing Storage', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
+    storagelist = forms.ChoiceField(label='Storage Daemon', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
 
 
 class StorageDiskForm(StorageForm):
@@ -35,5 +35,6 @@ class StorageAliasForm(StorageForm):
     def __init__(self, storageips=(), *args, **kwargs):
         super(StorageAliasForm, self).__init__(*args, **kwargs)
         self.fields['storageip'].choices = storageips
+        self.fields['storagelist'].label = 'Existing Storage'
 
     storageip = forms.ChoiceField(label='Storage IP', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))

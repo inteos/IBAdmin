@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^editdisk/(?P<name>.*)/$', views.editdisk, name='storageeditdisk'),
     url(r'^editdedup/(?P<name>.*)/$', views.editdedup, name='storageeditdedup'),
     url(r'^edittape/(?P<name>.*)/$', views.edittape, name='storageedittape'),
+    url(r'^editalias/(?P<name>.*)/$', views.editalias, name='storageeditalias'),
 
     url(r'^volume/$', views.volinfo, name='storagevolumeinfo_rel'),
     url(r'^volume/(?P<name>.*)/$', views.volinfo, name='storagevolumeinfo'),

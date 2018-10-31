@@ -36,8 +36,10 @@ $(function () {
       function onSavedata(data){
         if (data){
           $('#restartsrvinfo').show();
+          $('#saveinfo').removeClass('alert-success').addClass('alert-warning');
         } else {
           $('#restartsrvinfo').hide();
+          $('#saveinfo').removeClass('alert-warning').addClass('alert-success');
         };
         $('#saveinfo').show();
       };

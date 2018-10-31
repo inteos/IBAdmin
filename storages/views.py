@@ -502,12 +502,12 @@ def adddedup(request):
 
 
 def addalias(request):
-    st = getStorageNames()
+    st = getDIRStorageNamesnAlias()
     storages = ()
-    ip = detectipall()
-    ipall = [(a, a) for a in ip]
     for s in st:
         storages += ((s, s),)
+    ip = detectipall()
+    ipall = [(a, a) for a in ip]
     if request.method == 'GET':
         form = StorageAliasForm(storages=storages, storageips=ipall)
         form.fields['address'].disabled = True
@@ -523,13 +523,11 @@ def addalias(request):
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
                 storage = form.cleaned_data['storagelist']
-                # address = form.cleaned_data['address']
                 storageip = form.cleaned_data['storageip']
                 # create a Storage resource
                 #   TODO: and a Storage component and all required resources
-                #with transaction.atomic():
-                #    extendStoragededup(storname=name, descr=descr, sdcomponent=storage, dedupidxdir=dedupidxdir,
-                #                       dedupdir=dedupdir)
+                with transaction.atomic():
+                    createStorageAlias(storname=name, descr=descr, storage=storage, address=storageip)
                 directorreload()
                 response = redirect('storageinfo', name)
                 response['Location'] += '?n=1'
@@ -655,14 +653,28 @@ def makeinitialdata(name, storage):
     return data
 
 
+def makeinitialaliasdata(name, storage):
+    data = {
+        'name': name,
+        'descr': storage['Descr'],
+        'storagelist': storage['Alias'],
+        'storageip': storage['Address']
+    }
+    return data
+
+
 def edit(request, name):
     backurl = request.GET.get('b', None)
     storageres = getDIRStorageinfo(name=name)
     if storageres is None:
         raise Http404()
     storage = extractstorageparams(storageres)
-    #if storage.get('InternalStorage'):
-    #    raise Http404()
+    alias = storage.get('Alias', None)
+    if alias is not None:
+        response = redirect('storageeditalias', name)
+        if backurl is not None:
+            response['Location'] += '?b=' + backurl
+        return response
     mediatype = storage.get('MediaType')
     if mediatype.startswith('File'):
         response = redirect('storageeditdisk', name)
@@ -687,8 +699,6 @@ def editdisk(request, name):
     if storageres is None:
         raise Http404()
     storage = extractstorageparams(storageres)
-    #if storage.get('InternalStorage'):
-    #    return redirect('storagedefined')
     st = getStorageNames()
     storages = ()
     for s in st:
@@ -733,13 +743,60 @@ def editdisk(request, name):
     return redirect('storagedefined')
 
 
+def editalias(request, name):
+    storageres = getDIRStorageinfo(name=name)
+    if storageres is None:
+        raise Http404()
+    storage = extractstorageparams(storageres)
+    st = getDIRStorageNamesnAlias()
+    storages = ()
+    for s in st:
+        storages += ((s, s),)
+    ip = detectipall()
+    ipall = [(a, a) for a in ip]
+    if request.method == 'GET':
+        data = makeinitialaliasdata(name, storage)
+        form = StorageAliasForm(storages=storages, storageips=ipall, initial=data)
+        form.fields['name'].disabled = True
+        form.fields['storagelist'].disabled = True
+        context = {'contentheader': 'Storages', 'apppath': ['Storage', 'Edit', 'Alias'], 'form': form,
+                   'storagestatusdisplay': 1, 'Storage': storage}
+        updateMenuNumbers(context)
+        return render(request, 'storage/editalias.html', context)
+    else:
+        # print request.POST
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            post = request.POST.copy()
+            post['name'] = name
+            post['storagelist'] = storage['Alias']
+            data = makeinitialaliasdata(name, storage)
+            form = StorageAliasForm(data=post, storages=storages, storageips=ipall, initial=data)
+            if form.is_valid():
+                if form.has_changed():
+                    # print "form valid and changed ... "
+                    if 'descr' in form.changed_data:
+                        # update description
+                        with transaction.atomic():
+                            updateDIRStorageDescr(name=name, descr=form.cleaned_data['descr'])
+                    # if 'storageip' in form.changed_data:
+                        # update archivedir
+                        # with transaction.atomic():
+                        #    updateStorageAliasAddress(storname=name, address=form.cleaned_data['storageip'])
+                    directorreload()
+                return redirect('storageinfo', name)
+            else:
+                # TODO zrobić obsługę błędów, albo i nie
+                print form.is_valid()
+                print form.errors.as_data()
+    return redirect('storagedefined')
+
+
 def edittape(request, name):
     storageres = getDIRStorageinfo(name=name)
     if storageres is None:
         raise Http404()
     storage = extractstorageparams(storageres)
-    # if storage.get('InternalStorage'):
-    #    return redirect('storagedefined')
     storageid = storage.get("StorageDirTapeid")
     if storageid is None:
         return redirect('storagedefined')
@@ -816,8 +873,6 @@ def editdedup(request, name):
     if storageres is None:
         raise Http404()
     storage = extractstorageparams(storageres)
-    #if storage.get('InternalStorage'):
-    #    return redirect('storagedefined')
     st = getStorageNames()
     storages = ()
     for s in st:

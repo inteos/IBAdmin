@@ -45,7 +45,7 @@ class ConfParameter(models.Model):
     enc = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.resid) + str(self.name) + "=" + str(self.value) + " (ID:" + str(self.parid) + ")"
+        return str(self.name) + "=" + str(self.value) + " (ID:" + str(self.parid) + ")"
 
 
 class Version(models.Model):

@@ -12,27 +12,11 @@
         },
         componentname: true,
       },
-      {{ form.address.name }}: {
-        required: "#{{ form.storagelist.id_for_label }}:blank",
-        remote: {
-          url: "{% url 'storageaddress' %}"
-        }
-      },
-      {{ form.storagelist.name }}: {
-        required: "#{{ form.address.id_for_label }}:blank",
-      },
     },
     messages: {
       {{ form.name.name }}: {
         remote: "Storage name already exist.",
         componentname: "Storage name can include simple letters, digits dash, space and underscore only.",
-      },
-      {{ form.address.name }}: {
-        required: 'One of: "Storage address" or "Existing Storge" is required.',
-        remote: "Address name not resolved. Please correct.",
-      },
-      {{ form.storagelist.name }}: {
-        required: 'One of: "Storage address" or "Existing Storage" is required.',
       },
     },
     highlight: function(element) {
@@ -55,4 +39,4 @@
   });
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}
-{% include 'widgets/helpbutton.js' with helppage='storage.adddedup' %}
+{% include 'widgets/helpbutton.js' with helppage='storage.addalias' %}

@@ -397,6 +397,17 @@ def getDIRStorageNames(dircompid=None):
     return storagenames
 
 
+def getDIRStorageNamesnAlias(dircompid=None):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    # list of the all Storages for clients available
+    storageres = ConfResource.objects.filter(compid_id=dircompid, type__name='Storage').exclude(confparameter__name='.Alias').order_by('name')
+    storagenames = ()
+    for sr in storageres:
+        storagenames += (sr.name,)
+    return storagenames
+
+
 def getStorageNames():
     # list of the all Storage components available
     storages = ConfComponent.objects.filter(type='S').order_by('name')

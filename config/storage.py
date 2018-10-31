@@ -11,7 +11,7 @@ def createSDStorage(sdcompid=None, name='ibadmin', address='localhost', dedupdir
     resid = createSDresStorage(sdcompid=sdcompid, name=name, descr=descr)
     # add parameters
     sdaddrsid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=RESTYPE['SDAddresses'])
-    addSDStorageAddress(sdaddrsid, address)
+    addSDStorageAddress(sdcompid=sdcompid, resid=sdaddrsid, address=address)
     # static BEE parameters
     addparameterstr(resid, 'WorkingDirectory', '/opt/bacula/working')
     addparameterstr(resid, 'PidDirectory', '/opt/bacula/working')
@@ -360,6 +360,30 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
     addparameterstr(resid, 'DedupIndexDirectory', dedupidxdirn)
 
 
+def createStorageAlias(dircompid=None, storname=None, descr='', storage=None, address='localhost'):
+    if storname is None or storage is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    storageid = getresourceid(dircompid, storage, 'Storage')
+    sdcomponent = getparameter(storageid, '.StorageComponent')
+    sdcompid = getSDcompid(sdcomponent)
+    # insert new Storage {} resource into Dir conf
+    resid = createDIRresStorage(dircompid=dircompid, name=storname, descr=descr)
+    # insert parameters
+    addparameter(resid, '.Alias', storage)
+    addparameterstr(resid, 'Address', address)
+    # copy other parameters
+    storparams = ConfParameter.objects.filter(resid=storageid).exclude(name='Address').exclude(name='.InternalStorage')
+    for param in storparams:
+        if param.name.startswith('.StorageDir'):
+            continue
+        np = ConfParameter(resid_id=resid, name=param.name, value=param.value, str=param.str, enc=param.enc)
+        np.save()
+    # add SD address if required
+    addSDStorageAddress(sdcompid=sdcompid, address=address)
+
+
 def updateStorageTapelib(dircompid=None, sdcompid=None, sdcomponent=None, storname=None, tapelib=None):
     if storname is None:
         return None
@@ -449,6 +473,10 @@ def updateStorageDedupidxdir(dircompid=None, sdcompid=None, sdcomponent=None, st
     updateparameter(dircompid, storname, 'Storage', '.StorageDirDedupidx', dedupidxdirn)
 
 
+def updateSDAddresses(sdcompid=None, address='localhost'):
+    addSDStorageAddress(sdcompid=sdcompid, address=address)
+
+
 def updateStorageAddress(dircompid=None, sdcompid=None, sdcomponent=None, address='localhost'):
     if dircompid is None:
         dircompid = getDIRcompid()
@@ -461,7 +489,18 @@ def updateStorageAddress(dircompid=None, sdcompid=None, sdcomponent=None, addres
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdcomponent)
     # Yes, SDComponent:name and SDComponent:Storage:name are always the same
-    updateparameter(sdcompid, sdcomponent, 'Storage', 'SDAddress', address)
+    # TODO: update to match new sdaddresses schema
+    updateSDAddresses(sdcompid=sdcompid, address=address)
+
+
+def updateStorageAliasAddress(dircompid=None, storname=None, address='localhost'):
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    param = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname, name='Address')
+    param.update(value=address)
+    sdcomponent = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname, name='.StorageComponent')
+    sdcompid = getSDcompid(name=sdcomponent.value)
+    updateSDAddresses(sdcompid=sdcompid, address=address)
 
 
 def deleteSDAutochanger(sdcompid=None, sdname=None, autoname=None):

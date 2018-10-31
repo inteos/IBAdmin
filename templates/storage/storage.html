@@ -27,12 +27,16 @@
           <th>Storage Name</th>
           <th>Storage Address</th>
           <th class="text-center">Media Type</th>
+          {% if Storage.Alias %}
+          <th class="text-center">Alias</th>
+          {% else %}
           {% if Storage.MType == 'Tape' %}
           <th>Device</th>
           {% else %}
           <th>Directory</th>
           {% if Storage.MType == 'Dedu' %}
           <th>Index</th>
+          {% endif %}
           {% endif %}
           {% endif %}
           <th>Description</th>
@@ -43,9 +47,13 @@
           <td>{{ Storage.Address }}</td>
           <td class="vertical-align text-center storage-media-type"><span class="badge {{ Storage.MediaType|mediacolor }}">
             <i class="fa {{ Storage.MediaType|mediaicon }}"></i></span>{{ Storage.MediaType }}</td>
+          {% if Storage.Alias %}
+          <td class="vertical-align text-center"><i class="fa fa-external-link-square"></i> {{ Storage.Alias }}</td>
+          {% else %}
           <td>{{ Storage.StorageDirDevice }}</td>
           {% if Storage.MType == 'Dedu' %}
           <td>{{ Storage.StorageDirDedupidx }}</td>
+          {% endif %}
           {% endif %}
           <td>{{ Storage.Descr }}</td>
           <td class="text-center" style="width: 100px"><span class="label {{ Storage.Status|statusbgcolor }}">{{ Storage.Status|statustext }}</span></td>

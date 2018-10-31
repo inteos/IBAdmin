@@ -23,7 +23,13 @@
             <td class="vertical-align">{{ st.Descr }}</td>
             <td class="vertical-align text-center storage-media-type"><span class="badge {{ st.MediaType|mediacolor }}">
               <i class="fa {{ st.MediaType|mediaicon }}"></i></span>{{ st.MediaType }}</td>
-            <td class="vertical-align">{{ st.StorageDirDevice }}</td>
+            <td class="vertical-align">
+            {% if st.Alias %}
+              <i class="fa fa-external-link-square" data-toggle="tooltip" data-original-title="Alias storage"></i> {{ st.Alias }}
+            {% else %}
+              {{ st.StorageDirDevice }}
+            {% endif %}
+            </td>
             <td class="vertical-align text-center"><span class="label {{ st.Status|statusbgcolor }}">{{ st.Status|statustext }}</span></td>
             <td class="vertical-align text-center">
               <div class="btn-group">
