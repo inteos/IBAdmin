@@ -3,6 +3,7 @@ from .job import updateJobsnr, updateJobsDefinednr
 from .client import updateClientsDefinednr
 from .storage import updateStorageDefinednr, updateStorageVolumesnr, updateStoragedetectdedup
 from .task import updateTasksrunningall
+from .plat import IBADVERSION
 
 
 def updateMenuNumbers(context):
@@ -13,3 +14,4 @@ def updateMenuNumbers(context):
     updateStorageVolumesnr(context)
     updateStoragedetectdedup(context)
     updateTasksrunningall(context)
+    context['ibadminver'] = IBADVERSION

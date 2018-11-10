@@ -1,0 +1,48 @@
+{% load staticfiles %}
+<div id="aboutmodal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	<h4 class="modal-title"><i class="fa fa-info-circle"></i> About</h4>
+      </div>
+      <div class="modal-body">
+		<h4>
+			<img src="{% static 'ibadmin.png' %}"/> IBAdmin Community
+		</h4>
+		<p>
+			<b>Inteos Backup Administration GUI version {{ ibadminver }}</b>.
+		</p>
+		<p class="text-aqua">
+			<a href="http://inteosbackup.pl">Inteos Backup</a> is a backup service based on 
+			<a href="http://bacula.com.pl/">Bacula Enterprise&reg;</a>
+			and provided by <a href="http://www.inteos.pl/">Inteos Sp. z o.o.</a><br>
+			IBAdmin Community as a general purpose tool it can be used by any Bacula Enterprise
+			and Bacula Community enthusiasts.
+		</p>
+		<p class="text-aqua">
+			&copy; 2018 Inteos Sp. z o.o. All rights reserved.
+			IBAdmin Community is licensed under the <a href="https://opensource.org/licenses/AGPL-3.0">AGPL-3.0</a>.
+		</p>
+		<p>
+			IBAdmin uses and is powered by: <a href="https://adminlte.io">AdminLTE</a>,
+			<a href="https://getbootstrap.com/">Bootstrap</a>, <a href="https://jquery.com/">jQuery</a> and 
+			<a href="https://www.djangoproject.com/">Django</a> Web framework.
+		</p>
+		<p class="text-muted">
+			AdminLTE is an open source project that is licensed under the <a href="http://opensource.org/licenses/MIT">MIT license</a>.
+			Bootstrap is an open source toolkit for developing with HTML, CSS, and JS. It is licensed under the 
+			<a href="http://opensource.org/licenses/MIT">MIT license</a> and is copyright 2018 Twitter.
+			jQuery is a fast, small, and feature-rich JavaScript library which is licensed under the 
+			<a href="http://opensource.org/licenses/MIT">MIT license</a>.
+			Django is a high-level Python Web framework that encourages rapid development and clean, pragmatic design.
+			Django is available open-source under the <a href="https://opensource.org/licenses/BSD-2-Clause">BSD license</a>.
+			Bacula&reg; is a registered trademark of Kern Sibbald.
+		</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

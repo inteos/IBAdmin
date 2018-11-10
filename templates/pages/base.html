@@ -111,6 +111,7 @@
           <!-- vmmenu.html -->
           {% include "pages/backupmenu.html" %}
           <!-- hamenu.html -->
+          {% include "pages/helpmenu.html" %}
         </ul><!-- /.sidebar-menu -->
       </section>
       <!-- /.sidebar -->
@@ -145,8 +146,10 @@
       {# % include 'widgets/alerts.html' % #}
       {% block content %}{% endblock %}
     </section><!-- /.content -->
+    {% include 'widgets/aboutmodal.html' %}
   </div><!-- /.content-wrapper -->
   {% endblock contentwrapper %}
+
 
   {% block footer %}
   <!-- Main Footer -->

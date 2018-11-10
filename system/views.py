@@ -62,7 +62,7 @@ def config(request):
         form.fields['storageip'].disabled = True
         form.fields['clientip'].disabled = True
     context = {'contentheader': 'System', 'contentheadersmall': 'Config', 'apppath': ['Backup', 'Config'], 'form': form,
-               'ibadminver': IBADVERSION, 'backupver': backupver, 'osver': osver, 'platform': platform}
+               'backupver': backupver, 'osver': osver, 'platform': platform}
     updateMenuNumbers(context)
     updateservicestatus(context)
     return render(request, 'system/config.html', context)
