@@ -1,0 +1,25 @@
+{% extends "pages/base.html" %}
+{% with contentheader='Permission denied' %}{% endwith %}
+{% block content %}
+<div class="error-page">
+  <h2 class="headline text-orange"> 403</h2>
+  <div class="error-content">
+    <h3><i class="fa fa-warning text-orange"></i> You do not have a sufficient permissions to view this page.</h3>
+    <p>
+      The page you want to display is restricted to users with special permissions. You should ask your Administrator for
+      granting you required permissions or roles.
+      Meanwhile, you may <a href="{% url 'home' %}">return to dashboard</a>{% if searchpannel %} or try using the search form{% endif %}.
+    </p>
+  {% if searchpannel %}
+    <form class="search-form">
+      <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Search">
+        <div class="input-group-btn">
+          <button type="submit" name="submit" class="btn btn-warning btn-flat"><i class="fa fa-search"></i></button>
+        </div>
+      </div><!-- /.input-group -->
+    </form>
+  {% endif %}
+  </div><!-- /.error-content -->
+</div><!-- /.error-page -->
+{% endblock %}

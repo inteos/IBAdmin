@@ -1,0 +1,20 @@
+{% if perms.users.view_users %}
+<!-- Users admim system menu -->
+<li class="treeview {% if apppath.0 == 'Users' %}active{% endif %}">
+  <a href="#"><i class="fa fa-users"></i> <span>Users</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+{% if perms.users.add_users %}
+    {% if apppath.1 == 'Add' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'usersadd' %}"><i class="fa fa-plus"></i> <span>Add User</span></a>
+    </li>
+{% endif %}
+    {% if apppath.1 == 'Defined' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'usersdefined' %}"><i class="fa fa-th-list"></i><span>List</span><span class="pull-right-container">
+        <small class="label pull-right bg-teal">{{ usersnr }}</small></span></a>
+    </li>
+    {% if userstatusdisplay %}
+      {% include "pages/userinfomenu.html" %}
+    {% endif %}
+  </ul>
+</li>
+{% endif %}

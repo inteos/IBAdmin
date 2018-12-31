@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 import string
 import random
@@ -6,14 +6,14 @@ import base64
 from Crypto.Cipher import AES
 
 
-def randomstr(size=64, chars=list(string.ascii_letters) + list(string.digits)):
-    # było także:  + list('!@#$%^&*_+-=')
+def randomstr(size=64, chars=tuple(string.ascii_letters) + tuple(string.digits)):
+    # it was:  + tuple('!@#$%^&*_+-='), but Windows client had problems
     return ''.join(random.choice(chars) for _ in range(size))
 
 
 def getencpass(comp, password):
     # encrypt password
-    comptxt = comp.rjust(32)
+    comptxt = comp[:32].rjust(32)
     passwordtxt = password.rjust(32)
     cipher = AES.new(comptxt, AES.MODE_ECB)
     encoded = base64.b64encode(cipher.encrypt(passwordtxt))
@@ -25,12 +25,15 @@ def getrndencpass(comp):
     password = randomstr()
     return getencpass(comp, password)
 
+
+"""
 # p='password123'
 # c='ibadmin'
 # ep=getencpass(c,p)
 # print ep
 # dp=getdecpass(c,ep)
 # print '"'+dp+'"'
+"""
 
 
 def getdecpass(comp, encpass):
@@ -65,14 +68,14 @@ def getscheduletext(data=None):
         return ''
     (backupsch, backuprepeat) = data.split(':', 1)
     schrepeatdict = {
-        'r1': 'Every Hour',
-        'r2': 'Every 2 Hours',
-        'r3': 'Every 3 Hours',
-        'r4': 'Every 4 Hours',
-        'r6': 'Every 6 Hours',
-        'r8': 'Every 8 Hours',
-        'r12': 'Every 12 Hours',
-        'r24': 'Once a Day',
+        'r1': 'Every hour',
+        'r2': 'Every 2 hours',
+        'r3': 'Every 3 hours',
+        'r4': 'Every 4 hours',
+        'r6': 'Every 6 hours',
+        'r8': 'Every 8 hours',
+        'r12': 'Every 12 hours',
+        'r24': 'Once a day',
     }
     if backupsch == 'c1':
         return schrepeatdict[backuprepeat]

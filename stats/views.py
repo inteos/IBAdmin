@@ -3,11 +3,12 @@ from __future__ import unicode_literals
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
 from django.urls import reverse
-from config.confinfo import getDIRJobinfo
+from config.conf import *
 from libs.job import extractjobparams, getleveltext
 from libs.menu import updateMenuNumbers
 from libs.statistic import *
 from django.db.models import Q
+from users.decorators import *
 import datetime
 
 
@@ -43,6 +44,8 @@ def update_charttype(context=None, chart=1, barwidth=0.75):
         context.update({'lines': {'show': True}, 'points': {'show': True}})
 
 
+@any_perm_required('stats.view_backup_stats', 'stats.view_system_stats', 'stats.view_daemons_stats',
+                   'stats.view_job_stats')
 def statdata(request, name, starttime, endtime, chart, valdiv):
     param = get_object_or_404(StatParams, name=name)
     stime = datetime.datetime.fromtimestamp(int(starttime))
@@ -74,99 +77,113 @@ def statdata(request, name, starttime, endtime, chart, valdiv):
     return JsonResponse(context, safe=False)
 
 
+@perm_required('stats.view_backup_stats')
 def backup_jobs(request):
     params = StatDaterange.objects.filter(parid__name__contains='bacula.jobs').order_by('parid')
     context = {'contentheader': 'Backup Statistics', 'contentheadersmall': 'Jobs',
                'apppath': ['Statistics', 'Backup', 'Jobs'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_backup_stats')
 def backup_volumes(request):
     params = StatDaterange.objects.filter(parid__name__contains='bacula.volumes').order_by('parid')
     context = {'contentheader': 'Backup Statistics', 'contentheadersmall': 'Volumes',
                'apppath': ['Statistics', 'Backup', 'Volumes'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_backup_stats')
 def backup_tapes(request):
     params = StatDaterange.objects.filter(parid__name__contains='bacula.tape').order_by('parid')
     context = {'contentheader': 'Backup Statistics', 'contentheadersmall': 'Tapes',
                'apppath': ['Statistics', 'Backup', 'Tapes'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_backup_stats')
 def backup_sizes(request):
-    params = StatDaterange.objects.filter(Q(parid__name__contains='bacula.size') | Q(parid__name__contains='catalog.size')).order_by('parid')
+    params = StatDaterange.objects.filter(Q(parid__name__contains='bacula.size') |
+                                          Q(parid__name__contains='catalog.size')).order_by('parid')
     context = {'contentheader': 'Backup Statistics', 'contentheadersmall': 'Sizes',
                'apppath': ['Statistics', 'Backup', 'Sizes'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_system_stats')
 def system_cpu(request):
     params = StatDaterange.objects.filter(parid__name__contains='system.cpu').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'CPU',
                'apppath': ['Statistics', 'System', 'CPU'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_system_stats')
 def system_memory(request):
     params = StatDaterange.objects.filter(parid__name__contains='system.mem').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Memory',
                'apppath': ['Statistics', 'System', 'Memory'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_system_stats')
 def system_swap(request):
     params = StatDaterange.objects.filter(parid__name__contains='system.swap').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Swap',
                'apppath': ['Statistics', 'System', 'Swap'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_system_stats')
 def system_disks(request):
     params = StatDaterange.objects.filter(parid__name__contains='system.disk').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Disk',
                'apppath': ['Statistics', 'System', 'Disks'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_system_stats')
 def system_fs(request):
     params = StatDaterange.objects.filter(parid__name__contains='system.fs').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Filesystems',
                'apppath': ['Statistics', 'System', 'Filesystem'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_system_stats')
 def system_net(request):
     params = StatDaterange.objects.filter(parid__name__contains='system.net').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Network interfaces',
                'apppath': ['Statistics', 'System', 'Network'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_daemons_stats')
 def stats_server(request):
-    params = StatDaterange.objects.filter(Q(parid__name__contains='bacula.daemon') | Q(parid__name__contains='ibadmin.daemon')).order_by('parid')
+    params = StatDaterange.objects.filter(Q(parid__name__contains='bacula.daemon') |
+                                          Q(parid__name__contains='ibadmin.daemon')).order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Server Daemons',
                'apppath': ['Statistics', 'Daemons', 'Server'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
+@perm_required('stats.view_daemons_stats')
 def stats_client(request):
     params = StatDaterange.objects.filter(parid__name__contains='bacula.client').order_by('parid')
     context = {'contentheader': 'System Statistics', 'contentheadersmall': 'Clients',
                'apppath': ['Statistics', 'Daemons', 'Clients'], 'params': params}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/default.html', context)
 
 
@@ -237,8 +254,9 @@ def define_chart_at(params=None, id=1, name=None, level='F', jtype='B'):
     })
 
 
+@perm_required('stats.view_job_stats')
 def stats_job(request, name):
-    jobres = getDIRJobinfo(name=name)
+    jobres = getDIRJobinfo(request, name=name)
     if jobres is None:
         raise Http404()
     jobparams = extractjobparams(jobres)
@@ -277,22 +295,22 @@ def stats_job(request, name):
 
     context = {'contentheader': 'Job Statistics', 'contentheadersmall': name, 'Name': name,
                'apppath': ['Statistics', 'Job', name], 'params': params, 'jobstatsdisplay': 1}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'stats/job.html', context)
 
 
 def getnpoints(last=0):
-    l = int(last)
-    if l == 1:
+    ll = int(last)
+    if ll == 1:
         # last 10 jobs
         return 10
-    if l == 2:
+    if ll == 2:
         # last 20 jobs
         return 20
-    if l == 3:
+    if ll == 3:
         # last 50 jobs
         return 50
-    if l == 4:
+    if ll == 4:
         # last 100 jobs
         return 100
     # default

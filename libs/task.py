@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
+from __future__ import unicode_literals
 from tasks.models import *
 import os
 
@@ -13,12 +13,12 @@ def getTasksrunningnr():
     return Tasks.objects.exclude(status='F').count()
 
 
-def updateTasksrunningnr(context):
+def updateTasksrunningnr(request, context):
     val = getTasksrunningnr()
     context.update({'tasksrunningnr': val})
 
 
-def updateTasksrunningall(context):
+def updateTasksrunningall(request, context):
     val = getTasksInfo()
     context.update({'tasksrunningnr': val.count, 'tasksinfo': val})
 

@@ -1,0 +1,12 @@
+{% load ibadtexts %}
+<li class="active">
+  <a href="#"><i class="fa fa-cube"></i> <span>{{ Role.group.name|truncatechars:24 }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    <li{% if apppath.1 == 'Info' %} class="active"{% endif %}>
+      <a href="{% url 'rolesinfo' Role.group.name %}"><i class="fa fa-calendar-check-o"></i> <span>{% if perms.roles.change_roles %}Permissions{% else %}Info{% endif %}</span></a></li>
+{% if perms.roles.change_roles and Role.internal != True %}
+    <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
+      <a href="{% url 'rolesedit' Role.group.name %}"><i class="fa fa-wrench"></i> <span>Edit</span></a></li>
+{% endif %}
+  </ul>
+</li>

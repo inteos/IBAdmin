@@ -23,7 +23,7 @@
         },
         { "width": "45px", "sClass": "vertical-align text-center" },
         { "sClass": "vertical-align"},
-        { "width": "50px", "sClass": "vertical-align text-center", "orderable": false, "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+        { "width": "50px", "sClass": "vertical-align text-center", "orderable": false, "render": function (data,type,row){ return renderbadge(data)} },
         { "sClass": "vertical-align" },
         { "sClass": "vertical-align", "render": function (data,type,row){ return bytestext(data)} },
       ],

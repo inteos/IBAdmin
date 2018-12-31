@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/osstatus.html" with osstatusvis=0 %}
+{% endblock %}
+
+{% block content %}
 <div class="box box-info">
   <div class="box-header">
     <i class="fa fa-laptop"></i>
@@ -17,7 +21,11 @@
           <th>Client Name</th>
           <th>{% if Client.Alias %}Client Alias{% else %}Client Address{% endif %}</th>
           <th>Description</th>
+          {% if Client.Department %}
+          <th class="text-center">Department</th>
+          {% endif %}
           <th class="text-center">OS</th>
+          {% if Client.vCenterName %}<th class="text-center">vCenter</th>{% endif %}
           <th>Version</th>
           {% if Client.ClusterName or Client.ClusterService %}<th class="text-center">Cluster Name</th>{% endif %}
           <th class="text-center">Status</th>
@@ -28,7 +36,11 @@
           <td>{{ Client.Name }}</td>
           <td>{% if Client.Alias %}<i class="fa fa-external-link-square"></i> <a href="{% url 'clientsinfo' Client.Alias %}">{{ Client.Alias }}</a>{% else %}{{ Client.Address }}{% endif %}</td>
           <td>{{ Client.Descr }}</td>
+          {% if Client.Department %}
+            <td class="text-center"><span class="label {{ Client.Department.color|default:'bg-blue' }}">{{ Client.Department.name }}</span></td>
+          {% endif %}
           <td class="text-center"><span class="badge {{ Client.OS|OSbgcolor }}"><i class="fa {{ Client.OS|OSicon }}"></i> {{ Client.OS|OStext }} </span></td>
+          {% if Client.vCenterName %}<td class="text-center">{{ Client.vCenterName }}</td>{% endif %}
           <td>{% autoescape off %}{{ Client.Uname }}{% endautoescape %}</td>
           {% if Client.ClusterName %}<td class="text-center"><i class="fa fa-cubes" data-toggle="tooltip" data-original-title="Cluster Node"></i> {{ Client.ClusterName }}</td>
           {% elif Client.ClusterService %}<td class="text-center"><i class="fa fa-cube" data-toggle="tooltip" data-original-title="Cluster Service"></i> {{ Client.ClusterService }}</td>{% endif %}
@@ -40,22 +52,40 @@
     <hr>
     <div class="row">
       <div class="col-sm-12 center-block">
+{% if perms.clients.status_clients %}
         <a class="btn btn-app" href="{% url 'clientsstatus' Client.Name %}"><i class="fa fa-external-link"></i>Status</a>
-        {% if Client.OS == 'proxmox' %}
-        <a class="btn btn-app" href="{% url 'jobsaddproxmox' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>GuestVM Backup</a>
+{% endif %}
+{% if perms.jobs.add_jobs %}
+        {% if clientvmhost %}
+        <a class="btn btn-app" href="{% url 'jobsaddre' Client.OS %}?c={{ Client.Name }}&b={% url 'clientsinfo' Client.Name %}"><i class="fa fa-plus"></i>GuestVM Backup</a>
         {% else %}
-        <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
+        <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?b={% url 'clientsinfo' Client.Name %}&c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
         {% endif %}
+{% endif %}
+
+{% if perms.clients.restore_clients %}
         <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
+{% endif %}
+{% if perms.clients.change_clients %}
         <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-wrench"></i>Edit</a>
+{% endif %}
+{% if perms.clients.delete_clients %}
         {% if not Client.InternalClient %}
         <a class="btn btn-app" data-toggle="modal" data-target="#deleteclientconfirm" data-name="{{ Client.Name }}" data-url="{% url 'clientsdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
         {% endif %}
+{% endif %}
         <!-- <a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
+{% if perms.clients.get_configfile %}
         {% if not Client.Alias and not Client.ClusterService and not Client.InternalClient %}<a href="{% url 'confclientconfig' Client.Name %}" class="btn btn-app"><i class="glyphicon glyphicon-save-file"></i>Config file</a>{% endif %}
+        {% if Client.vCenterName and Client.OS == 'vmware' %}
+          {% if Client.Alias %}<a href="{% url 'confvsphereconfig' Client.Alias %}" class="btn btn-app"><i class="glyphicon glyphicon-save-file"></i>vSphere.conf</a>
+          {% else %}<a href="{% url 'confvsphereconfig' Client.Name %}" class="btn btn-app"><i class="glyphicon glyphicon-save-file"></i>vSphere.conf</a>{% endif %}
+        {% endif %}
+{% endif %}
         <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
       </div>
     </div>
+{% if perms.jobs.view_jobs %}
     <div class="box-group" id="clientinfo">
       <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
       <div class="panel box box-primary">
@@ -105,6 +135,7 @@
         </div>
       </div><!-- panel -->
     </div>
+{% endif %}
   </div><!-- /.box-body -->
 </div><!-- /.box -->
 {% include "widgets/deleteclientconfirm.html" %}

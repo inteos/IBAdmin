@@ -1,0 +1,146 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{%load ibadtexts %}
+{% load ibadcolors %}
+
+{% block contentwidget %}
+{% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-5 col-md-6">
+    <!-- Widget: user widget style 1 -->
+    <div class="box box-widget widget-user-2">
+      <!-- Add the bg color to the header using any of the bg-* classes -->
+      <div class="widget-user-header {{ User.is_superuser|usertypecolor:User.is_staff }}">
+        <div class="widget-user-image">
+          <img class="img-circle" src="{% static 'dist/img/avatar.png' %}" alt="User Avatar">
+        </div><!-- /.widget-user-image -->
+        <h3 class="widget-user-username">{{ User.first_name|fullname:User.last_name|default:User.username }}</h3>
+        <h5 class="widget-user-desc">{% if User.first_name|fullname:User.last_name %}{{ User.username }}{% else %}&nbsp;{% endif %}</h5>
+      </div>
+      <div class="box-body">
+        <ul class="nav nav-stacked">
+          <li class="profilelist">
+            <div><i class="fa fa-user-secret"></i> User type <span class="pull-right badge {{ User.is_superuser|usertypecolor:User.is_staff }}">{{ User.is_superuser|usertypetext:User.is_staff }}</span></div>
+          </li>
+          <li class="profilelist">
+            <div><i class="fa fa-envelope-o"></i> email <span class="pull-right badge bg-purple">{{ User.email|truncatechars:45 }}</span></div>
+          </li>
+          <li class="profilelist">
+            <div><i class="fa fa-fire"></i> Status <span id="userlockbadge" class="pull-right badge"></span></div>
+          </li>
+          <li class="profilelist">
+            <div><i class="fa fa-history"></i> Last login <span class="pull-right badge bg-aqua">{{ User.last_login|date:'d M Y h:i'|default:'Never logged' }}</span></div>
+          </li>
+          <li class="profilelist">
+            <div><i class="fa fa-gear"></i> User created <span class="pull-right badge bg-yellow-active">{{ User.date_joined|date:'d M Y' }}</span></div>
+          </li>
+        </ul>
+      </div>
+{% if perms.auth.change_user or perms.users.suspend_users or perms.users.delete_users and User.username != 'admin' and User.username != user.username %}
+      <div class="box-footer">
+{% if perms.users.change_users %}
+        <a class="btn btn-app" href="{% url 'usersedit' User.username %}?b={% url 'usersinfo' User.username %}"><i class="fa fa-wrench"></i>Edit</a>
+{% endif %}
+{% if perms.users.suspend_users %}
+        <a id="userlockbutton" class="btn btn-app" data-toggle="modal" data-target="#userlockconfirm" data-name="{{ User.username }}" data-url="{% url 'userslock_rel' %}" style="display: none;"><i class="fa fa-lock"></i>Suspend</a>
+        <a id="userunlockbutton" class="btn btn-app" data-toggle="modal" data-target="#userunlockconfirm" data-name="{{ User.username }}" data-url="{% url 'usersunlock_rel' %}" style="display: none;"><i class="fa fa-unlock"></i>Activate</a>
+{% endif %}
+{% if perms.users.delete_users and User.username != 'admin' and User.username != user.username %}
+        <a class="btn btn-app" data-toggle="modal" data-target="#userdeleteconfirm" data-name="{{ User.username }}" data-url="{% url 'usersdelete_rel' %}"><i class="fa fa-user-times"></i>Delete</a>
+{% endif %}
+      </div>
+{% endif %}
+    </div><!-- /.widget-user -->
+  </div>
+{% if not User.is_staff %}
+  <div class="col-lg-7 col-md-6">
+    <div class="row">
+        <div class="col-lg-6">
+          <div class="box box-info">
+            <div class="box-header with-border">
+              <i class="fa fa-bank"></i>
+              <h4 class="box-title">Departments</h4>
+              <div class="box-tools pull-right">
+                {% include "widgets/helpbutton.html" with box=1 id='departhelp' %}
+                {% include "widgets/refreshbutton.html" with box=1 id='departrefresh' %}
+              </div>
+            </div><!-- /.box-header -->
+            <div id="departsbox" class="box-body">
+            <br><br>
+            </div>
+{% if perms.departments.add_members %}
+            <div class="box-footer">
+              <form role="form" id="adddepartform" method="post">
+              {% csrf_token %}
+                <div class="form-group">
+                  <label for="{{ formdepart.departments.id_for_label }}">{{ formdepart.departments.label }}</label>
+                  <div class="input-group">
+                    {{ formdepart.departments }}
+                    <span class="input-group-btn">
+                      <button id="adddepart" type="button" class="btn btn-info btn-flat">Add</button>
+                    </span>
+                  </div>
+                </div>
+              </form>
+            </div>
+{% endif %}
+            <div id="departsboxloading" class="overlay">
+              <i class="fa fa-refresh fa-spin"></i>
+            </div>
+          </div><!-- /.box -->
+        </div>
+{% if not User.is_superuser %}
+        <div class="col-lg-6">
+          <div class="box box-success">
+            <div class="box-header with-border">
+              <i class="fa fa-users"></i>
+              <h4 class="box-title">Roles</h4>
+              <div class="box-tools pull-right">
+                {% include "widgets/helpbutton.html" with box=1 id='roleshelp' %}
+                {% include "widgets/refreshbutton.html" with box=1 id='rolesrefresh' %}
+              </div>
+            </div><!-- /.box-header -->
+            <div id="rolesbox" class="box-body">
+            <br><br>
+            </div>
+{% if perms.users.change_users %}
+            <div class="box-footer">
+              <form role="form" id="addrolesform" method="post">
+              {% csrf_token %}
+                <div class="form-group">
+                  <label for="{{ formrole.roles.id_for_label }}">{{ formrole.roles.label }}</label>
+                  <div class="input-group">
+                    {{ formrole.roles }}
+                    <span class="input-group-btn">
+                      <button id="addrole" type="button" class="btn btn-info btn-flat">Add</button>
+                    </span>
+                  </div>
+                </div>
+              </form>
+            </div>
+{% endif %}
+            <div id="rolesboxloading" class="overlay">
+              <i class="fa fa-refresh fa-spin"></i>
+            </div>
+          </div><!-- /.box -->
+        </div>
+{% endif %}
+    </div>
+  </div>
+{% endif %}
+</div>
+{% if perms.users.suspend_users %}
+{% include "widgets/userlockconfirm.html" %}
+{% include "widgets/userunlockconfirm.html" %}
+{% endif %}
+{% if perms.users.delete_users %}
+{% include "widgets/userdeleteconfirm.html" %}
+{% endif %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "users/info.js" %}
+{% endblock %}

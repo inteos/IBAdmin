@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/osstatus.html" with osstatusvis=0 %}
+{% endblock %}
+
+{% block content %}
 <div class="box box-primary">
   <div class="box-header">
     <i class="fa fa-laptop"></i>
@@ -42,11 +46,11 @@
     <div class="row">
       <div class="col-sm-10 center-block">
         <a class="btn btn-app" href="{% url 'clientsinfo' Client.Name %}"><i class="fa fa-info-circle"></i>Info</a>
-	{% if Client.OS == 'proxmox' %}
-	<a class="btn btn-app" href="{% url 'jobsaddproxmox' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>GuestVM Backup</a>
+        {% if clientvmhost %}
+        <a class="btn btn-app" href="{% url 'jobsaddre' Client.OS %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>GuestVM Backup</a>
         {% else %}
         <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
-	{% endif %}
+        {% endif %}
         <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
         {% if not Client.InternalClient %}
         <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-edit"></i>Edit</a>

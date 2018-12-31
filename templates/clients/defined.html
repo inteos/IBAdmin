@@ -1,6 +1,10 @@
 {% extends "pages/base.html" %}
+
+{% block contentwidget %}
+{% include "widgets/osstatus.html" with osstatusvis=1 %}
+{% endblock %}
+
 {% block content %}
-{% include "widgets/osstatus.html" %}
 <div class="box box-primary">
   <div class="box-header">
     <i class="fa fa-th-list"></i>

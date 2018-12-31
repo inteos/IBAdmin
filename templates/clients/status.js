@@ -13,7 +13,7 @@ $(function () {
       { "width": "30px", "sClass": "vertical-align text-center" },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align" },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return bytestext(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return bytessectext(data)}  },

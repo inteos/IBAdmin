@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
@@ -7,7 +7,7 @@ from libs.system import *
 from libs.job import *
 from libs.menu import updateMenuNumbers
 from libs.bconsole import *
-from django.db.models import Q
+from django.contrib import messages
 from django.db import transaction
 from .forms import *
 from jobs.models import Job
@@ -15,44 +15,48 @@ from config.conf import *
 from config.models import ConfResource
 from operator import itemgetter
 from tasks.models import *
+from users.decorators import *
+from libs.ibadmin import *
+from libs.vmhosts import VMHOSTSOSTYPES
 import os
 
 
+@perm_required('clients.view_clients')
 def defined(request):
     """ Defined Clients table - list """
     context = {'contentheader': 'Clients', 'contentheadersmall': 'currently defined', 'apppath': ['Clients', 'Defined']}
-    updateMenuNumbers(context)
-    updateClientsOSnrlist(context)
+    updateMenuNumbers(request, context)
+    updateClientsOSnrlist(request, context)
     return render(request, 'clients/defined.html', context)
 
 
+@perm_required('clients.view_clients')
 def defineddata(request):
     """ JSON for warning jobs datatable """
-    draw = request.GET['draw']
-    offset = int(request.GET['start'])
-    limit = int(request.GET['length'])
-    # order_col = cols[int(request.GET['order[0][column]'])]
-    # order_dir = '-' if 'desc' == request.GET['order[0][dir]'] else ''
-    search = request.GET['search[value]']
-    (clientslist, total, filtered) = getDIRClientsListfiltered(search=search, offset=offset, limit=limit)
+    cols = [clientparamsnamekey, clientparamsaddresskey, clientparamsdescrkey, clientparamsdepartkey, clientparamsoskey,
+            clientparamsclusterkey, jobparamsstatuskey]
+    (clientslist, total, filtered) = getDIRClientsListfiltered(request, cols=cols)
     data = []
     for clientres in clientslist:
-        updateClientres(clientres)
         clientparams = extractclientparams(clientres)
         # print clientparams
+        dname, dcolor = getdepartmentlabel(clientparams.get('Department'))
         data.append([clientparams['Name'], [clientparams.get('Address'), clientparams.get('Alias')],
-                     clientparams.get('Descr'), clientparams.get('OS'),
+                     clientparams.get('Descr'), [dcolor, dname],
+                     ibadmin_render_os(clientparams.get('OS')),
                      [clientparams.get('ClusterName'), clientparams.get('ClusterService')],
                      clientparams.get('Status'),
                      [clientparams['Name'], clientparams.get('InternalClient')],
                      ])
+    draw = request.GET['draw']
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 
 
+@perm_required('clients.view_clients')
 def info(request, name):
     """ Client info """
-    clientres = getDIRClientinfo(name=name)
+    clientres = getDIRClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     updateClientres(clientres)
@@ -60,29 +64,33 @@ def info(request, name):
     if client.get('Disabledfordelete', None):
         # the job is disabled so redirect to defined jobs
         return redirect('clientsdefined')
+    depart = client.get('Department')
+    if depart is not None:
+        client.update({'Department': getDepartment(depart)})
+    clientvmhost = False
+    clientos = client.get('OS', None)
+    if clientos in VMHOSTSOSTYPES:
+        clientvmhost = True
     context = {'contentheader': 'Clients', 'apppath': ['Clients', 'Info', name], 'Client': client,
-               'clientstatusdisplay': 1}
-    updateMenuNumbers(context)
-    updateClientsOSnrlist(context)
+               'clientstatusdisplay': 1, 'clientvmhost': clientvmhost}
+    updateMenuNumbers(request, context)
+    updateClientsOSnrlist(request, context)
     return render(request, 'clients/client.html', context)
 
 
+@any_perm_required('clients.view_clients')
+@perm_required('jobs.view_jobs')
 def infodefineddata(request, name):
     """ JSON for warning jobs datatable """
-    draw = request.GET['draw']
-    offset = int(request.GET['start'])
-    limit = int(request.GET['length'])
-    # order_col = cols[int(request.GET['order[0][column]'])]
-    # order_dir = '-' if 'desc' == request.GET['order[0][dir]'] else ''
-    search = request.GET['search[value]']
-    (jobslist, total, filtered) = getDIRClientJobsListfiltered(client=name, search=search, offset=offset, limit=limit)
+    cols = [jobparamsnamekey, None, jobparamspoolkey, jobparamsstoragekey, jobparamslevelkey, jobparamsdescrkey]
+    (jobslist, total, filtered) = getDIRJobsListfiltered(request, client=name, cols=cols)
     data = []
     for jobres in jobslist:
         jobparams = extractjobparams(jobres)
         # print jobparams
         schparam = jobparams.get('Scheduleparam')
         if schparam:
-            scheduletext = getscheduletext(schparam) + ' at ' + jobparams.get('Scheduletime')
+            scheduletext = '%s at %s' % (getscheduletext(schparam), jobparams.get('Scheduletime'))
         else:
             scheduletext = None
         pool = jobparams.get('Pool')
@@ -91,28 +99,37 @@ def infodefineddata(request, name):
         else:
             pooltext = None
         data.append([jobparams['Name'], [jobparams.get('Enabled'), scheduletext], pooltext, jobparams.get('Storage'),
-                     [jobparams.get('Level'), jobparams.get('Type')], jobparams.get('Descr'),
+                     ibadmin_render_joblevel(jobparams.get('Level'), jobparams.get('Type')),
+                     jobparams.get('Descr'),
                      [jobparams['Name'], jobparams.get('Type'), jobparams.get('InternalJob')],
                      ])
+    draw = request.GET['draw']
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 
 
+@perm_required('clients.status_clients')
 def status(request, name):
     """ Client online status """
-    clientres = getDIRClientinfo(name=name)
+    clientres = getDIRClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
-    clientname = clientres.get('Name', 'Undefined')
-    if getClientDisabledfordelete(name=clientname):
+    client = extractclientparams(clientres)
+    if client.get('Disabledfordelete', None):
+        # the job is disabled so redirect to defined jobs
         return redirect('clientsdefined')
-    context = {'contentheader': 'Clients', 'apppath': ['Clients', 'Status', name],
-               'Client': extractclientparams(clientres), 'clientstatusdisplay': 1}
-    updateMenuNumbers(context)
-    updateClientsOSnrlist(context)
+    clientvmhost = False
+    clientos = client.get('OS', None)
+    if clientos in VMHOSTSOSTYPES:
+        clientvmhost = True
+    context = {'contentheader': 'Clients', 'apppath': ['Clients', 'Status', name], 'Client': client,
+               'clientstatusdisplay': 1, 'clientvmhost': clientvmhost}
+    updateMenuNumbers(request, context)
+    updateClientsOSnrlist(request, context)
     return render(request, 'clients/status.html', context)
 
 
+@perm_required('clients.status_clients')
 def statusheader(request, name):
     """ wywołanie ajax dla parametrów klienta """
     stat = getClientStatus(name)
@@ -129,7 +146,7 @@ def statusheader(request, name):
             'Started': stat['started'],
             'RunJobs': stat['jobs_run'],
             'JobsRunning': stat['jobs_running'],
-            'Plugins': stat['plugins'].replace(',', '<br>'),
+            'Plugins': stat['plugins'].split(','),
         }
         context = {'Client': client}
     csname = 'bacula.client.' + name + '.status'
@@ -140,6 +157,7 @@ def statusheader(request, name):
     return render(request, 'clients/statusheader.html', context)
 
 
+@perm_required('clients.status_clients')
 def statusrunning(request, name):
     """ wywołanie ajax dla aktualnie uruchomionych zadań na kliencie """
     clientjobs = getClientrunningJobs(name)
@@ -172,12 +190,14 @@ def statusrunning(request, name):
         bytes = j.get('JobBytes', 0)
         bytessec = j.get('Bytessec', 0)
         status = j.get('Status', '')
-        data.append([jobid, job, starttime, [level, typ], files, bytes,
+        data.append([jobid, job, starttime, ibadmin_render_joblevel(level, typ), files, bytes,
                      bytessec, [jobid, job, typ, status]])
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 
 
+@perm_required('clients.view_clients')
+@perm_required('jobs.view_jobs')
 def historydata(request, name):
     """ wywołanie ajax dla datatables podający zadania uruchomione dla danego klienta """
     cols = ['jobid', 'name', 'starttime', 'endtime', 'level', 'jobfiles', 'jobbytes', 'jobstatus', '']
@@ -208,30 +228,26 @@ def historydata(request, name):
         else:
             estr = j.endtime.strftime('%Y-%m-%d %H:%M:%S')
         data.append([j.jobid, j.name, [sstr, j.schedtime.strftime('%Y-%m-%d %H:%M:%S')], estr,
-                     [j.level, j.type], j.jobfiles, j.jobbytes, [j.jobstatus, j.joberrors],
+                     ibadmin_render_joblevel(j.level, j.type), j.jobfiles, j.jobbytes,
+                     ibadmin_render_jobstatus(j.jobstatus, j.joberrors),
                      [j.jobid, j.name, j.type, j.jobstatus]])
     context = {'draw': draw, 'recordsTotal': total, 'recordsFiltered': filtered, 'data': data}
     return JsonResponse(context)
 
 
-def address(request):
-    """ JSON for host address """
-    addr = request.GET.get('address', '')
-    return JsonResponse(checkAddress(addr), safe=False)
-
-
-def name(request):
+@any_perm_required('clients.add_clients', 'clients.change_clients', 'clients.add_node_clients',
+                   'virtual.add_vmware', 'virtual.add_proxmox',
+                   'virtual.add_xen', 'virtual.add_kvm', 'virtual.add_hyperv')
+def clientsname(request):
     """
         JSON for client name
         when client name already exist then return false
     """
     client = request.GET.get('name', '').encode('ascii', 'ignore')
-    check = True
-    if ConfResource.objects.filter(compid__type='D', type__name='Client', name=client).count() == 1:
-        check = False
-    return JsonResponse(check, safe=False)
+    return JsonResponse(checkClientname(client), safe=False)
 
 
+@any_perm_required('clients.add_clients', 'clients.change_clients')
 def clustername(request):
     """
         JSON for cluster name
@@ -245,59 +261,81 @@ def clustername(request):
     return JsonResponse(check, safe=False)
 
 
+@perm_required('clients.add_clients')
 def addstd(request):
+    departments = getUserDepartmentsList(request)
     if request.method == 'GET':
-        form = ClientForm()
+        form = ClientStdForm(departments=departments)
+        backurl = request.GET.get('b', None)
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Add', 'Standalone'], 'form': form}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/addstd.html', context)
     else:
-        # print request.POST
         add = request.POST.get('add', 0)
         cancel = request.POST.get('cancel', 0)
+        backurl = request.POST.get('backurl')
         if add and not cancel:
-            form = ClientForm(request.POST)
+            form = ClientStdForm(data=request.POST, departments=departments)
             if form.is_valid():
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
                 address = form.cleaned_data['address']
                 os = form.cleaned_data['os']
                 defjob = form.cleaned_data['defjob']
+                depart = form.cleaned_data['departments']
+                # check if default department selected = No department in config
+                if depart == ' ':
+                    depart = None
                 # create a Client resource and a Client component and all required resources
                 with transaction.atomic():
-                    createClient(name=name, address=address, os=os, descr=descr)
+                    createClient(name=name, address=address, os=os, department=depart, descr=descr)
                     if defjob:
-                        createDefaultClientJob(name=name, clientos=os)
+                        createDefaultClientJob(request, name=name, clientos=os)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    if backurl is not None and backurl != '':
+        return redirect(backurl)
     return redirect('clientsdefined')
 
 
+@perm_required('clients.add_node_clients')
+def clusterparam(request, clustername):
+    clusternodes = ConfResource.objects.filter(confparameter__name='.ClusterName', confparameter__value=clustername)
+    params = {}
+    if clusternodes.count() > 0:
+        params = {
+            'os': ConfParameter.objects.filter(resid_id__in=clusternodes, name='.OS')[:1][0].value,
+            'department': ConfParameter.objects.filter(resid_id__in=clusternodes, name='.Department')[:1][0].value,
+        }
+    return JsonResponse(params, safe=False)
+
+
+@perm_required('clients.add_node_clients')
 def addnode(request):
-    cl = getDIRClientsClusters()
+    departments = getUserDepartmentsList(request)
+    cl = getDIRClientsClusters(request)
     clusters = (('', ''),)
-    # clusters = ()
     for c in cl:
         clusters += ((c, c),)
     if request.method == 'GET':
-        form = ClientNodeForm(clusters=clusters)
+        form = ClientNodeForm(clusters=clusters, departments=departments)
         if len(clusters) == 0:
             form.fields['clusterlist'].disabled = True
+        backurl = request.GET.get('b', None)
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Add', 'Cluster node'], 'form': form}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/addnode.html', context)
     else:
         # print request.POST
         add = request.POST.get('add', 0)
         cancel = request.POST.get('cancel', 0)
+        backurl = request.POST.get('backurl')
         if add and not cancel:
-            form = ClientNodeForm(data=request.POST, clusters=clusters)
+            form = ClientNodeForm(data=request.POST, clusters=clusters, departments=departments)
             if form.is_valid():
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
@@ -308,98 +346,112 @@ def addnode(request):
                 address = form.cleaned_data['address']
                 os = form.cleaned_data['os']
                 defjob = form.cleaned_data['defjob']
+                depart = form.cleaned_data['departments']
+                # check if default department selected = No department in config
+                if depart == ' ':
+                    depart = None
                 # create a Client resource and a Client component and all required resources
                 with transaction.atomic():
                     createClientNode(name=name, address=address, os=os, descr=descr, cluster=cluster,
-                                     clusterlist=clusterlist)
+                                     clusterlist=clusterlist, department=depart)
                     if defjob:
-                        createDefaultClientJob(name=name, clientos=os)
+                        createDefaultClientJob(request, name=name, clientos=os)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    if backurl is not None and backurl != '':
+        return redirect(backurl)
     return redirect('clientsdefined')
 
 
+@perm_required('clients.add_service_clients')
 def addservice(request):
-    cl = getDIRClientsClusters()
+    departments = getUserDepartmentsList(request)
+    cl = getDIRClientsClusters(request)
     if not len(cl):
+        messages.info(request, "No clusters defined, so cannot add a cluster service. Add cluster node first.",
+                      extra_tags="Info!")
         return redirect('clientsaddnode')
     clusters = ()
     for c in cl:
         clusters += ((c, c),)
     if request.method == 'GET':
-        form = ClientServiceForm(clusters=clusters)
+        form = ClientServiceForm(clusters=clusters, departments=departments)
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Add', 'Cluster service'], 'form': form}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/addservice.html', context)
     else:
         # print request.POST
         add = request.POST.get('add', 0)
         cancel = request.POST.get('cancel', 0)
         if add and not cancel:
-            form = ClientServiceForm(data=request.POST, clusters=clusters)
+            form = ClientServiceForm(data=request.POST, clusters=clusters, departments=departments)
             if form.is_valid():
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
                 address = form.cleaned_data['address']
                 cluster = form.cleaned_data['cluster']
                 defjob = form.cleaned_data['defjob']
+                depart = form.cleaned_data['departments']
+                # check if default department selected = No department in config
+                if depart == ' ':
+                    depart = None
                 # create a Client resource and a Client component and all required resources
                 with transaction.atomic():
-                    createClientService(name=name, address=address, cluster=cluster, descr=descr)
+                    createClientService(request, name=name, address=address, cluster=cluster, descr=descr, department=depart)
                     if defjob:
-                        createDefaultClientJob(name=name, client=name)
+                        createDefaultClientJob(request, name=name, client=name)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
     return redirect('clientsdefined')
 
 
+@perm_required('clients.add_alias_clients')
 def addalias(request):
-    cl = getDIRClientsNamesnalias()
+    departments = getUserDepartmentsList(request)
+    cl = getDIRClientsNamesnAlias(request)
     clients = ()
     for c in cl:
         clients += ((c, c),)
     if request.method == 'GET':
         # initialclient = request.GET.get('c', None)
-        form = ClientAliasForm(clients=clients)
+        form = ClientAliasForm(clients=clients, departments=departments)
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Add', 'Alias'], 'form': form}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/addalias.html', context)
     else:
         # print request.POST
         add = request.POST.get('add', 0)
         cancel = request.POST.get('cancel', 0)
         if add and not cancel:
-            form = ClientAliasForm(clients=clients, data=request.POST)
+            form = ClientAliasForm(data=request.POST, clients=clients, departments=departments)
             if form.is_valid():
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
                 client = form.cleaned_data['client']
                 defjob = form.cleaned_data['defjob']
+                depart = form.cleaned_data['departments']
+                # check if default department selected = No department in config
+                if depart == ' ':
+                    depart = None
                 # create a Client resource based on a Client component
                 with transaction.atomic():
-                    createClientAlias(name=name, client=client, descr=descr)
+                    createClientAlias(request, name=name, client=client, descr=descr, department=depart)
                     if defjob:
-                        createDefaultClientJob(name=name, client=name)
+                        createDefaultClientJob(request, name=name, client=name)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
     return redirect('clientsdefined')
 
 
-def makeinitialdata(name, client):
+def makeinitialdata(name, client, backurl):
     data = {
         'name': name,
         'descr': client['Descr'],
@@ -407,13 +459,16 @@ def makeinitialdata(name, client):
         'os': client['OS'],
         'client': client.get('Alias'),
         'cluster': client.get('ClusterService'),
+        'departments': client.get('Department'),
+        'backurl': backurl,
     }
     return data
 
 
+@module_perms_required('clients')
 def edit(request, name):
     backurl = request.GET.get('b', None)
-    clientres = getDIRClientinfo(name=name)
+    clientres = getDIRClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     client = extractclientparams(clientres)
@@ -433,26 +488,32 @@ def edit(request, name):
     return response
 
 
+@perm_required('clients.change_clients')
 def editstd(request, name):
-    clientres = getDIRClientinfo(name=name)
+    clientres = getDIRClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
+    departments = getUserDepartmentsList(request)
     client = extractclientparams(clientres)
     if request.method == 'GET':
-        data = makeinitialdata(name, client)
-        form = ClientForm(initial=data)
+        backurl = request.GET.get('b', None)
+        data = makeinitialdata(name, client, backurl)
+        form = ClientStdForm(initial=data, departments=departments)
         form.fields['name'].disabled = True
         form.fields['os'].disabled = True
         if client.get('InternalClient'):
             form.fields['address'].disabled = True
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Edit', name], 'clientstatusdisplay': 1,
                    'Client': client, 'form': form, 'OS': client['OS']}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/editstd.html', context)
     else:
         # print request.POST
         cancel = request.POST.get('cancel', 0)
+        backurl = request.POST.get('backurl')
+        if backurl is None or backurl == '':
+            backurl = 'clientsinfo'
         if not cancel:
             # print "Save!"
             post = request.POST.copy()
@@ -460,141 +521,151 @@ def editstd(request, name):
             post['os'] = client['OS']
             if client.get('InternalClient'):
                 post['address'] = client['Address']
-            data = makeinitialdata(name, client)
-            form = ClientForm(data=post, initial=data)
-            if form.is_valid() and form.has_changed():
-                # print "form valid and changed ... "
-                if 'descr' in form.changed_data:
-                    # update description
-                    # print "Update description"
+            data = makeinitialdata(name, client, backurl)
+            form = ClientStdForm(data=post, initial=data, departments=departments)
+            if form.is_valid():
+                if form.has_changed():
+                    # print "form valid and changed ... "
                     with transaction.atomic():
-                        updateClientDescr(name=name, descr=form.cleaned_data['descr'])
-                if 'address' in form.changed_data:
-                    # update address
-                    # print "Update address"
-                    with transaction.atomic():
-                        updateClientAddress(name=name, address=form.cleaned_data['address'])
-                if 'os' in form.changed_data:
-                    # update os
-                    # print "Update OS"
-                    # TODO: To nie skonczone, i trzeba zastanowic się jak to zrobic i czy robic?
-                    # chwilowo jest to wyłączone
-                    # updateClientOS(name=name, os=form.cleaned_data['os'])
-                    pass
-                directorreload()
-                return redirect('clientsinfo', name)
+                        if 'descr' in form.changed_data:
+                            # print "Update description"
+                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
+                        if 'address' in form.changed_data:
+                            # print "Update address"
+                            updateClientAddress(request, name=name, address=form.cleaned_data['address'])
+                        if 'departments' in form.changed_data:
+                            # update department
+                            depart = form.cleaned_data['departments']
+                            # check if default department selected = No department in config
+                            if depart == ' ':
+                                depart = None
+                            updateClientDepartment(request, name=name, department=depart)
+                        if 'os' in form.changed_data:
+                            # print "Update OS"
+                            # TODO: Unsupported right now. Do we really want to support this feature?
+                            # updateClientOS(name=name, os=form.cleaned_data['os'])
+                            pass
+                    directorreload()
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
-    return redirect('clientsinfo', name)
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    return redirect(backurl, name)
 
 
+@perm_required('clients.change_clients')
 def editservice(request, name):
-    cl = getDIRClientsClusters()
+    clientres = getDIRClientinfo(request, name=name)
+    if clientres is None:
+        raise Http404()
+    client = extractclientparams(clientres)
+    departments = getUserDepartmentsList(request)
+    cl = getDIRClientsClusters(request)
     if not len(cl):
+        messages.error(request, "No clusters defined! Report it to service!", extra_tags="Error!")
         return redirect('clientsaddnode')
     clusters = ()
     for c in cl:
         clusters += ((c, c),)
-    clientres = getDIRClientinfo(name=name)
-    if clientres is None:
-        raise Http404()
-    client = extractclientparams(clientres)
     if request.method == 'GET':
-        data = makeinitialdata(name, client)
-        form = ClientServiceForm(initial=data, clusters=clusters)
+        backurl = request.GET.get('b', None)
+        data = makeinitialdata(name, client, backurl)
+        form = ClientServiceForm(initial=data, clusters=clusters, departments=departments)
         form.fields['name'].disabled = True
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Edit', name], 'clientstatusdisplay': 1,
                    'Client': client, 'form': form, 'OS': client['OS']}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/editservice.html', context)
     else:
         # print request.POST
         cancel = request.POST.get('cancel', 0)
+        backurl = request.POST.get('backurl')
+        if backurl is None or backurl == '':
+            backurl = 'clientsinfo'
         if not cancel:
             # print "Save!"
             post = request.POST.copy()
             post['name'] = name
-            data = makeinitialdata(name, client)
-            form = ClientServiceForm(data=post, initial=data, clusters=clusters)
-            if form.is_valid() and form.has_changed():
-                # print "form valid and changed ... "
-                if 'descr' in form.changed_data:
-                    # update description
-                    # print "Update description"
+            data = makeinitialdata(name, client, backurl)
+            form = ClientServiceForm(data=post, initial=data, clusters=clusters, departments=departments)
+            if form.is_valid():
+                if form.has_changed():
+                    # print "form valid and changed ... "
                     with transaction.atomic():
-                        updateClientDescr(name=name, descr=form.cleaned_data['descr'])
-                if 'address' in form.changed_data:
-                    # update address
-                    # print "Update address"
-                    with transaction.atomic():
-                        updateClientAddress(name=name, address=form.cleaned_data['address'])
-                if 'cluster' in form.changed_data:
-                    # update cluster
-                    # print "Update cluster"
-                    with transaction.atomic():
-                        updateClientCluster(name=name, cluster=form.cleaned_data['cluster'])
-                directorreload()
-                return redirect('clientsinfo', name)
+                        if 'descr' in form.changed_data:
+                            # print "Update description"
+                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
+                        if 'address' in form.changed_data:
+                            # print "Update address"
+                            updateClientAddress(request, name=name, address=form.cleaned_data['address'])
+                        if 'cluster' in form.changed_data:
+                            # print "Update cluster"
+                            updateClientCluster(request, name=name, cluster=form.cleaned_data['cluster'])
+                        if 'departments' in form.changed_data:
+                            # update department
+                            depart = form.cleaned_data['departments']
+                            updateClientDepartment(request, name=name, department=depart)
+                    directorreload()
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
-    return redirect('clientsdefined')
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    return redirect(backurl, name)
 
 
+@perm_required('clients.change_clients')
 def editalias(request, name):
-    cl = getDIRClientsNamesnalias()
-    clients = ()
-    for c in cl:
-        clients += ((c, c),)
-    clientres = getDIRClientinfo(name=name)
+    clientres = getDIRClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     client = extractclientparams(clientres)
+    departments = getUserDepartmentsList(request)
+    cl = getDIRClientsNamesnAlias(request)
+    clients = ()
+    for c in cl:
+        clients += ((c, c),)
     if client.get('Alias') is None:
         return redirect('clientsedit')
     if request.method == 'GET':
-        data = makeinitialdata(name, client)
-        form = ClientAliasForm(initial=data, clients=clients)
+        backurl = request.GET.get('b', None)
+        data = makeinitialdata(name, client, backurl)
+        form = ClientAliasForm(initial=data, clients=clients, departments=departments)
         form.fields['name'].disabled = True
         context = {'contentheader': 'Client', 'apppath': ['Clients', 'Edit', name], 'clientstatusdisplay': 1,
                    'Client': client, 'form': form}
-        updateMenuNumbers(context)
-        updateClientsOSnrlist(context)
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
         return render(request, 'clients/editalias.html', context)
     else:
         # print request.POST
         cancel = request.POST.get('cancel', 0)
+        backurl = request.POST.get('backurl')
+        if backurl is None or backurl == '':
+            backurl = 'clientsinfo'
         if not cancel:
             # print "Save!"
             post = request.POST.copy()
             post['name'] = name
-            data = makeinitialdata(name, client)
-            form = ClientAliasForm(data=post, initial=data, clients=clients)
-            if form.is_valid() and form.has_changed():
-                # print "form valid and changed ... "
-                if 'descr' in form.changed_data:
-                    # update description
-                    # print "Update description"
+            data = makeinitialdata(name, client, backurl)
+            form = ClientAliasForm(data=post, initial=data, clients=clients, departments=departments)
+            if form.is_valid():
+                if form.has_changed():
+                    # print "form valid and changed ... "
                     with transaction.atomic():
-                        updateClientDescr(name=name, descr=form.cleaned_data['descr'])
-                if 'client' in form.changed_data:
-                    # update alias
-                    # print "Update alias"
-                    with transaction.atomic():
-                        updateClientAlias(name=name, alias=form.cleaned_data['client'])
-                directorreload()
-                return redirect('clientsinfo', name)
+                        if 'descr' in form.changed_data:
+                            # print "Update description"
+                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
+                        if 'client' in form.changed_data:
+                            # print "Update alias"
+                            updateClientAlias(request, name=name, alias=form.cleaned_data['client'])
+                        if 'departments' in form.changed_data:
+                            # update department
+                            depart = form.cleaned_data['departments']
+                            updateClientDepartment(request, name=name, department=depart)
+                    directorreload()
             else:
-                # TODO zrobić obsługę błędów, albo i nie
-                print form.is_valid()
-                print form.errors.as_data()
-    return redirect('clientsdefined')
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    return redirect(backurl, name)
 
 
+@perm_required('clients.delete_clients')
 def makedelete(request, name):
     """ Kasuje definicję klienta wraz ze zdefiniowanymi zadaniami i historią """
     client = get_object_or_404(ConfResource, name=name, type__name='Client')

@@ -1,5 +1,6 @@
 {% extends "pages/base.html" %}
-{% block content %}
+
+{% block contentwidget %}
 <div class="row">
   <div class="col-lg-3 col-md-6">
     {% include 'widgets/dirstatus.html' %}
@@ -14,6 +15,9 @@
     {% include 'widgets/statdstatus.html' %}
   </div>
 </div>
+{% endblock %}
+
+{% block content %}
 <div class="row">
  <div class="col-xs-12">
   <div id="restartinfo" class="alert alert-success alert-dismissible" style="display: none;">

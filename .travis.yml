@@ -12,9 +12,6 @@ env:
   - DJANGO_SETTINGS_MODULE="ibadmin.settings"
   - PYTHONPATH="$HOME/builds/inteos/IBAdmin"
   - PIP_USE_MIRRORS=true
-# Last two for OS X, courtesy of stackoverflow.com/a/22697917/419005
-# - CFLAGS=-Qunused-arguments
-# - CPPFLAGS=-Qunused-arguments
 
 install:
   - pip install -r requirements.txt

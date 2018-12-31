@@ -3,14 +3,17 @@ from libs.widgets import *
 
 
 class StorageForm(forms.Form):
-    def __init__(self, storages=(), *args, **kwargs):
+    def __init__(self, storages=(), departments=(), *args, **kwargs):
         super(StorageForm, self).__init__(*args, **kwargs)
         self.fields['storagelist'].choices = storages
+        self.fields['departments'].choices = departments
 
     name = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Storage name', 'icon': 'fa fa-paw', 'placeholder': 'Name'}))
     descr = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Description', 'icon': 'fa fa-commenting-o', 'placeholder': '...'}))
     address = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Remote address', 'icon': 'fa fa-envelope-o', 'placeholder': 'Address'}))
     storagelist = forms.ChoiceField(label='Storage Daemon', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
+    departments = forms.MultipleChoiceField(label='Departments', required=False, widget=forms.SelectMultiple(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}))
+    backurl = forms.CharField(required=False, widget=forms.HiddenInput())
 
 
 class StorageDiskForm(StorageForm):
@@ -38,3 +41,4 @@ class StorageAliasForm(StorageForm):
         self.fields['storagelist'].label = 'Existing Storage'
 
     storageip = forms.ChoiceField(label='Storage IP', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
+    departments = forms.ChoiceField(label='Department', required=True, widget=forms.Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}))

@@ -75,6 +75,14 @@ def detectdedup():
         return False
 
 
+def detectvsphere():
+    ded = os.path.isfile('/opt/bacula/plugins/vsphere-fd.so')
+    if ded is True:
+        return True
+    else:
+        return False
+
+
 def checkarchivedir(archivedir):
     return os.path.isdir(archivedir)
 

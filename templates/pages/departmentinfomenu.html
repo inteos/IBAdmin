@@ -1,0 +1,11 @@
+<li class="active">
+  <a href="#"><i class="fa fa-bank"></i> <span>{{ Department.name|truncatechars:24 }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    <li{% if apppath.1 == 'Info' %} class="active"{% endif %}>
+      <a href="{% url 'departsinfo' Department.shortname %}"><i class="fa fa-users"></i> <span>Members</span></a></li>
+{% if perms.departments.change_departments %}
+    <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
+      <a href="{% url 'departsedit' Department.shortname %}"><i class="fa fa-wrench"></i> <span>Edit</span></a></li>
+{% endif %}
+  </ul>
+</li>

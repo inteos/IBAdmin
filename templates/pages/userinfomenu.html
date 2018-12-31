@@ -1,0 +1,12 @@
+{% load ibadtexts %}
+<li class="active">
+  <a href="#"><i class="fa fa-user"></i> <span>{{ User.first_name|fullname:User.last_name|default:User.username|truncatechars:24 }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    {% if apppath.1 == 'Info' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'usersinfo' User.username %}"><i class="fa fa-info-circle"></i> <span>Info</span></a></li>
+{% if perms.auth.change_user %}
+    {% if apppath.1 == 'Edit' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'usersedit' User.username %}"><i class="fa fa-wrench"></i> <span>Edit</span></a></li>
+{% endif %}
+  </ul>
+</li>

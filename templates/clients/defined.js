@@ -12,20 +12,25 @@ $(function () {
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderclientlink(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderclientaddress(data[0],data[1])} },
       { "sClass": "vertical-align" },
-      { "width": "128px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderosbadge(data)} }, // OS
+      { "width": "128px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderdepartmentlabel(data);} },
+      { "width": "128px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} }, // OS
       { "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderclientcluster(data[0],data[1])} },
       { "width": "64px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderstatus(data)} }, // Status
       { "width": "128px", "orderable": false, "sClass": "vertical-align text-center", // 32px for every button
         "render": function ( data, type, row ) {
           var btn = '<button class="btn btn-sm btn-default" type="button" ';
-          var binf = btn + 'onclick="location.href=\'{% url 'clientsinfo_rel' %}'+data[0]+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
-          var bres = btn + 'onclick="location.href=\'{% url 'restoreclient_rel' %}'+data[0]+'/\';"><i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Restore"></i></button>\n';
-          var bedi = btn + 'onclick="location.href=\'{% url 'clientsedit_rel' %}'+data[0]+'/\';"><i class="fa fa-wrench" data-toggle="tooltip" data-original-title="Edit"></i></button>\n';
-          var bdel = btn + 'data-toggle="modal" data-target="#deleteclientconfirm" data-name="'+data[0]+'" data-url="{% url 'clientsdelete_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
-          var ret = binf + bres + bedi;
+          var ret = btn + 'onclick="location.href=\'{% url 'clientsinfo_rel' %}'+data[0]+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
+{% if perms.clients.restore_clients %}
+          ret += btn + 'onclick="location.href=\'{% url 'restoreclient_rel' %}'+data[0]+'/\';"><i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Restore"></i></button>\n';
+{% endif %}
+{% if perms.clients.change_clients %}
+          ret += btn + 'onclick="location.href=\'{% url 'clientsedit_rel' %}'+data[0]+'/?b={% url 'clientsdefined' %}\';"><i class="fa fa-wrench" data-toggle="tooltip" data-original-title="Edit"></i></button>\n';
+{% endif %}
+{% if perms.clients.delete_clients %}
           if (data[1] != 'Yes'){
-            ret += bdel;
+            ret += btn + 'data-toggle="modal" data-target="#deleteclientconfirm" data-name="'+data[0]+'" data-url="{% url 'clientsdelete_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
           };
+{% endif %}
           return '<div class="btn-group">' + ret + '</div>';
         },
       },

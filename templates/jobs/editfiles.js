@@ -1,27 +1,9 @@
 <script>
-  $(function () {
-    // Initialize Select2 Elements
-    $(".select2").select2();
-    // Initialize backupsch and all forms
-    {% if form.backupsch.value == 'c1' %}
-    $('#divrepeat').show();
-    $('#divweekdays').hide();
-    $('#divmonthdays').hide();
-    {% endif %}
-    {% if form.backupsch.value == 'c2' %}
-    $('#divrepeat').hide();
-    $('#divweekdays').show();
-    $('#divmonthdays').hide();
-    {% endif %}
-    {% if form.backupsch.value == 'c3' %}
-    $('#divrepeat').hide();
-    $('#divweekdays').hide();
-    $('#divmonthdays').show();
-    {% endif %}
-  });
-  $("#editform").submit(function() {
-    $('select').removeAttr('disabled');
-  });
+{% include 'widgets/jobformeditinitialize.js' %}
+{% include 'widgets/jobformbackupsch.js' %}
+{% include 'widgets/jobformscheduleweek.js' %}
+{% include 'widgets/jobformschedulemonth.js' %}
+{% include 'widgets/jobformretention.js' %}
   $("#editform").validate({
     rules: {
       {{ form.name.name }}: {
@@ -63,103 +45,6 @@
         error.insertAfter(element);
       }
     }
-  });
-// TODO od tego miejsca add/edit .js jest takie samo - do przewalenia do zbiorczego pliku
-  $(".timepicker").timepicker({
-    showInputs: false,
-    minuteStep: 1,
-    showMeridian: false,
-  });
-  $(function(){
-    $('#{{ form.backupsch.id_for_label }}').change(function(){
-      if ($('#{{ form.backupsch.id_for_label }}').val() == 'c1'){
-        $('#divrepeat').show();
-        $('#divweekdays').hide();
-        $('#divmonthdays').hide();
-      } else
-      if ($('#{{ form.backupsch.id_for_label }}').val() == 'c2'){
-        $('#divrepeat').hide();
-        $('#divweekdays').show();
-        $('#divmonthdays').hide();
-      } else
-      if ($('#{{ form.backupsch.id_for_label }}').val() == 'c3'){
-        $('#divrepeat').hide();
-        $('#divweekdays').hide();
-        $('#divmonthdays').show();
-      }
-    });
-  });
-  $(function(){
-    $('#scheduleweek_7').change(function(){
-        var control;
-        var controls = ['#monlevel', '#tuelevel', '#wedlevel', '#thulevel', '#frilevel', '#satlevel', '#sunlevel'];
-        if ($('#scheduleweek_7').val() == 'full'){
-            for (var i = 0; i < 7; i++) {
-                control = '#scheduleweek_' + i;
-                $(control).val("full").trigger("change");
-                $(control).attr('disabled','disabled');
-            }
-        } else
-        if ($('#scheduleweek_7').val() == 'incr'){
-            for (var i = 0; i < 7; i++) {
-                control = '#scheduleweek_' + i;
-                $(control).val("incr").trigger("change");
-                $(control).attr('disabled','disabled');
-            }
-        } else
-        if ($('#scheduleweek_7').val() == 'diff'){
-            for (var i = 0; i < 7; i++) {
-                control = '#scheduleweek_' + i;
-                $(control).val("diff").trigger("change");
-                $(control).attr('disabled','disabled');
-            }
-        } else
-        if ($('#scheduleweek_7').val() == 'off'){
-            for (var i = 0; i < 7; i++) {
-                control = '#scheduleweek_' + i;
-                $(control).removeAttr('disabled');
-            }
-        }
-    });
-  });
-  $(function(){
-    $('#schedulemonth_31').change(function(){
-      var control;
-      if ($('#schedulemonth_31').val() == 'full'){
-        for (var i = 0; i < 31; i++) {
-          control = '#schedulemonth_' + i;
-          $(control).val("full").trigger("change");
-          $(control).attr('disabled','disabled');
-        }
-      } else
-      if ($('#schedulemonth_31').val() == 'incr'){
-        for (var i = 0; i < 31; i++) {
-          control = '#schedulemonth_' + i;
-          $(control).val("incr").trigger("change");
-          $(control).attr('disabled','disabled');
-        }
-      } else
-      if ($('#schedulemonth_31').val() == 'diff'){
-        for (var i = 0; i < 31; i++) {
-          control = '#schedulemonth_' + i;
-          $(control).val("diff").trigger("change");
-          $(control).attr('disabled','disabled');
-        }
-      } else
-      if ($('#schedulemonth_31').val() == 'off'){
-        for (var i = 0; i < 31; i++) {
-          control = '#schedulemonth_' + i;
-          $(control).removeAttr('disabled');
-        }
-      }
-    });
-  });
-  $(".dropdown-menu li a").click(function(event){
-    event.preventDefault();
-    var selText = $(this).text();
-    var selValue = this.id;
-    $('#{{ form.retention.id_for_label }}-button').html(selText+' <span class="caret"></span>');
-    $('#{{ form.retention.id_for_label }}-interval').val(selValue);
   });
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}

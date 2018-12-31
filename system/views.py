@@ -6,44 +6,49 @@ from django.db import transaction
 from libs.menu import updateMenuNumbers
 from libs.job import getJobsrunningnr
 from libs.system import *
+from libs.storage import getDIRStorageNames
 from libs.plat import *
 from libs.bconsole import *
 from subprocess import call
 from config.conf import *
 from .forms import *
 from jobs.models import Log
+from users.decorators import *
 
 
+@userissuperuser_required()
 def daemons(request):
     context = {'contentheader': 'Daemons', 'contentheadersmall': 'Manage', 'apppath': ['Backup', 'Daemons']}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     updateservicestatus(context)
     return render(request, 'system/daemons.html', context)
 
 
+@userissuperuser_required()
 def messages(request):
     context = {'contentheader': 'Messages', 'apppath': ['Backup', 'Messages']}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'system/messages.html', context)
 
 
+@userissuperuser_required()
 def config(request):
     name = getDIRname()
     osver = getOSVersion()
     # TODO: when Director is unavailable then we can't verify backup version
     out = getBackupVersion()
-    backupver = out['edition'] + ' ' + out['version']
+    backupver = "%s %s" % (out['edition'], out['version'])
     ip = detectipall()
     ipall = [(a, a) for a in ip]
     sip = getDIRInternalStorageAddress()
     cip = getFDClientAddress(name=name)
     descr = getDIRdescr()
     email = getDIRadminemail()
-    stor = getDIRStorageNames()
+    stor = getDIRStorageNames(request)
     storages = [(a, a) for a in stor]
     defstorage = getDefaultStorage()
     license = getLicenseKey()
-    platform = getOSPlatform()
+    platforminfo = getOSPlatform()
     data = {
         'name': name,
         'descr': descr,
@@ -61,13 +66,14 @@ def config(request):
     if len(ip) < 2:
         form.fields['storageip'].disabled = True
         form.fields['clientip'].disabled = True
-    context = {'contentheader': 'System', 'contentheadersmall': 'Config', 'apppath': ['Backup', 'Config'], 'form': form,
-               'backupver': backupver, 'osver': osver, 'platform': platform}
-    updateMenuNumbers(context)
+    context = {'contentheader': 'System', 'contentheadersmall': 'Config', 'apppath': ['Backup', 'Config'],
+               'form': form, 'backupver': backupver, 'osver': osver, 'platform': platforminfo}
+    updateMenuNumbers(request, context)
     updateservicestatus(context)
     return render(request, 'system/config.html', context)
 
 
+@userissuperuser_required()
 def configsave(request):
     restartinfo = False
     if request.method == 'POST':
@@ -78,7 +84,7 @@ def configsave(request):
         cip = getFDClientAddress(name=name)
         descr = getDIRdescr()
         email = getDIRadminemail()
-        stor = getDIRStorageNames()
+        stor = getDIRStorageNames(request)
         storages = [(a, a) for a in stor]
         defstorage = getDefaultStorage()
         data = {
@@ -97,31 +103,28 @@ def configsave(request):
         if post.get('clientip') is None:
             post['clientip'] = cip
         form = SystemConfigForm(storageip=ipall, clientip=ipall, storages=storages, initial=data, data=post)
-        if form.is_valid() and form.has_changed():
-            # print "form valid and changed ... ", form.changed_data
-            if 'descr' in form.changed_data:
-                # print "Update descr!"
+        if form.is_valid():
+            if form.has_changed():
+                # print "form valid and changed ... ", form.changed_data
                 with transaction.atomic():
-                    updateDIRDescr(descr=form.cleaned_data['descr'])
-            if 'defstorage' in form.changed_data:
-                # print "Update defstorage"
-                with transaction.atomic():
-                    updateDIRdefaultStorage(storname=form.cleaned_data['defstorage'])
-            if 'storageip' in form.changed_data:
-                # print "Update Storage IP"
-                with transaction.atomic():
-                    restartinfo = True
-                    updateStorageAddress(sdcomponent=name, address=form.cleaned_data['storageip'])
-            if 'clientip' in form.changed_data:
-                # print "Update Client IP"
-                with transaction.atomic():
-                    restartinfo = True
-                    updateClientAddress(name=name, address=form.cleaned_data['clientip'])
-            if 'email' in form.changed_data:
-                # print "Update email"
-                with transaction.atomic():
-                    updateDIRadminemail(email=form.cleaned_data['email'])
-            directorreload()
+                    if 'descr' in form.changed_data:
+                        # print "Update descr!"
+                        updateDIRDescr(request, descr=form.cleaned_data['descr'])
+                    if 'defstorage' in form.changed_data:
+                        # print "Update defstorage"
+                        updateDIRdefaultStorage(storname=form.cleaned_data['defstorage'])
+                    if 'storageip' in form.changed_data:
+                        # print "Update Storage IP"
+                        restartinfo = True
+                        updateStorageAddress(sdcomponent=name, address=form.cleaned_data['storageip'])
+                    if 'clientip' in form.changed_data:
+                        # print "Update Client IP"
+                        restartinfo = True
+                        updateClientAddress(request, name=name, address=form.cleaned_data['clientip'])
+                    if 'email' in form.changed_data:
+                        # print "Update email"
+                        updateDIRadminemail(email=form.cleaned_data['email'])
+                directorreload()
         else:
             # TODO zrobic obsługę błędów albo i nie
             print form.is_valid()
@@ -135,33 +138,38 @@ def servicestatuswidget(request):
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def masterlogdisplay(request):
     logs = getsystemdlog('bacula-dir')
     context = {'Logs': logs, 'daemon': 'Master Daemon logs'}
     return render(request, 'system/daemonlogs.html', context)
 
 
+@userissuperuser_required()
 def sdlogdisplay(request):
     logs = getsystemdlog('bacula-sd')
     context = {'Logs': logs, 'daemon': 'Storage Daemon logs'}
     return render(request, 'system/daemonlogs.html', context)
 
 
+@userissuperuser_required()
 def fdlogdisplay(request):
     logs = getsystemdlog('bacula-fd')
     context = {'Logs': logs, 'daemon': 'File Daemon logs'}
     return render(request, 'system/daemonlogs.html', context)
 
 
+@userissuperuser_required()
 def ibadlogdisplay(request):
     logs = getsystemdlog('ibadstatd')
     context = {'Logs': logs, 'daemon': 'Collector Daemon logs'}
     return render(request, 'system/daemonlogs.html', context)
 
 
+@userissuperuser_required()
 def masterstop(request):
     confirm = request.GET.get('conf', None)
-    if confirm is not None or getJobsrunningnr() == 0:
+    if confirm is not None or getJobsrunningnr(request) == 0:
         status = 1
         call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-dir'])
     else:
@@ -170,9 +178,10 @@ def masterstop(request):
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def storagestop(request):
     confirm = request.GET.get('conf', None)
-    if confirm is not None or getJobsrunningnr() == 0:
+    if confirm is not None or getJobsrunningnr(request) == 0:
         status = 1
         call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-sd'])
     else:
@@ -181,45 +190,52 @@ def storagestop(request):
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def filedaemonstop(request):
     call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-fd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def ibaddaemonstop(request):
     call([SUDOCMD, SYSTEMCTL, 'stop', 'ibadstatd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def masterstart(request):
     call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-dir'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def storagestart(request):
     call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-sd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def filedaemonstart(request):
     call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-fd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def ibaddaemonstart(request):
     call([SUDOCMD, SYSTEMCTL, 'start', 'ibadstatd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def masterrestart(request):
     confirm = request.GET.get('conf', None)
-    if confirm is not None or getJobsrunningnr() == 0:
+    if confirm is not None or getJobsrunningnr(request) == 0:
         status = 1
         call([SUDOCMD, SYSTEMCTL, 'restart', 'bacula-dir'])
     else:
@@ -228,9 +244,10 @@ def masterrestart(request):
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def storagerestart(request):
     confirm = request.GET.get('conf', None)
-    if confirm is not None or getJobsrunningnr() == 0:
+    if confirm is not None or getJobsrunningnr(request) == 0:
         status = 1
         call([SUDOCMD, SYSTEMCTL, 'restart', 'bacula-sd'])
     else:
@@ -239,18 +256,21 @@ def storagerestart(request):
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def filedaemonrestart(request):
     call([SUDOCMD, SYSTEMCTL, 'restart', 'bacula-fd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def ibaddaemonrestart(request):
     call([SUDOCMD, SYSTEMCTL, 'restart', 'ibadstatd'])
     context = {'status': 1}
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def messagesdata(request):
     """ JSON for jobs running datatable """
     cols = ['time', 'logtext']
@@ -275,6 +295,7 @@ def messagesdata(request):
     return JsonResponse(context)
 
 
+@userissuperuser_required()
 def messagesclear(request):
     query = Log.objects.filter(jobid=0).all()
     query.delete()

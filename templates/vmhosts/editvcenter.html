@@ -1,0 +1,54 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+
+{% block contentwidget %}
+{% include "widgets/vmstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-plus"></i>
+        <h3 class="box-title">Edit VMware vCenter</h3>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="editform" method="post" action="{% url 'vmsvcenteredit' form.name.value %}">
+        {% csrf_token %}
+        <div class="box-body">
+          {{ form.name }}
+          {{ form.descr }}
+          {{ form.username }}
+          <div class="form-group">
+            <label for="{{ form.password.id_for_label }}" class="col-sm-2 control-label">{{ form.password.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.password }}
+                <span class="input-group-addon"><i id="{{ form.password.id_for_label }}icon" class="fa fa-lock"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          {{ form.address }}
+          {{ form.url }}
+          {{ form.thumbprint }}
+          {% include "widgets/selectdepartmentsform.html" %}
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="add"><i class="glyphicon glyphicon-floppy-disk"></i>Save</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+{% block pagejs %}
+  {% include "vmhosts/editvcenter.js" %}
+{% endblock %}

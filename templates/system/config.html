@@ -1,6 +1,10 @@
 {% extends "pages/base.html" %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
  <div class="col-xs-12">
   <div id="saveinfo" class="alert alert-success alert-dismissible" style="display: none;">

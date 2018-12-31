@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="box {{ Job.Status|jobstatusboxcolor:Job.Errors }}">
   <div class="box-header">
     <i class="fa fa-server"></i>
@@ -45,7 +49,7 @@
         </tr>
       </table>
     </div>
-    {% if Job.priorjobid %}
+    {% if Job.iscopyof %}
     <div class="col-lg-1 col-xs-12"><span class="badge bg-purple">Copy of: <a href="{% url 'jobslog' Job.priorjobid %}" class="text-white">{{ Job.priorjobid }}</a></span></div>
     <br>
     {% endif %}
@@ -61,23 +65,33 @@
     <div class="row">
       <div class="col-sm-10 center-block">
         <a href="{% url 'jobsinfo' Job.Name %}" class="btn btn-app"><i class="fa fa-info-circle"></i>Info</a>
+{% if perms.stats.view_job_stats %}
         {% if Job.Type != 'D' %}<a href="{% url 'statsjob' Job.Name %}" class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>{% endif %}
+{% endif %}
+{% if perms.jobs.restart_jobs %}
         {% if Job.Status in 'EfA' %}
         <a class="btn btn-app" data-toggle="modal" data-target="#restartjobidconfirm" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh"></i>Restart</a>
         {% endif %}
         {% if Job.Status == 'I' %}
         <a class="btn btn-app" data-toggle="modal" data-target="#restartijobidconfirm" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh"></i>Restart</a>
         {% endif %}
-        {% if Job.Type == 'B' %}
-        {% if Job.Status in 'TI' %}
+{% endif %}
+{% if perms.jobs.restore_jobs %}
+        {% if Job.Type == 'B' and Job.Status in 'TI' %}
         <a href="{% url 'restorejobid' Job.JobId %}" class="btn btn-app"><i class="fa fa-cloud-upload"></i>Restore</a>
         {% endif %}
-        {% endif %}
+{% endif %}
+        {% if perms.jobs.change_jobs %}
         {% if not Job.InternalJob %}
         <a href="{% url 'jobsedit' Job.Name %}" class="btn btn-app"><i class="fa fa-wrench"></i>Edit</a>
         {% endif %}
+{% endif %}
+{% if perms.jobs.delete_jobid %}
         <a class="btn btn-app" data-toggle="modal" data-target="#deletejobidconfirm" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
+{% endif %}
+{% if perms.jobs.comment_jobs %}
         <a class="btn btn-app" data-toggle="modal" data-target="#commentedit" data-name="{{ Job.Name }}" data-jobid="{{ Job.JobId }}"><i class="fa fa-comment-o"></i>Comment</a>
+{% endif %}
       </div>
     </div>
     <div class="box-group" id="jobinfo">
@@ -104,6 +118,7 @@
         </div>
       {% endif %}
       {% if Job.Type != 'D' and Job.Type != 'R' and Job.Type != 'c' %}
+{% if perms.jobs.view_datalocation %}
       <div class="panel box box-primary">
         <div class="box-header with-border">
           <h2 class="box-title">
@@ -117,6 +132,7 @@
           </div>
         </div>
       </div>
+{% endif %}
       <div class="panel box box-primary">
         <div class="box-header with-border">
           <h2 class="box-title">

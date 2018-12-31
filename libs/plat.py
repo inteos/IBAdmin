@@ -1,21 +1,21 @@
-# coding=utf-8
+# -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 import platform
 
 
-# globals
-SUDOCMD = "/usr/bin/sudo"
-SYSTEMCTL = "/usr/bin/systemctl"
-# App Version
-IBADVERSION = 'Community.2018.2'
 # Bacula Enterprise 8.4.x - 1017
 # Bacula Enterprise 8.6.x - 1018
 # Bacula Enterprise 8.8.x - 1019
+# Bacula Enterprise 10.2 - 1020
 # Bacula Community 7.4.x - 15
 # Bacula Community 9.2.x - 16
-CATVERSUPPORTED = (1017, 1018, 1019, 15, 16)
+BEECATVERSUPPORTED = (1017, 1018, 1019, 1020)
+BCCATVERSUPPORTED = (15, 16)
+CATVERSUPPORTED = BEECATVERSUPPORTED + BCCATVERSUPPORTED
 BACULACOMMUNITY = False
 # system commands
+SUDOCMD = "/usr/bin/sudo"
+SYSTEMCTL = "/usr/bin/systemctl"
 JOURNALCTL = "/usr/bin/journalctl --no-pager -u "
 NETIPCMD = "/usr/sbin/ip"
 LSSCSICMD = "/usr/bin/lsscsi -g"

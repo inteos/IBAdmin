@@ -84,6 +84,22 @@ def maininit(fg=0):
 
 
 def mainloop(fg=0):
+    """
+    Tue Aug 14 14:26:40 2018 : Collecting ...
+    Traceback (most recent call last):
+      File "/opt/ibadmin/utils/ibadstatd.py", line 154, in <module>
+        mainloop(fg=1)
+      File "/opt/ibadmin/utils/ibadstatd.py", line 108, in mainloop
+        Bacula.collect(conn, fg)
+      File "/opt/ibadmin/utils/Collect/Bacula.py", line 158, in collect
+        cur.execute(SQL[param])
+      File "/usr/lib64/python2.7/site-packages/psycopg2/extras.py", line 120, in execute
+        return super(DictCursor, self).execute(query, vars)
+    psycopg2.OperationalError: terminating connection due to administrator command
+    server closed the connection unexpectedly
+        This probably means the server terminated abnormally
+        before or while processing the request.
+    """
     conn = None
     while cont:
         if fg:

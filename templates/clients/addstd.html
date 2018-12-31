@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/osstatus.html" with osstatusvis=1 %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-success">
@@ -14,19 +18,14 @@
       <!-- form start -->
       <form class="form-horizontal" id="addform" method="post" action="{% url 'clientsadd' %}">
         {% csrf_token %}
+        {{ form.backurl }}
         <div class="box-body">
           {{ form.name }}
           {{ form.descr }}
           {{ form.address }}
-          <div id="os-group" class="form-group">
-            <label for="{{ form.os.id_for_label }}" class="col-sm-2 control-label">{{ form.os.label }}</label>
-            <div class="col-sm-10">
-              <div class="input-group">
-              {{ form.os }}
-                <span class="input-group-addon"><i id="{{ form.os.id_for_label }}icon" class="fa fa-linux"></i></span>
-              </div>
-            </div>
-          </div><!-- /.form-group -->
+          {% include "widgets/clientosform.html" %}
+          {% include "widgets/selectdepartmentsform.html" %}
+{% if perms.clients.create_default_job %}
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox icheck">
@@ -34,6 +33,7 @@
               </div>
             </div>
           </div><!-- /.form-group -->
+{% endif %}
         </div><!-- /.box-body -->
         <div class="box-footer">
           <div class="row">

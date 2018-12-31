@@ -55,7 +55,7 @@
     messages: {
       {{ form.name.name }}: {
         remote: "Storage name already exist.",
-        componentname: "Storage name can include simple letters, digits dash, space and underscore only.",
+        componentname: "Storage name must include simple letters, digits, dashes, spaces and underscore only.",
       },
       {{ form.address.name }}: {
         required: 'One of: "Storage address" or "Existing Storge" is required.',

@@ -12,10 +12,12 @@ $('{{ selector }}').on('click', function () {
       button.text(text);
     });
   };
+{% include 'widgets/onErrorReceivedbutton.js' %}
   $.ajax({
     url: url,
     type: "GET",
     dataType: "json",
     success: onDataReceived,
+    error: onErrorReceived,
   });
 });

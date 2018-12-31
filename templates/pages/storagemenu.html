@@ -1,12 +1,15 @@
+{% if perms.storages.view_storages %}
 {% load ibadtexts %}
 <!-- Storage menu -->
 <li class="treeview {% if apppath.0 == 'Storage' %}active{% endif %}">
   <a href="#"><i class="fa fa-database"></i> <span>Storage</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
   <ul class="treeview-menu">
+{% if perms.storages.add_storages %}
     <li {% if apppath.1 == 'Add' %} class="active"{% endif %}>
       <a href="#"><i class="fa fa-plus"></i>New Storage<span class="pull-right-container">
         <i class="fa fa-angle-left pull-right"></i></span></a>
       <ul class="treeview-menu">
+{% if user.is_superuser and user.is_staff %}
         <li{% if apppath.2 == 'Disk storage' %} class="active"{% endif %}>
           <a href="{% url 'storageadddisk' %}"><i class="fa fa-database"></i><span>Disk Storage</span></a></li>
         <li{% if apppath.2 == 'Tape storage' %} class="active"{% endif %}>
@@ -15,10 +18,12 @@
         <li{% if apppath.2 == 'Dedup storage' %} class="active"{% endif %}>
           <a href="{% url 'storageadddedup' %}"><i class="fa fa-cubes"></i><span>Deduplication</span></a></li>
         {% endif %}
+{% endif %}
         <li{% if apppath.2 == 'Alias' %} class="active"{% endif %}>
           <a href="{% url 'storageaddalias' %}"><i class="fa fa-magic"></i><span>Alias</span></a></li>
       </ul>
     </li>
+{% endif %}
     {% if storagenr %}
     <li{% if apppath.1 == 'Defined' %} class="active"{% endif %}>
       <a href="{% url 'storagedefined' %}"><i class="fa fa-th-list"></i><span>List</span><span class="pull-right-container">
@@ -27,6 +32,7 @@
     {% if storagestatusdisplay %}
       {% include "pages/storageinfomenu.html" %}
     {% endif %}
+{% if perms.storages.view_volumes %}
     <li {% if apppath.1 == 'Volumes' %} class="active"{% endif %}>
       <a href="{% url 'storagevolumes' %}"><i class="fa fa-database"></i><span>Volumes</span>
         <span id="storagevolumesnr" class="pull-right-container" {% if not storagevolumesnr %}style="display: none;"{% endif %}>
@@ -38,5 +44,7 @@
         </a>
       </li>
       {% endif %}
+{% endif %}
   </ul>
 </li>
+{% endif %}

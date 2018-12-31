@@ -1,9 +1,13 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
-<div class="row" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+{% endblock %}
+
+{% block content %}
+<div class="row">
   <div class="col-xs-12">
     <div class="box box-success">
       <div class="box-header">
@@ -46,6 +50,7 @@
               </div>
             </div>
           </div><!-- /.form-group -->
+          {% include "widgets/selectdepartmentsform.html" %}
         </div><!-- /.box-body -->
         <div class="box-footer">
           <div class="row">

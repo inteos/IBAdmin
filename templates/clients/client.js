@@ -11,10 +11,10 @@ $(function () {
     "bAutoWidth": false,
     "columns": [
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderjoblink(data)} },
-      { "sClass": "vertical-align", "render": function (data,type,row){ return renderdatadis(data[0],data[1])} },
+      { "orderable": false, "sClass": "vertical-align", "render": function (data,type,row){ return renderdatadis(data[0],data[1])} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdatana(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderstoragelink(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "width": "160px", "orderable": false, "sClass": "vertical-align text-center", // 32px for every button
         "render": function ( data, type, row ) {
@@ -54,10 +54,10 @@ $(function () {
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdataar(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdata(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return bytestext(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderstatuslabel(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlabel(data)} },
       { "width": "96px", "orderable": false, "sClass": "vertical-align text-center", <!-- 32px for every button -->
         "render": function (data,type,row){
           var tmp;

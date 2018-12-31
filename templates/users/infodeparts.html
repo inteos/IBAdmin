@@ -1,0 +1,16 @@
+{% if Departments %}
+  <ul class="todo-list">
+    {% for d in Departments %}
+    <li class="{{ d.color|default:'bg-blue' }}">
+      <span class="text">{{ d.name|truncatechars:40 }}</span>
+{% if perms.departments.delete_members %}
+      <div class="tools">
+        <i class="fa fa-trash-o widget-delete depart-delete" data-departname="{{ d.name }}" data-toggle="tooltip" data-original-title="Remove"></i>
+      </div>
+{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No departments member.</p>
+{% endif %}

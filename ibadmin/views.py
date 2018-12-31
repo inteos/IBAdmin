@@ -1,24 +1,34 @@
-from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
+from __future__ import unicode_literals
 from django.shortcuts import render
-from django.http import HttpResponseServerError, JsonResponse
+from django.http import JsonResponse
 from libs.menu import updateMenuNumbers
-from libs.statistic import *
 from libs.system import *
-from jobs.models import Job
-from config.models import *
 
 
 def handler404(request):
     context = {}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     updateservicestatus(context)
     return render(request, '404.html', context)
 
 
 def handler500(request):
     context = {}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     updateservicestatus(context)
     return render(request, '500.html', context)
 
+
+def ibadmin_css(request):
+    return render(request, 'ibadmin.css', {})
+
+
+def ibadmin_js(request):
+    return render(request, 'ibadmin.js', {})
+
+
+def address(request):
+    """ JSON for host address """
+    addr = request.GET.get('address', '')
+    return JsonResponse(checkAddress(addr), safe=False)

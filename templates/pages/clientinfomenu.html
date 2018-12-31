@@ -1,11 +1,15 @@
 <li class="active">
-  <a href="#"><i class="fa fa-laptop"></i> <span>{{ Client.Name }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <a href="#"><i class="fa fa-laptop"></i> <span>{{ Client.Name|truncatechars:24 }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
   <ul class="treeview-menu">
-    <li{% if apppath.1 == 'Info' %} class="active"{% endif %}>
+    {% if apppath.1 == 'Info' %}<li class="active">{% else %}<li>{% endif %}
       <a href="{% url 'clientsinfo' Client.Name %}"><i class="fa fa-info-circle"></i> <span>Info</span></a></li>
-    <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
+{% if perms.clients.change_clients %}
+    {% if apppath.1 == 'Edit' %}<li class="active">{% else %}<li>{% endif %}
       <a href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-wrench"></i> <span>Edit</span></a></li>
-    <li{% if apppath.1 == 'Status' %} class="active"{% endif %}>
+{% endif %}
+{% if perms.clients.status_clients %}
+    {% if apppath.1 == 'Status' %}<li class="active">{% else %}<li>{% endif %}
       <a href="{% url 'clientsstatus' Client.Name %}"><i class="fa fa-external-link"></i> <span>Status</span></a></li>
+{% endif %}
   </ul>
 </li>

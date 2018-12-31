@@ -1,28 +1,41 @@
+{% if perms.clients.view_clients %}
 <!-- Clients menu -->
 <li class="treeview {% if apppath.0 == 'Clients' or apppath.0 == 'Client' %}active{% endif %}">
   <a href="#"><i class="fa fa-laptop"></i> <span>Clients</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
   <ul class="treeview-menu">
+{% if perms.clients.add_clients or perms.clients.add_node_clients or perms.clients.add_service_clients or perms.clients.add_alias_clients %}
     {% if apppath.1 == 'Add' %}<li class="active">{% else %}<li>{% endif %}
       <a href="#"><i class="fa fa-plus"></i>New Client<span class="pull-right-container">
         <i class="fa fa-angle-left pull-right"></i></span></a>
       <ul class="treeview-menu">
+{% if perms.clients.add_clients %}
         {% if apppath.2 == 'Standalone' %}<li class="active">{% else %}<li>{% endif %}
           <a href="{% url 'clientsadd' %}"><i class="fa fa-desktop"></i><span>Standalone</span></a></li>
+{% endif %}
+{% if perms.clients.add_node_clients %}
         {% if apppath.2 == 'Cluster node' %}<li class="active">{% else %}<li>{% endif %}
           <a href="{% url 'clientsaddnode' %}"><i class="fa fa-cubes"></i><span>Cluster node</span></a></li>
+{% endif %}
+{% if perms.clients.add_service_clients %}
         {% if apppath.2 == 'Cluster service' %}<li class="active">{% else %}<li>{% endif %}
           <a href="{% url 'clientsaddservice' %}"><i class="fa fa-cube"></i><span>Cluster service</span></a></li>
+{% endif %}
+{% if perms.clients.add_alias_clients %}
         {% if apppath.2 == 'Alias' %}<li class="active">{% else %}<li>{% endif %}
           <a href="{% url 'clientsaddalias' %}"><i class="fa fa-magic"></i><span>Alias</span></a></li>
+{% endif %}
       </ul>
     </li>
-    {% if clientsnr %}
+{% endif %}
+{% if clientsnr %}
     {% if apppath.1 == 'Defined' %}<li class="active">{% else %}<li>{% endif %}
-      <a href="{% url 'clientsdefined' %}"><i class="fa fa-th-list"></i><span>List</span><span class="pull-right-container">
-        <small class="label pull-right bg-teal">{{ clientsnr }}</small></span></a></li>
-    {% endif %}
+      <a href="{% url 'clientsdefined' %}"><i class="fa fa-th-list"></i><span>List</span>
+        <span class="pull-right-container"><small class="label pull-right bg-teal">{{ clientsnr }}</small></span>
+      </a></li>
+{% endif %}
     {% if clientstatusdisplay %}
       {% include "pages/clientinfomenu.html" %}
     {% endif %}
   </ul>
 </li>
+{% endif %}

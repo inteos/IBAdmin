@@ -1,0 +1,34 @@
+{% load static %}
+{% if Users %}
+<ul class="users-list clearfix">
+{% for usr in Users %}
+  <li>
+{% if perms.departments.delete_members %}
+    <a class="fa fa-times pull-right member-delete" data-username="{{ usr.user.username }}" data-toggle="tooltip" data-original-title="Remove"></a>
+{% endif %}
+    <div class="users-list-img">
+      <img src="{% static 'dist/img/avatar.png' %}" alt="User Image">
+      {% if not usr.user.is_active %}<i class="fa fa-lock pull-right member-locked"></i>{% endif %}
+    </div>
+{% if perms.users.view_users %}
+    <a class="users-list-name" href="{% url 'usersinfo' usr.user.username %}">
+{% else %}
+    <i class="users-list-name">
+{% endif %}
+      {% if usr.user.first_name != '' or usr.user.last_name != '' %}{{ usr.user.first_name }} {{ usr.user.last_name }}{% else %}{{ usr.user.username }}{% endif %}
+{% if not perms.users.view_users %}
+    </i>
+{% else %}
+    </a>
+{% endif %}
+    <span class="users-list-date">{{ usr.user.last_login|date:'Y-m-d h:m'|default:'never logged' }}</span>
+  </li>
+{% endfor %}
+</ul>
+{% else %}
+<div class="col-xs-12">
+  <p></p>
+  <p>No Members available.</p>
+{% if perms.departments.add_members %}
+  <p><i class="fa fa-life-ring"></i> You can add with <span class="label label-info"><i class="fa fa-user-plus"></i> Add member</span> button.</p></div>
+{% endif %}{% endif %}

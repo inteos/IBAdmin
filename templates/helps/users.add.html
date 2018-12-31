@@ -1,0 +1,28 @@
+{% load staticfiles %}
+{% load ibadcolors %}
+<h4>New User</h4>
+<p>Here you can define a new user which can have access to IBAdmin.</p>
+<p>
+<ul class="list-unstyled">
+    <li><b>User name</b> - is the name which will be used to login to service.</li>
+    <li><b>First name/Last name</b> - the name of the user.</li>
+    <li><b>Email</b> - user email.</li>
+    <li><b>Password</b> - user password used to authenticate.</li>
+    <li><b>User type</b> - the basic user level access. There are three acceslevels possible:
+        <ul>
+            <li><span class="badge {{ True|usertypecolor:True }}">Superuser</span> - has all permissions and access to
+                all resources by default. You cannot assign any Department or Role to Superuser.</li>
+            <li><span class="badge {{ True|usertypecolor:False }}">Administrator</span> - has all permissions to all
+                resources in his Departments if he is a member of any Department. Has no access to system configuration
+                and statistics.</li>
+            <li><span class="badge {{ False|usertypecolor:False }}">Standard</span> - has no permissions until assigned
+                by Roles. Has access to resources available in his Departments if he is a member of any Department.</li>
+        </ul>
+    </li>
+    <li><b>Departments</b> - select multiple Departments which will be assigned to user.</li>
+    <li><b>Roles</b> - select multiple permission Roles granted to user.</li>
+</ul>
+</p>
+<p><i class="fa fa-info-circle text-aqua"></i> Info - any user with "<i>Can add users</i>" permission can define new
+    user with access level no higher then himself. When Administrator or Standard user is the member of any Department
+    he has to define departments for new user from his membership. You cannot assign Roles to Administrators.</p>

@@ -1,12 +1,14 @@
 <li class="active">
-  <a href="#"><i class="fa fa-cubes"></i> <span>{{ Job.Name }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <a href="#"><i class="fa fa-cubes"></i> <span>{{ Job.Name|truncatechars:24 }}</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
   <ul class="treeview-menu">
     <li{% if apppath.2 == 'Info' %} class="active"{% endif %}>
       <a href="{% url 'jobsinfo' Job.Name %}"><i class="fa fa-info-circle"></i> <span>Info</span></a></li>
+{% if perms.jobs.change_jobs %}
     {% if Job.InternalJob != 'Yes' and Job.InternalJob != 1 %}
     <li{% if apppath.1 == 'Edit' %} class="active"{% endif %}>
       <a href="{% url 'jobsedit' Job.Name %}"><i class="fa fa-edit"></i> <span>Edit</span></a></li>
     {% endif %}
+{% endif %}
     {% if Job.JobId %}
     {% if apppath.2 == 'Log' %}
     <li class="active">

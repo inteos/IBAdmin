@@ -1,0 +1,84 @@
+{% extends "pages/base.html" %}
+
+{% block contentwidget %}
+{% include "widgets/vmstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="box box-info">
+  <div class="box-header">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined vCenter Hosts</h3>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 id='vcenterlistrefresh' %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <div class="col-sm-12">
+        <table id="vcenterlist" class="table table-bordered table-striped table-hover">
+          <thead>
+          {% include "vmhosts/vcenter.legend1.html" %}
+          </thead>
+          <tfoot>
+          {% include "vmhosts/vcenter.legend1.html" %}
+          </tfoot>
+        </table>
+      </div>
+    </div>
+{% if perms.virtual.add_vcenter or perms.clients.view_clients or perms.jobs.view_jobs or perms.storages.view_storages %}
+    <div class="row">
+      <hr>
+      <div class="col-sm-12 center-block">
+{% if perms.virtual.add_vcenter %}
+        <a class="btn btn-app" href="{% url 'vmsaddvcenter' %}"><i class="fa fa-plus"></i>Add vCenter</a>
+{% endif %}
+{% if perms.clients.view_clients %}
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+{% endif %}
+{% if perms.jobs.view_jobs %}
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+{% endif %}
+{% if perms.storages.view_storages %}
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+{% endif %}
+      </div>
+    </div>
+{% endif %}
+    <div class="box-group">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div class="panel box box-success">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-server"></i>
+            <span> VMware Proxy Clients</span>
+          </h4>
+          {% include "widgets/refreshbutton.html" with box=0 id='clientslistrefresh' %}
+        </div>
+        <div class="box-body">
+          <div class="table-responsive">
+            <table id="clientslist" class="table table-bordered table-striped table-hover">
+              <thead>
+              {% include "vmhosts/vcenter.legend2.html" %}
+              </thead>
+              <tfoot>
+              {% include "vmhosts/vcenter.legend2.html" %}
+              </tfoot>
+            </table>
+          </div>
+{% if perms.virtual.add_vmware %}
+          <a class="btn btn-app" href="{% url 'vmsaddvcenterclient' %}"><i class="fa fa-plus"></i>Assign VMware Proxy</a>
+{% endif %}
+        </div>
+      </div><!-- panel -->
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/deleteclientconfirm.html" %}
+{% include "vmhosts/deletevcenterconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "vmhosts/vcenter.js" %}
+{% endblock %}

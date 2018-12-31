@@ -5,8 +5,11 @@
     Restore <img src="{% static 'help/images/ibadmin-restoreb2.png' %}">, Edit <img src="{% static 'help/images/ibadmin-editb2.png' %}">
     and Delete <img src="{% static 'help/images/ibadmin-deleteb1.png' %}"> the Backup Client.</p>
 <p><i class="fa fa-info-circle text-danger"></i> You cannot delete a Client if it has a running Jobs. Deleting a Client will delete all defined Jobs and jobs history.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> When display information about Virtual Host backup client (<i>VMware, Proxmox, etc.</i>) then you can Define New Guest VM Job instead.</p>
+<p><i class="fa fa-info-circle text-green"></i> You can download File Daemon config file for Standard and Cluster Node backup clients with download button <img src="{% static 'help/images/ibadmin-saveclientconfigb1.png' %}"></p>
+<p><i class="fa fa-info-circle text-green"></i> You can download vSphere Plugin config file for VMware Proxy client with dedicated download button <img src="{% static 'help/images/ibadmin-savevcenterconfigb1.png' %}"></p>
 <p><b>Client Defined Jobs</b> - information about defined Jobs of the client.</p>
-<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
+<p>You can always refresh the view using Refresh button - <img src="{% static 'help/images/ibadmin-refreshb1.png' %}"></p>
 <p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display detailed information about any selected Job.</p>
 <p><img src="{% static 'help/images/ibadmin-runb1.png' %}"> Start selected Job.</p>
 <p><i class="fa fa-info-circle text-aqua"></i> You can't start <span class="badge bg-purple">Restore</span> job manually, use Restore (<img src="{% static 'help/images/ibadmin-restoreb1.png' %}">) button for that.</p>
@@ -16,7 +19,6 @@
 <p><i class="fa fa-info-circle text-aqua"></i> You cannot delete a defined Job when it is running.</p>
 <p>You can search or sort the list to find or check what you are looking for.</p>
 <p><b>Jobs History</b> - information of the history jobs running on this client.</p>
-<p>You can always refresh the view using Refresh button (<img src="{% static 'help/images/ibadmin-refreshb1.png' %}">).</p>
 <p><img src="{% static 'help/images/ibadmin-infob1.png' %}"> Display details and log information about selected JobId.</p>
 <p><img src="{% static 'help/images/ibadmin-restoreb1.png' %}"> Make restore of selected JobId.</p>
 <p><img src="{% static 'help/images/ibadmin-deleteb2.png' %}"> Delete selected JobId.</p>

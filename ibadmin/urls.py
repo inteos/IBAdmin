@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.conf import settings
 from django.contrib.staticfiles import views
 from django.conf.urls import handler404, handler500
+from .views import *
+
 
 urlpatterns = [
     url(r'^', include('dashboard.urls')),
@@ -30,6 +32,13 @@ urlpatterns = [
     url(r'^restore/', include('restore.urls')),
     url(r'^config/', include('config.urls')),
     url(r'^system/', include('system.urls')),
+    url(r'^virtual/', include('virtual.urls')),
+    url(r'^users/', include('users.urls')),
+    url(r'^roles/', include('roles.urls')),
+    url(r'^departments/', include('departments.urls')),
+    url(r'^utils/address/', address, name='addressresolution'),
+    url(r'^ibadmin.js$', ibadmin_js, name='ibadminjs'),
+    url(r'^ibadmin.css$', ibadmin_css, name='ibadmincss'),
 ]
 
 handler404 = 'ibadmin.views.handler404'

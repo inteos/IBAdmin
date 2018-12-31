@@ -16,6 +16,40 @@ INTERVALS = (
     ('years', 'Years'),
 )
 
+LABELCOLORS = (
+    ('bg-blue', 'Blue label'),
+    ('bg-red', 'Red label'),
+    ('bg-green', 'Green label'),
+    ('bg-orange', 'Orange label'),
+    ('bg-navy', 'Navy label'),
+    ('bg-yellow', 'Yellow label'),
+    ('bg-teal', 'Teal label'),
+    ('bg-olive', 'Olive label'),
+    ('bg-maroon', 'Maroon label'),
+    ('bg-aqua', 'Aqua label'),
+    ('bg-purple', 'Purple label'),
+    ('bg-fuchsia', 'Fuchsia label'),
+    ('bg-lime', 'Lime label'),
+    ('bg-black', 'Black label'),
+)
+
+LABELCOLORSDICT = {
+    'bg-blue': 'Blue label',
+    'bg-red': 'Red label',
+    'bg-green': 'Green label',
+    'bg-orange': 'Orange label',
+    'bg-navy': 'Navy label',
+    'bg-yellow': 'Yellow label',
+    'bg-teal': 'Teal label',
+    'bg-olive': 'Olive label',
+    'bg-maroon': 'Maroon label',
+    'bg-aqua': 'Aqua label',
+    'bg-purple': 'Purple label',
+    'bg-fuchsia': 'Fuchsia label',
+    'bg-lime': 'Lime label',
+    'bg-black': 'Black label',
+}
+
 
 def leveltuple(off=False, disableincr=False, disablediff=False):
     lvl = ()
@@ -29,6 +63,15 @@ def leveltuple(off=False, disableincr=False, disablediff=False):
     return lvl
 
 
+def mergeleveltuple(off=False, levels=None):
+    lvl = {}
+    if levels is not None:
+        lvl = levels
+    di = lvl.get('disableincr', False)
+    dd = lvl.get('disablediff', False)
+    return leveltuple(off, di, dd)
+
+
 def level2form(level='Full'):
     if level.lower().startswith('f'):
         return 'full'
@@ -36,12 +79,6 @@ def level2form(level='Full'):
         return 'incr'
     if level.lower().startswith('d'):
         return 'diff'
-
-
-class ibadCharField(forms.CharField):
-    def __init__(self, max_length=None, min_length=None, strip=True, label=None, *args, **kwargs):
-        super(ibadCharField, self).__init__(max_length=max_length, min_length=min_length, strip=strip, *args, **kwargs)
-        self.widget.label = label
 
 
 class RetentionField(forms.MultiValueField):

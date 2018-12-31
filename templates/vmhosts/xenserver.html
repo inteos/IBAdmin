@@ -1,0 +1,75 @@
+{% extends "pages/base.html" %}
+
+{% block contentwidget %}
+{% include "widgets/vmstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="box box-info">
+  <div class="box-header">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined XenServer Hosts</h3>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body no-padding">
+    <div class="table-responsive">
+      <div class="col-xs-12">
+        <table id="clientslist" class="table table-bordered table-striped table-hover">
+          <thead>
+          {% include "vmhosts/xenserver.legend1.html" %}
+          </thead>
+          <tfoot>
+          {% include "vmhosts/xenserver.legend1.html" %}
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <hr>
+      <div class="col-sm-10 center-block">
+        <a class="btn btn-app" href="{% url 'vmsaddxenserver' %}"><i class="fa fa-plus"></i>New VM Host</a>
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+      </div>
+    </div>
+    <div class="box-group" id="clientinfo">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+      <div id="xenserverguestlist" class="panel box box-primary">
+        <div class="box-header with-border">
+          <h4 class="box-title">
+            <i class="fa fa-cubes"></i>
+            <span data-toggle="collapse" data-parent="#clientinfo"> VM Guests list</span>
+          </h4>
+          {% include "widgets/refreshbutton.html" with id="guestsrefresh" disabled=1 %}
+        </div>
+        <div id="One" class="panel-collapse collapse">
+          <div class="box-body">
+            <div class="table-responsive">
+              <table id="guestslist" class="table table-bordered table-striped table-hover">
+                <thead>
+                {% include "vmhosts/xenserver.legend2.html" %}
+                </thead>
+                <tfoot>
+                {% include "vmhosts/xenserver.legend2.html" %}
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="vmguestsloading" class="overlay" style="display: none;">
+          <i class="fa fa-refresh fa-spin"></i>
+        </div>
+      </div><!-- panel -->
+    </div>
+  </div><!-- /.box-body -->
+</div><!-- /.box -->
+{% include "widgets/deleteclientconfirm.html" %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "vmhosts/xenserver.js" %}
+{% endblock %}

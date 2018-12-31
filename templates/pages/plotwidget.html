@@ -1,16 +1,16 @@
 <!-- line chart -->
-<div class="box {{ box|default:'box-primary' }}">
+<div id="widgetid_{{ id }}" class="box {{ box|default:'box-primary' }}">
   <div class="box-header with-border">
-    <i class="fa {{ icon|default:'fa-area-chart' }}"></i>
+    <i class="{{ icon|default:'fa fa-area-chart' }}"></i>
     <h3 class="box-title">{{ title }}</h3>
     <div class="box-tools pull-right">
       {% include 'pages/minimizebutton.html' %}
       {% include 'pages/refreshbutton.html' with id=id %}
-      <!-- <button id="{{ id }}remove" type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>-->
+      <button id="{{ id }}remove" type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
     </div>
   </div>
   <div class="box-body">
-    <div id="{{ id }}" style="height: {{ height }};"></div>
+    <div id="{{ id }}" style="height: {{ height }}px;"></div>
   </div><!-- /.box-body-->
   <div id="{{ id }}loading" class="overlay">
     <i class="fa fa-refresh fa-spin"></i>

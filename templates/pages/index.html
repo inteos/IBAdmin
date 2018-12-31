@@ -1,20 +1,32 @@
 {% extends "pages/base.html" %}
 
-{% block content %}
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
-  <section class="col-lg-7 col-md-6 col-sm-12">
-  {% include "pages/plotwidget.html" with id='cpuutilwidget' title='System Utilization' height='189px' %}
-  {% include "pages/plotwidget.html" with id='backupsizewidget' title='Total Backup Size' height='189px' icon='fa-bar-chart' %}
-  {% include "pages/servicestatus.html" with id='servicestatus' title='Service status' %}
+{% if not Section1 and not Section2 %}
+  <div class="col-lg-6 col-xs-12 col-lg-offset-3">
+    <div class="callout callout-info">
+      <h4>No Widgets enabled.</h4>
+      <p>You have disabled all widgets in your <a href="{% url 'usersprofile' %}">profile</a>.
+        If you want to display some of them here in Dashboard you should enable it.</p>
+    </div>
+  </div>
+{% else %}
+  <section id="col1" class="col-lg-7 col-md-6 col-sm-12 connectedSortable">
+  {% for w in Section1 %}
+  {% include w.widget.template with id=w.widget.widgetid title=w.widget.name icon=w.widget.icon height=w.widget.height %}
+  {% endfor %}
   </section><!-- /.col -->
 
-  <section class="col-lg-5 col-md-6 col-sm-12">
-  {% include "pages/lastjobs.html" with id='lastjobswidget' title='Latest Jobs' %}
-  {% include "pages/plotwidget.html" with id='runningjobswidget' title='Running Jobs' height='189px' icon='fa-bar-chart' %}
-  {% include "pages/plotwidget.html" with id='alljobswidget' title='All Jobs' height='189px' icon='fa-line-chart' %}
-
+  <section id="col2" class="col-lg-5 col-md-6 col-sm-12 connectedSortable">
+  {% for w in Section2 %}
+  {% include w.widget.template with id=w.widget.widgetid title=w.widget.name icon=w.widget.icon height=w.widget.height %}
+  {% endfor %}
   </section><!-- /.col -->
+{% endif %}
 </div><!-- /.row -->
 {% endblock %}
 

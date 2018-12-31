@@ -30,16 +30,31 @@ def detectlibs():
 
 def mt_status(dev=None):
     time.sleep(1)
-    if dev is None:
-        return None
     lines = []
+    status = {
+        'status': None,
+        'lines': lines,
+        'log': 'Unexecuted',
+    }
+    if dev is None:
+        return status
     if os.path.exists(dev):
-        out = Popen(MTCMD + ' -f ' + dev + ' status', shell=True, stdout=PIPE).stdout.read()
-        lines = out.splitlines()
-        for data in lines:
-            if 'ONLINE' in data:
-                return True, lines
-    return False, lines
+        if os.access(dev, os.W_OK):
+            out = Popen(MTCMD + ' -f ' + dev + ' status', shell=True, stdout=PIPE).stdout.read()
+            lines = out.splitlines()
+            for data in lines:
+                if 'ONLINE' in data:
+                    status['status'] = True
+                    status['lines'] = lines
+                    status['log'] = ''
+                    return status
+            status['status'] = False
+            status['log'] = ''
+        else:
+            status['log'] = "Permission denied: %s\n" % str(dev)
+    else:
+        status['log'] = "Dev %s not exist\n" % str(dev)
+    return status
 
 
 def mtx_statusinfo(dev=None):

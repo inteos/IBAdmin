@@ -1,0 +1,82 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+{% load staticfiles %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<link rel="stylesheet" href="{% static 'plugins/jstree/themes/proton/style.min.css' %}" />
+<div class="box box-success">
+{% include 'restore/clientselected.html' with Name=Job.Client %}
+  <div class="box-body no-padding">
+    <div class="box-group" id="clientjobs">
+      <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
+{% include 'restore/jobselected.html' %}
+{% include 'restore/jobidselected.html' %}
+      <div class="panel box box-info">
+        <div class="box-header with-border">
+          <i class="fa fa-archive"></i>
+          <h4 class="box-title"> Proxmox VM data</h4>
+        </div>
+        <div id="Three" class="panel-collapse collapse in">
+          <div class="box-body">
+{% if Jobids != 'unavl' %}
+            <div class="col-xs-12">
+              <div class="well well-sm">
+                <div class="treecontainer">
+                  <div id="jstreediv"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xs-12">
+              <div id="jobidslist">
+                <dl class="dl-horizontal">
+                  <dt>JobIds involved:</dt>
+                  <dd>
+                    {% for j in Jobidsparams %}
+                    <span class="label {{ j.level|joblevelbgcolor:'B' }}">{{ j.jobid }}</span>
+                    {% endfor %}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+            <div class="col-xs-12">
+              <form class="form-horizontal" id="restoreform" method="post" style="margin-top: 12px;">
+                {% csrf_token %}
+                {{ form.rselected }}
+                {{ form.client }}
+                {% include 'widgets/restorelocalform.html' %}
+                {% include 'widgets/restoreclientform.html' %}
+                {{ form.proxmoxstorage }}
+                {{ form.proxmoxpool }}
+                {{ form.where }}
+                {% include 'widgets/restorereplaceform.html' %}
+                {{ form.comment }}
+              </form>
+              {% include 'widgets/restorebuttonform.html' %}
+            </div>
+{% else %}
+            <div class="col-xs-12">
+              <div class="well well-sm">
+                <p><i class="fa fa-calendar-times-o"></i> No data available.</p>
+                It means that the Job: {{ Job.Name }} does not backup any data up to this JobId: {{ Job.JobId }}.
+                Select different Job or JobId, please.
+              </div>
+            </div>
+{% endif %}
+          </div>
+        </div>
+      </div><!-- panel -->
+    </div>
+  </div><!-- /.box-body -->
+{% if Jobids != 'unavl' %}
+  <div id="treeviewloading" class="overlay">
+    <i class="fa fa-refresh fa-spin"></i>
+  </div>
+{% endif %}
+</div><!-- /.box -->
+{% include 'restore/restoreprepare.html' %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "restore/jobidproxmox.js" %}
+{% endblock %}

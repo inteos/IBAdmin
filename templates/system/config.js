@@ -43,12 +43,16 @@ $(function () {
         };
         $('#saveinfo').show();
       };
+      function onErrorReceived(request,status,error){
+        {% include 'widgets/errorprocessingajax.js' %}
+      };
       $.ajax({
         url: "{% url 'systemconfigsave' %}",
         type: "POST",
         data: formdata,
         dataType: "json",
         success: onSavedata,
+        error: onErrorReceived,
       });
     };
   });

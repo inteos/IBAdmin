@@ -25,9 +25,10 @@ urlpatterns = [
     url(r'^editstd/(?P<name>.*)/$', views.editstd, name='clientseditstd'),
     url(r'^editservice/(?P<name>.*)/$', views.editservice, name='clientseditservice'),
     url(r'^editalias/(?P<name>.*)/$', views.editalias, name='clientseditalias'),
-    url(r'^address/$', views.address, name='clientsaddress'),
-    url(r'^name/$', views.name, name='clientsname'),
+    url(r'^name/$', views.clientsname, name='clientsname'),
     url(r'^clustername/$', views.clustername, name='clientsclustername'),
+    url(r'^clusterparam/(?P<clustername>.*)/$', views.clusterparam, name='clientsclusterparam'),
+    url(r'^clusterparam/$', views.clusterparam, name='clientsclusterparam_rel'),
     url(r'^makedelete/$', views.makedelete, name='clientsdelete_rel'),
     url(r'^makedelete/(?P<name>.*)/$', views.makedelete, name='clientsdelete'),
 ]

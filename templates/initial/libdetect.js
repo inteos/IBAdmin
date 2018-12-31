@@ -6,9 +6,13 @@ $(function () {
     radioClass: 'iradio_square-blue',
   });
 });
-
+$("#initsetup").validate({
+  submitHandler: function(form) {
+    $('#initialwait').show();
+    form.submit();
+  },
+});
 var intervalId;
-
 function refreshProgress(){
   $.ajax({
     url: "{% url 'initialtaskprogress' %}",

@@ -83,4 +83,16 @@ ul.jstree-container-ul.jstree-children {
 .popover-content {
   max-height: 400px;
   overflow-y: auto;
- }
+}
+.select2-selection__rendered > span {
+  vertical-align: 2px;
+}
+.select2-results__option > span {
+  vertical-align: 2px;
+}
+.box .nav-stacked>li.profilelist {
+  margin-bottom: .6em;
+}
+ul.todo-list>li.bg-red .tools, ul.todo-list>li.bg-fuchsia .tools {
+  color: #0073b7 !important;
+}

@@ -26,7 +26,7 @@ SECRET_KEY = 'z+d$5ie=e28ov=d+iftgl*!y6!85qgi0xm46&lvw$t^p934$t5'
 DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
-ADMINS = [('Admin','root@localhost')]
+ADMINS = [('Admin', 'root@localhost')]
 
 # Application definition
 
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'roles',
     'dashboard',
     'tags',
     'clients',
@@ -48,6 +50,8 @@ INSTALLED_APPS = [
     'tasks',
     'restore',
     'system',
+    'departments',
+    'virtual',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +61,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'users.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -66,7 +71,7 @@ ROOT_URLCONF = 'ibadmin.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -123,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
-#TIME_ZONE = 'Europe/Warsaw'
+# TIME_ZONE = 'Europe/Warsaw'
 
 USE_I18N = True
 

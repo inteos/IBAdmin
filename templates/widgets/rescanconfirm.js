@@ -1,4 +1,3 @@
-$('#rescanconfirmprogress')
 $('#rescanconfirmbutton').on('click', function () {
   var button = $(this);
   var text = button.text();
@@ -6,6 +5,7 @@ $('#rescanconfirmbutton').on('click', function () {
   var url = button.data('url');
   var taskid = 0;
   var rpintervalId;
+  {% include 'widgets/onErrorReceivedbutton.js' %}
   function closeProgress(){
     clearInterval(rpintervalId);
     $('#rescanconfirmprogress').on('hidden.bs.modal', function (){
@@ -23,32 +23,35 @@ $('#rescanconfirmbutton').on('click', function () {
         clearInterval(rpintervalId);
     };
   function refreshProgress(){
+    function onDataReceived(data) {
+      var progress = data[0]
+      $('#taskprogress').css('width',data[1]).attr('aria-valuenow',progress);
+      $('#taskprogress').html(data[1]);
+      $('#operationlog').html(data[2]);
+      var status = data[3]
+      if (status == 'E' || status == 'C'){
+        $('#rescanconfirmprogress').addClass('modal-danger');
+        $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-times-circle"></i> Library {{ storage }} detection failed.');
+        finishProcess();
+      } else
+      if (status == 'S'){
+        $('#rescanconfirmprogress').addClass('modal-success');
+        $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} hardware did not changed.');
+        finishProcess();
+      } else
+      if (progress == 100){
+        $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} detection done.');
+        $('#{{ form.taskid.id_for_label }}').val(taskid);
+        finishProcess();
+      }
+    };
+    {% include 'widgets/onErrorReceived.js' %}
     $.ajax({
       url: "{% url 'storagetapetaskprogress_rel' %}" + taskid + '/',
       type: "GET",
       dataType: "json",
-      success: function(data){
-        var progress = data[0]
-        $('#taskprogress').css('width',data[1]).attr('aria-valuenow',progress);
-        $('#taskprogress').html(data[1]);
-        $('#operationlog').html(data[2]);
-        var status = data[3]
-        if (status == 'E' || status == 'C'){
-            $('#rescanconfirmprogress').addClass('modal-danger');
-            $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-times-circle"></i> Library {{ storage }} detection failed.');
-            finishProcess();
-        } else
-        if (status == 'S'){
-            $('#rescanconfirmprogress').addClass('modal-success');
-            $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} hardware did not changed.');
-            finishProcess();
-        } else
-        if (progress == 100){
-          $('#rescanconfirmprogress').find('.modal-header').find('h4').html('<i class="fa fa-check-circle"></i> Library {{ storage }} detection done.');
-          $('#{{ form.taskid.id_for_label }}').val(taskid);
-          finishProcess();
-        }
-      },
+      success: onDataReceived,
+      error: onErrorReceived,
     });
   };
   function onDataReceived(data) {
@@ -70,5 +73,6 @@ $('#rescanconfirmbutton').on('click', function () {
     type: "GET",
     dataType: "json",
     success: onDataReceived,
+    error: onErrorReceived,
   });
 });

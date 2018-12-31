@@ -1,0 +1,20 @@
+{% if perms.roles.view_roles %}
+<!-- Users admim system menu -->
+<li class="treeview {% if apppath.0 == 'Roles' %}active{% endif %}">
+  <a href="#"><i class="fa fa-puzzle-piece"></i> <span>Roles</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+{% if perms.roless.add_roles %}
+    {% if apppath.1 == 'Add' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'rolesadd' %}"><i class="fa fa-plus"></i> <span>Add Role</span></a>
+    </li>
+{% endif %}
+    {% if apppath.1 == 'Defined' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'rolesdefined' %}"><i class="fa fa-th-list"></i><span>List</span><span class="pull-right-container">
+        <small class="label pull-right bg-teal">{{ rolesnr }}</small></span></a>
+    </li>
+    {% if rolestatusdisplay %}
+      {% include "pages/rolesinfomenu.html" %}
+    {% endif %}
+  </ul>
+</li>
+{% endif %}

@@ -1,9 +1,9 @@
-  <div class="col-lg-4 col-md-5 col-xs-12">
+  <div class="col-lg-5 col-md-6 col-xs-12">
     {% if FSData.Include %}
     <p><span class="label label-success">Include</span></p>
     <ul class="row">
     {% for i in FSData.Include %}
-      {% if FSData.Include|length > 5 %}
+      {% if FSData.Include|length > 6 %}
     <li class="col-xs-6">{{ i.value }}</li>
       {% else %}
     <li class="col-xs-12">{{ i.value }}</li>
@@ -32,7 +32,7 @@
   </div>
 
   {% if FSData.Exclude %}
-  <div class="col-lg-8 col-md-6 col-xs-12">
+  <div class="col-lg-5 col-md-6 col-xs-12">
     <p><span class="label label-warning">Exclude</span></p>
     <ul class="row">
       {% for e in FSData.Exclude %}

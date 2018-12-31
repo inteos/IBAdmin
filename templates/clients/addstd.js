@@ -1,26 +1,15 @@
 <script>
+{% include 'widgets/osicon.js' %}
+  $(function () {
+    var curos = $("#{{ form.os.id_for_label }}").val();
+    var icon = set_osicon(curos);
+    $('#{{ form.os.id_for_label }}icon').removeClass().addClass(icon);
+  });
   $(function () {
     //Initialize Select2 Elements
     $(".select2").select2();
     $("#{{ form.os.id_for_label }}").on('change', function(event){
-      var icon = 'fa fa-server';
-      switch (this.value){
-        case 'rhel':
-        case 'deb':
-          icon = 'fa fa-linux';
-          break;
-        case 'win32':
-        case 'win64':
-          icon = 'fa fa-windows';
-          break;
-        case 'osx':
-          icon = 'fa fa-apple'
-          break;
-        case 'proxmox':
-        case 'xen':
-          icon = 'fa fa-cloud';
-          break;
-      };
+      var icon = set_osicon(this.value);
       $('#{{ form.os.id_for_label }}icon').removeClass().addClass(icon);
     });
   });
@@ -43,7 +32,7 @@
       {{ form.address.name }}: {
         required: true,
         remote: {
-          url: "{% url 'clientsaddress' %}"
+          url: "{% url 'addressresolution' %}"
         }
       }
     },

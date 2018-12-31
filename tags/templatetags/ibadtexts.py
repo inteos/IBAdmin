@@ -1,6 +1,8 @@
 from django import template
 from django.utils.safestring import mark_safe
 from libs.conf import getscheduletext, getretentiontext
+from libs.ibadmin import *
+from django.contrib.messages import constants as message_constants
 
 register = template.Library()
 
@@ -8,8 +10,8 @@ register = template.Library()
 @register.filter
 def bytestext(value):
     try:
-        val = long(value)
-    except:
+        val = int(value)
+    except ValueError:
         return value
     if val < 1024:
         return str(val) + " Bytes"
@@ -23,160 +25,59 @@ def bytestext(value):
 
 @register.filter
 def jobstatustext(value, arg):
-    if value == 'A':
-        return 'Canceled'
-    if value == 'C' or value == 'F' or value == 'S' or value == 'M' or value == 'm' or value == 's' or value == 'j' \
-            or value == 'c' or value == 'd' or value == 't':
-        return 'Queued'
-    if value == 'E' or value == 'f':
-        return 'Error'
-    if value == 'I':
-        return 'Incomplete'
-    if value == 'R':
-        return 'Running'
-    if value == 'T' and arg < 1:
-        return 'Success'
-    if (value == 'T' and arg > 0) or value == 'W':
-        return 'Warning'
-    return 'Unknown'
+    return ibadmin_jobstatustext(value, arg)
 
 
 @register.filter
 def statustext(value):
-    if type(value) is int:
-        if value == 1:
+    if value is not None:
+        if int(value) == 1:
             return 'Online'
-        if value == 0:
+        if int(value) == 0:
             return 'Offline'
     return "Unknown"
 
 
 @register.filter
 def jobtypetext(value):
-    if value == 'B':
-        return "Backup"
-    if value == 'R':
-        return "Restore"
-    if value == 'D':
-        return "Admin"
-    if value == 'C':
-        return "Copied"
-    if value == 'c':
-        return "CopyJob"
-    if value == 'M':
-        return "Migrated"
-    if value == 'g':
-        return "Migration"
-    if value == 'V':
-        return "Verify"
-    if value == 'V':
-        return "Verify"
-    if value == 'S':
-        return "ScanJob"
-    return "Unknown"
+    return ibadmin_jobtext(value)
 
 
 @register.filter
 def jobleveltext(value, arg=None):
-    """
-    
-    :param value: Job->Level
-    :param arg: Job->Type
-    :return: 
-    """
-    if arg is not None and (arg in ('R', 'Restore')):
-        return "Restore"
-    if arg is not None and (arg in ('D', '', 'Admin')) or value == ' ' or value == '':
-        return "Admin"
-    if value in ('F', 'full', 'Full'):
-        return "Full"
-    if value in ('D', 'Differential', 'Diff', 'differential'):
-        return "Diff"
-    if value in ('I', 'Incremental', 'Incr', 'incremental'):
-        return "Incr"
-    if value == 'B':
-        return "Base"
-    if value in ('f', 'VirtualFull'):
-        return "VFull"
-    if value == 'S':
-        return "Since"
-    if value == 'C':
-        return "Ver2Cat"
-    if value == 'O':
-        return "Vol2Cat"
-    if value == 'd':
-        return "Disk2Cat"
-    if value == 'A':
-        return "VerData"
-    return "Unknown"
+    return ibadmin_jobleveltext(value, arg)
 
 
 @register.filter
 def mediaicon(value):
-    if value.startswith('Dedup'):
-        return "fa-cubes"
-    if value.startswith('Tape'):
-        return "fa-simplybuilt"
-    return "fa-database"
+    return ibadmin_media_icon(value)
 
 
 @register.filter
 def trimfilename(value, arg=32):
     out = value
-    l = len(value)
-    if l > arg:
+    length = len(value)
+    if length > arg:
         if value.startswith('/'):
-            out = "/.../" + value[l - arg + 5:]
+            out = "/.../" + value[length - arg + 5:]
         else:
-            out = value[0:3] + ".../" + value[l - arg + 7:]
+            out = value[0:3] + ".../" + value[length - arg + 7:]
     return out.replace('//', '/')
 
 
 @register.filter
 def OStext(value):
-    if value == 'rhel':
-        return "RHEL/Centos"
-    if value == 'deb':
-        return "Debian/Ubuntu"
-    if value == 'win32':
-        return "Windows 32bit"
-    if value == 'win64':
-        return "Windows 64bit"
-    if value == 'osx':
-        return "MacOS X"
-    if value == 'solsparc':
-        return "Solaris SPARC"
-    if value == 'solintel':
-        return "Solaris x86"
-    if value == 'aix':
-        return "AIX"
-    if value == 'hpux':
-        return "HP-UX"
-    if value == 'proxmox':
-        return "Proxmox"
-    if value == 'xen':
-        return "XenServer"
-    return "Unknown"
+    return ibadmin_ostext(value)
 
 
 @register.filter
 def OSicon(value):
-    if value in ('rhel', 'deb'):
-        return "fa-linux"
-    if value in ('win32', 'win64'):
-        return "fa-windows"
-    if value == 'osx':
-        return "fa-apple"
-    if value in ('proxmox', 'xen'):
-        return "fa-cloud"
-    return ""
+    return ibadmin_osicon(value)
 
 
 @register.filter
 def OSiconall(value):
-    if value in ('rhel', 'deb', 'win32', 'win64', 'osx'):
-        return OSicon(value)
-    return "fa-server"
+    return ibadmin_osiconall(value)
 
 
 @register.filter
@@ -196,56 +97,112 @@ def retentiontext(value):
 
 @register.filter
 def taskstatustext(value):
-    if value == 'N':
-        return "New"
-    if value == 'E':
-        return "Failed"
-    if value == 'F':
-        return "Success"
-    if value == 'C':
-        return "Canceled"
-    return "Running"
+    return ibadmin_tasks_text(value)
 
 
 @register.filter
 def charticon(value):
-    if type(value) is not int:
-        value = int(value)
-    if value == 1:
-        return 'fa-line-chart'
-    if value == 2:
-        return 'fa-bar-chart'
-    if value == 3:
-        return 'fa-area-chart'
-    if value == 4:
-        return 'fa-pie-chart'
-    return 'fa-bar-chart'
+    return ibadmin_charts_icon(value)
 
 
 @register.filter
 def charttext(value):
-    if type(value) is not int:
-        value = int(value)
-    if value == 1:
-        return 'Line chart'
-    if value == 2:
-        return 'Bar chart'
-    if value == 3:
-        return 'Area chart'
-    if value == 4:
-        return 'Pie chart'
-    return 'Bar chart - default'
+    return ibadmin_charts_text(value)
 
 
 @register.filter
 def jdapptext(value):
-    if value is not None:
-        if value == 'jd-backup-files':
-            return 'Files backup'
-        if value == 'jd-backup-proxmox':
-            return 'Proxmox backup'
-        if value == 'jd-admin':
-            return 'Admin Job'
-        if value == 'jd-backup-catalog':
-            return 'Catalog Backup'
-    return 'Unknown'
+    return ibadmin_jobapptext(value)
+
+
+@register.filter
+def plugintypetext(name):
+    return ibadmin_plugin_text(name)
+
+
+@register.filter
+def fullname(firstname, lastname):
+    if firstname or lastname:
+        return firstname + ' ' + lastname
+    else:
+        return None
+
+
+@register.filter
+def usertypetext(superuser, staff):
+    if superuser:
+        if staff:
+            return 'Superuser!'
+        else:
+            return 'Administrator'
+    return 'Standard'
+
+
+@register.filter
+def usertypetextfull(superuser, staff):
+    if superuser:
+        return 'You are the Superuser!'
+    if staff:
+        return 'Powerfull Administrator'
+    return 'Standard User'
+
+
+@register.filter
+def messageico(level):
+    if level == message_constants.INFO:
+        return 'fa-info-circle'
+    if level == message_constants.SUCCESS:
+        return 'fa-check'
+    if level == message_constants.WARNING:
+        return 'fa-warning'
+    if level == message_constants.ERROR:
+        return 'fa-ban'
+    return 'fa-coffee'
+
+
+@register.filter
+def messagealert(message):
+    level = 0
+    if hasattr(message, 'level'):
+        level = message.level
+    if level == message_constants.INFO:
+        return 'alert-info'
+    if level == message_constants.SUCCESS:
+        return 'alert-success'
+    if level == message_constants.WARNING:
+        return 'alert-warning'
+    if level == message_constants.ERROR:
+        return 'alert-danger'
+    return 'alert-warning'
+
+
+@register.filter
+def messagesubject(message):
+    subject = 'Info'
+    if hasattr(message, 'extra_tags'):
+        subject = message.extra_tags
+    if subject.startswith('slide:'):
+        subject = subject.split('slide:')[1]
+    if subject.startswith('noslide:'):
+        subject = subject.split('noslide:')[1]
+    return subject
+
+
+@register.filter
+def messagesbox(message):
+    boxclass = 'messagesbox'
+    level = message_constants.INFO
+    subject = ''
+    if hasattr(message, 'level'):
+        level = message.level
+    if hasattr(message, 'extra_tags'):
+        subject = message.extra_tags
+    if subject.startswith('slide:'):
+        boxclass = 'messagesbox'
+    else:
+        if subject.startswith('noslide:'):
+            boxclass = ''
+        else:
+            if level == message_constants.ERROR:
+                boxclass = ''
+    return boxclass

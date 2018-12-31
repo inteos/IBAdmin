@@ -1,56 +1,60 @@
-from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
+from __future__ import unicode_literals
 from django.db.models import Max, Q
 from django.db import OperationalError
 from django.core.exceptions import ObjectDoesNotExist
 from .models import *
+from .restype import RESTYPE
 from storages.models import Storage
+# import traceback
+#    print "======================================================="
+#    traceback.print_stack(limit=6)
 
 
-def getDIRcompid():
-    """ Returns None when no configuration available """
+def getDIRcompid(request=None):
+    """ Returns -1 when no configuration available """
+    if request is not None:
+        if hasattr(request, 'ibadmindircompid'):
+            return request.ibadmindircompid
     try:
         component = ConfComponent.objects.get(type='D')
     except OperationalError:
         return None
     except ObjectDoesNotExist:
         return -1
+    if request is not None:
+        request.ibadmindircompid = component.compid
     return component.compid
 
 
-def getDIRname():
+def getDIRname(request=None, dircompid=None):
     """ Returns None when no configuration available """
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
     try:
-        component = ConfComponent.objects.get(type='D')
-    except:
+        component = ConfComponent.objects.get(compid=dircompid)
+    except ObjectDoesNotExist:
         return None
     return component.name
 
 
-def getDIRdescr(dircompid=None):
+def getDIRdescr(request=None, dircompid=None):
     if dircompid is None:
-        dircompid = getDIRcompid()
-    dirres = ConfResource.objects.get(compid_id=dircompid, type__name='Director')
+        dircompid = getDIRcompid(request)
+    dirres = ConfResource.objects.get(compid_id=dircompid, type=RESTYPE['Director'])
     return dirres.description
 
 
-def getDIRCatalog():
-    compid = getDIRcompid()
-    resource = ConfResource.objects.get(compid_id=compid, type__name='Catalog')
+def getDIRCatalog(request=None):
+    compid = getDIRcompid(request)
+    resource = ConfResource.objects.get(compid_id=compid, type=RESTYPE['Catalog'])
     return resource.name
-
-
-def getLicenseKey():
-    dircompid = getDIRcompid()
-    dirname = getDIRname()
-    resid = getresourceid(dircompid, dirname, 'Director')
-    return getparameter(resid, '.IBADLicenseKey')
 
 
 def getFDcompid(name):
     try:
         component = ConfComponent.objects.get(type='F', name=name)
-    except:
+    except ObjectDoesNotExist:
         return None
     return component.compid
 
@@ -58,7 +62,7 @@ def getFDcompid(name):
 def getSDcompid(name):
     try:
         component = ConfComponent.objects.get(type='S', name=name)
-    except:
+    except ObjectDoesNotExist:
         return None
     return component.compid
 
@@ -82,7 +86,7 @@ def getparameter(resid, name):
     """
     try:
         param = ConfParameter.objects.get(resid_id=resid, name=name)
-    except:
+    except ObjectDoesNotExist:
         return None
     return param.value
 
@@ -97,7 +101,7 @@ def getparameterlist(resid, name):
     """
     try:
         param = ConfParameter.objects.filter(resid_id=resid, name=name).all().values()
-    except:
+    except ObjectDoesNotExist:
         return None
     return list(param)
 
@@ -105,7 +109,7 @@ def getparameterlist(resid, name):
 def getparameters(resid):
     try:
         param = ConfParameter.objects.filter(resid_id=resid).values()
-    except:
+    except ObjectDoesNotExist:
         return None
     return list(param)
 
@@ -113,7 +117,7 @@ def getparameters(resid):
 def getresourceid(compid, name, typename):
     try:
         resource = ConfResource.objects.get(compid_id=compid, name=name, type__name=typename)
-    except:
+    except ObjectDoesNotExist:
         return None
     return resource.resid
 
@@ -121,22 +125,37 @@ def getresourceid(compid, name, typename):
 def getsubresourceid(resid, typename):
     try:
         resource = ConfResource.objects.get(sub=resid, type__name=typename)
-    except:
+    except ObjectDoesNotExist:
         return None
     return resource.resid
 
 
-def getDIRPoolid(dircompid=None, name='Default'):
+def getparamskey(paramsdic, key):
+    """
+    function used for 'sorted()' as 'Params' key
+    :param paramsdic: jobparams or clientparams dicts with 'Params' table
+    :param key: a parameter key to sorted
+    :return: key to sorted
+    """
+    params = paramsdic['Params']
+    val = ''
+    for a in params:
+        if a['name'] == key:
+            val = a['value']
+    return val
+
+
+def getDIRPoolid(request=None, dircompid=None, name='Default'):
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     return getresourceid(compid=dircompid, name=name, typename='Pool')
 
 
-def getDIRJobparams(dircompid=None, jobres=None):
+def getDIRJobparams(request, dircompid=None, jobres=None):
     if jobres is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     jdname = getparameter(jobres.resid, 'JobDefs')
     jdid = getresourceid(dircompid, jdname, 'JobDefs')
     jobtype = getparameter(jdid, 'Type')
@@ -145,55 +164,13 @@ def getDIRJobparams(dircompid=None, jobres=None):
     return jobparams
 
 
-def getDIRJobinfo(dircompid=None, name=None):
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    try:
-        jobres = ConfResource.objects.get(compid_id=dircompid, type__name='Job', name=name)
-    except:
-        return None
-    return getDIRJobparams(dircompid, jobres)
-
-
-def getDIRJobsList(dircompid=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all jobs resources available
-    jobsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Job').exclude(confparameter__name='.Disabledfordelete').order_by('name')
-    jobslist = []
-    for jr in jobsres:
-        jobparams = getDIRJobparams(dircompid, jr)
-        jobslist.append(jobparams)
-    return jobslist
-
-
-def getDIRJobsListfiltered(dircompid=None, search='', offset=0, limit=0):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all jobs resources available
-    total = ConfResource.objects.filter(compid_id=dircompid, type__name='Job').exclude(confparameter__name='.Disabledfordelete').all().count()
-    if search != '':
-        f = Q(name__icontains=search) | Q(description__icontains=search)
-        filtered = ConfResource.objects.filter(Q(compid_id=dircompid, type__name='Job'), f).exclude(confparameter__name='.Disabledfordelete').count()
-        jobsres = ConfResource.objects.filter(Q(compid_id=dircompid, type__name='Job'), f).exclude(confparameter__name='.Disabledfordelete').order_by('name')[offset:offset + limit]
-    else:
-        filtered = total
-        jobsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Job').exclude(confparameter__name='.Disabledfordelete').order_by('name')[offset:offset + limit]
-    jobslist = []
-    for jr in jobsres:
-        jobparams = getDIRJobparams(dircompid, jr)
-        jobslist.append(jobparams)
-    return jobslist, total, filtered
-
-
 def getDIRJobType(dircompid=None, name=None):
     if name is None:
         return None
     if dircompid is None:
         dircompid = getDIRcompid()
-    jd = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__name=name, resid__type__name='Job', name='JobDefs').first()
+    jd = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__name=name, resid__type=RESTYPE['Job'],
+                                      name='JobDefs').first()
     if jd is not None:
         return jd.value
     return None
@@ -204,46 +181,10 @@ def getDIRJobDefs(dircompid=None, name=None):
         return None
     if dircompid is None:
         dircompid = getDIRcompid()
-    jd = ConfResource.objects.filter(compid_id=dircompid, name=name, type__name='JobDefs').first()
+    jd = ConfResource.objects.filter(compid_id=dircompid, name=name, type=RESTYPE['JobDefs']).first()
     if jd is not None:
         return jd
     return None
-
-
-def getDIRClientJobsList(dircompid=None, client=None):
-    if client is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all jobs resources for a client
-    jobsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Job', confparameter__name='Client',
-                                          confparameter__value=client).order_by('name')
-    jobslist = []
-    for jr in jobsres:
-        jobparams = getDIRJobparams(dircompid, jr)
-        jobslist.append(jobparams)
-    return jobslist
-
-
-def getDIRClientJobsListfiltered(dircompid=None, client=None, search='', offset=0, limit=0):
-    if client is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all jobs resources for a client
-    total = ConfResource.objects.filter(compid_id=dircompid, type__name='Job', confparameter__name='Client', confparameter__value=client).all().count()
-    if search != '':
-        f = Q(name__icontains=search) | Q(description__icontains=search)
-        filtered = ConfResource.objects.filter(Q(compid_id=dircompid, type__name='Job', confparameter__name='Client', confparameter__value=client), f).exclude(confparameter__name='.Disabledfordelete').count()
-        jobsres = ConfResource.objects.filter(Q(compid_id=dircompid, type__name='Job', confparameter__name='Client', confparameter__value=client), f).exclude(confparameter__name='.Disabledfordelete').order_by('name')[offset:offset + limit]
-    else:
-        filtered = total
-        jobsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Job', confparameter__name='Client', confparameter__value=client).exclude(confparameter__name='.Disabledfordelete').order_by('name')[offset:offset + limit]
-    jobslist = []
-    for jr in jobsres:
-        jobparams = getDIRJobparams(dircompid, jr)
-        jobslist.append(jobparams)
-    return jobslist, total, filtered
 
 
 def getDIRClientparams(clientres=None):
@@ -251,98 +192,6 @@ def getDIRClientparams(clientres=None):
         return None
     clientparams = {'Name': clientres.name, 'Descr': clientres.description, 'Params': getparameters(clientres.resid)}
     return clientparams
-
-
-def getDIRClientinfo(dircompid=None, name=None):
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    try:
-        clientres = ConfResource.objects.get(compid_id=dircompid, type__name='Client', name=name)
-    except:
-        return None
-    return getDIRClientparams(clientres)
-
-
-def getDIRClientsList(dircompid=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all Clients resources available
-    clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client').exclude(confparameter__name='.Disabledfordelete').order_by('name')
-    clientslist = []
-    for cr in clientsres:
-        clientparams = getDIRClientparams(cr)
-        clientslist.append(clientparams)
-    return clientslist
-
-
-def getDIRClientsListfiltered(dircompid=None, search='', offset=0, limit=0):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all Clients resources available
-    total = ConfResource.objects.filter(compid_id=dircompid, type__name='Client').exclude(confparameter__name='.Disabledfordelete').all().count()
-    if search != '':
-        f = Q(name__icontains=search) | Q(description__icontains=search)
-        filtered = ConfResource.objects.filter(Q(compid_id=dircompid, type__name='Client'), f).exclude(confparameter__name='.Disabledfordelete').count()
-        clientsres = ConfResource.objects.filter(Q(compid_id=dircompid, type__name='Client'), f).exclude(confparameter__name='.Disabledfordelete').order_by('name')[offset:offset + limit]
-    else:
-        filtered = total
-        clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client').exclude(confparameter__name='.Disabledfordelete').order_by('name')[offset:offset + limit]
-    clientslist = []
-    for cr in clientsres:
-        clientparams = getDIRClientparams(cr)
-        clientslist.append(clientparams)
-    return clientslist, total, filtered
-
-
-def getDIRClientsNames(dircompid=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all Clients resources available
-    clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client').order_by('name')
-    clientsnames = ()
-    for cr in clientsres:
-        clientsnames += (cr.name,)
-    return clientsnames
-
-
-def getDIRClientsNamesos(dircompid=None, os=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all Clients resources available
-    if os is None:
-        return getDIRClientsNames(dircompid)
-    clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client', confparameter__name='.OS',
-                                             confparameter__value=os).order_by('name')
-    clientsnames = ()
-    for cr in clientsres:
-        clientsnames += (cr.name,)
-    return clientsnames
-
-
-def getDIRClientsNamesnalias(dircompid=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all Clients resources available
-    clientsres = ConfResource.objects.filter(compid_id=dircompid, type__name='Client').exclude(confparameter__name='.Alias').exclude(confparameter__name='.ClusterService').order_by('name')
-    clientsnames = ()
-    for cr in clientsres:
-        clientsnames += (cr.name,)
-    return clientsnames
-
-
-def getDIRClientsClusters(dircompid=None):
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # List of the all Clients resources available
-    clientsres = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Client',
-                                              name='.ClusterName').distinct('value')
-    clusters = ()
-    for cr in clientsres:
-        clusters += (cr.value,)
-    return clusters
 
 
 def getDIRClientsClusterEncpass(cluster=None):
@@ -353,19 +202,6 @@ def getDIRClientsClusterEncpass(cluster=None):
     return encpass
 
 
-def getDIRClientAliases(dircompid=None, name=None):
-    if name is None:
-        return None
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    params = ConfParameter.objects.filter(resid__type__name='Client', name='.Alias', value=name)
-    aliases = ()
-    for al in params:
-        aliases += (al.resid.name,)
-    return aliases
-
-
 def getDIRStorageparams(storageres):
     if storageres is None:
         return None
@@ -374,9 +210,9 @@ def getDIRStorageparams(storageres):
     return storageparams
 
 
-def getDIRStorageList(dircompid=None):
+def getDIRStorageList(request, dircompid=None):
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     # list of the all Storages available
     storageres = ConfResource.objects.filter(compid_id=dircompid, type__name='Storage').order_by('name')
     storagelist = []
@@ -384,37 +220,6 @@ def getDIRStorageList(dircompid=None):
         storageparams = getDIRStorageparams(sr)
         storagelist.append(storageparams)
     return storagelist
-
-
-def getDIRStorageNames(dircompid=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # list of the all Storages for clients available
-    storageres = ConfResource.objects.filter(compid_id=dircompid, type__name='Storage').order_by('name')
-    storagenames = ()
-    for sr in storageres:
-        storagenames += (sr.name,)
-    return storagenames
-
-
-def getDIRStorageNamesnAlias(dircompid=None):
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    # list of the all Storages for clients available
-    storageres = ConfResource.objects.filter(compid_id=dircompid, type__name='Storage').exclude(confparameter__name='.Alias').order_by('name')
-    storagenames = ()
-    for sr in storageres:
-        storagenames += (sr.name,)
-    return storagenames
-
-
-def getStorageNames():
-    # list of the all Storage components available
-    storages = ConfComponent.objects.filter(type='S').order_by('name')
-    storagenames = ()
-    for sr in storages:
-        storagenames += (sr.name,)
-    return storagenames
 
 
 def getDIRStorageinfo(dircompid=None, name=None):
@@ -599,11 +404,11 @@ def getFDClientAddress(fdcompid=None, name=None):
     return address.value
 
 
-def getDIRClientOS(dircompid=None, name=None):
+def getDIRClientOS(request, dircompid=None, name=None):
     if name is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     os = ConfParameter.objects.get(resid__compid_id=dircompid, resid__name=name, resid__type__name='Client',
                                    name='.OS')
     return os.value
@@ -642,7 +447,7 @@ def getDIRadminemail(dircompid=None):
 def getStorageisDedup(storname=None):
     if storname is None:
         return False
-    return ConfParameter.objects.filter(resid__name=storname, name='.StorageDirDedupidx').count() > 0
+    return ConfParameter.objects.filter(resid__name=storname, name='MediaType', value__contains='Dedup').count() > 0
 
 
 def getDIRStorageType(dircompid=None, storname=None):

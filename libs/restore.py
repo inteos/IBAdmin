@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from datetime import *
 import stat
+from .utils import getrandomnumber
 
 
 FILETYPES = {
@@ -154,3 +155,7 @@ def decodeperm(mode=None):
         if imode & stat.S_ISVTX:
             perm[9] = 't'
     return ''.join(perm)
+
+
+def getpluginconffilename():
+    return "/tmp/ibad.rconf." + getrandomnumber()

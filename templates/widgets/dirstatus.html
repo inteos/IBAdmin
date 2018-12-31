@@ -1,7 +1,7 @@
       <div class="info-box">
         <span class="info-box-icon bg-green"><i class="fa fa-institution"></i></span>
         <div class="info-box-content">
-          <span class="info-box-number">Master Daemon</span>
+          <span class="info-box-number text-no-overflow">Master Daemon</span>
           <span id="DIRStatussuccess" class="info-box-text label label-success" {% if not DIRStatus %}style="display: none;"{% endif %}>Running</span>
           <span id="DIRStatusfailed" class="info-box-text label label-danger" {% if DIRStatus %}style="display: none;"{% endif %}><a href="{% url 'daemonindex' %}" class="text-white">Offline</a></span>
         </div><!-- /.info-box-content -->

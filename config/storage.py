@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 from .director import *
+from libs.system import getdevsymlink
 import os
 
 
@@ -228,7 +229,8 @@ def createStoragededup(dircompid=None, dirname=None, storname='ibadmin', address
     # insert new Director {} resource into SD conf
     createSDDirector(sdcompid=sdcompid, dirname=dirname, name=storname, password=password, descr=descr)
     # insert new Storage {} resource into SD conf
-    createSDStorage(sdcompid=sdcompid, name=storname, descr=descr, address=address, dedupdir=dedupdir, dedupindx=dedupidxdir)
+    createSDStorage(sdcompid=sdcompid, name=storname, descr=descr, address=address, dedupdir=dedupdir,
+                    dedupindx=dedupidxdir)
     # insert new Messages {} resource into SD conf
     createSDMessages(sdcompid=sdcompid, dirname=dirname)
     # create a list of archive devices
@@ -248,7 +250,7 @@ def createStoragededup(dircompid=None, dirname=None, storname='ibadmin', address
 
 
 def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None,
-                      archdir='/tmp'):
+                      archdir='/tmp', departments=None):
     if storname is None or (sdcomponent is None and sdcompid is None):
         return None
     if dircompid is None:
@@ -265,7 +267,8 @@ def extendStoragefile(dircompid=None, dirname=None, sdcompid=None, storname=None
     address = getDIRInternalStorageAddress()
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=storname, password=password, address=address,
-                     descr=descr, device=mediatype, mediatype=mediatype, sdcomponent=sdcomponent, sddirdevice=archdirn)
+                     descr=descr, device=mediatype, mediatype=mediatype, sdcomponent=sdcomponent, sddirdevice=archdirn,
+                     departments=departments)
     # TODO: extend maximumconcurrentjobs for SD
     # create a list of archive devices
     devices = []
@@ -321,7 +324,7 @@ def extendStoragetape(dircompid=None, dirname=None, sdcompid=None, storname=None
 
 
 def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=None, descr='', sdcomponent=None,
-                       dedupdir='/tmp', dedupidxdir='/tmp'):
+                       dedupdir='/tmp', dedupidxdir='/tmp', departments=None):
     if storname is None or (sdcomponent is None and sdcompid is None):
         return None
     if dircompid is None:
@@ -340,7 +343,7 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
     # insert new Storage {} resource into Dir conf
     createDIRStorage(dircompid=dircompid, dirname=dirname, name=storname, password=password, address=address,
                      descr=descr, device=mediatype, mediatype=mediatype, sdcomponent=sdcomponent, sddirdevice=dedupdirn,
-                     sddirdedupidx=dedupidxdirn)
+                     sddirdedupidx=dedupidxdirn, departments=departments)
     # TODO: extend maximumconcurrentjobs for SD
     # create a list of archive devices
     devices = []
@@ -360,11 +363,12 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
     addparameterstr(resid, 'DedupIndexDirectory', dedupidxdirn)
 
 
-def createStorageAlias(dircompid=None, storname=None, descr='', storage=None, address='localhost'):
+def createStorageAlias(request, dircompid=None, storname=None, descr='', storage=None, address='localhost',
+                       department=None):
     if storname is None or storage is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     storageid = getresourceid(dircompid, storage, 'Storage')
     sdcomponent = getparameter(storageid, '.StorageComponent')
     sdcompid = getSDcompid(sdcomponent)
@@ -373,8 +377,11 @@ def createStorageAlias(dircompid=None, storname=None, descr='', storage=None, ad
     # insert parameters
     addparameter(resid, '.Alias', storage)
     addparameterstr(resid, 'Address', address)
+    if department is not None and department not in ('', ' ', '#'):
+        addparameterstr(resid, '.Department', department)
     # copy other parameters
-    storparams = ConfParameter.objects.filter(resid=storageid).exclude(name='Address').exclude(name='.InternalStorage')
+    storparams = ConfParameter.objects.filter(resid=storageid).exclude(name='Address').exclude(name='.InternalStorage')\
+        .exclude(name='.Department')
     for param in storparams:
         if param.name.startswith('.StorageDir'):
             continue
@@ -416,11 +423,11 @@ def updateStorageTapelib(dircompid=None, sdcompid=None, sdcomponent=None, storna
         createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
 
 
-def updateStorageArchdir(dircompid=None, sdcompid=None, sdcomponent=None, storname=None, archdir='/tmp'):
+def updateStorageArchdir(request, dircompid=None, sdcompid=None, sdcomponent=None, storname=None, archdir='/tmp'):
     if storname is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     if sdcomponent is None:
         data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
                                          name='.StorageComponent')
@@ -483,7 +490,8 @@ def updateStorageAddress(dircompid=None, sdcompid=None, sdcomponent=None, addres
     params = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Storage', name='Address')
     params.update(value=address)
     if sdcomponent is None:
-        res = ConfResource.objects.get(compid_id=dircompid, type__name='Storage', confparameter__name='.InternalStorage')
+        res = ConfResource.objects.get(compid_id=dircompid, type__name='Storage',
+                                       confparameter__name='.InternalStorage')
         data = ConfParameter.objects.get(resid=res, name='.StorageComponent')
         sdcomponent = data.value
     if sdcompid is None:
@@ -496,9 +504,11 @@ def updateStorageAddress(dircompid=None, sdcompid=None, sdcomponent=None, addres
 def updateStorageAliasAddress(dircompid=None, storname=None, address='localhost'):
     if dircompid is None:
         dircompid = getDIRcompid()
-    param = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname, name='Address')
+    param = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
+                                         name='Address')
     param.update(value=address)
-    sdcomponent = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname, name='.StorageComponent')
+    sdcomponent = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage',
+                                            resid__name=storname, name='.StorageComponent')
     sdcompid = getSDcompid(name=sdcomponent.value)
     updateSDAddresses(sdcompid=sdcompid, address=address)
 
@@ -528,4 +538,3 @@ def deleteSDDevices(sdcompid=None, sdname=None, mediatype=None):
         resid = dev.resid
         # delete Autochanger resource and parameters
         deleteresource(resid)
-

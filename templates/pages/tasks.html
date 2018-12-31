@@ -1,20 +1,22 @@
-              <!-- Tasks Menu -->
-              <li class="dropdown tasks-menu">
-                <!-- Menu Toggle Button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-flag-o"></i>
-                  <span id="taskstatuswidgetnr" class="label label-info" {% if not tasksrunningnr %}style="display: none"{% endif %}>{{ tasksrunningnr }}</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li id="taskstatuswidgetinfo" class="header">{% if tasksrunningnr %}You have {{ tasksrunningnr }} tasks running{% else %}No tasks running{% endif %}</li>
-                  <li>
-                    <!-- Inner menu: contains the tasks -->
-                    <ul id="taskstatuswidget" class="menu">
-                    {% include 'widgets/taskswidget.html' %}
-                    </ul>
-                  </li>
-                  <li class="footer">
-                    <a href="{% url 'taskslist' %}">View all tasks</a>
-                  </li>
-                </ul>
-              </li>
+{% if perms.tasks.view_tasks %}
+<!-- Tasks Menu -->
+<li class="dropdown tasks-menu">
+  <!-- Menu Toggle Button -->
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+    <i class="fa fa-flag-o"></i>
+    <span id="taskstatuswidgetnr" class="label label-info" {% if not tasksrunningnr %}style="display: none"{% endif %}>{{ tasksrunningnr }}</span>
+  </a>
+  <ul class="dropdown-menu">
+    <li id="taskstatuswidgetinfo" class="header">{% if tasksrunningnr %}You have {{ tasksrunningnr }} tasks running{% else %}No tasks running{% endif %}</li>
+    <li>
+      <!-- Inner menu: contains the tasks -->
+      <ul id="taskstatuswidget" class="menu">
+      {% include 'widgets/taskswidget.html' %}
+      </ul>
+    </li>
+    <li class="footer">
+      <a href="{% url 'taskslist' %}">View all tasks</a>
+    </li>
+  </ul>
+</li>
+{% endif %}

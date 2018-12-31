@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-primary">

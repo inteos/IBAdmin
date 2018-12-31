@@ -11,7 +11,7 @@ import signal
 # Create your views here.
 def index(request):
     context = {'contentheader': 'Tasks', 'contentheadersmall': 'All'}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'tasks/index.html', context)
 
 
@@ -86,14 +86,14 @@ def progress(request, taskid):
 def statusnr(request):
     """ JSON for Jobsnr """
     context = {}
-    updateTasksrunningnr(context)
+    updateTasksrunningnr(request, context)
     return JsonResponse(context)
 
 
 def statuswidget(request):
     """ Tasks status widget/menu """
     context = {}
-    updateTasksrunningall(context)
+    updateTasksrunningall(request, context)
     return render(request, 'widgets/taskswidget.html', context)
 
 
@@ -110,7 +110,7 @@ def status(request, taskid):
         estr = task.endtime.strftime('%Y-%m-%d %H:%M:%S')
     context = {'contentheader': 'Tasks', 'contentheadersmall': 'All', 'Task': task, 'Procedure': procedure, 'Log': log,
                'EndTime': estr}
-    updateMenuNumbers(context)
+    updateMenuNumbers(request, context)
     return render(request, 'tasks/status.html', context)
 
 

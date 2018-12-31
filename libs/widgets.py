@@ -40,6 +40,84 @@ class ibadInputWidget(forms.widgets.TextInput):
         return mark_safe(html)
 
 
+class ibadPasswordInputWidget(forms.widgets.TextInput):
+    def render(self, name, value, attrs=None):
+        rname = name + '_r'
+        id_for_label = attrs['id']
+        id_for_rlabel = id_for_label + '_r'
+        label = self.attrs.get('label', 'Password')
+        rlabel = self.attrs.get('rlabel', 'Retype Password')
+        valuetag = ''
+        if value is not None:
+            valuetag = 'value="' + value + '"'
+        disabled = attrs.get('disabled', None)
+        disabletag = ''
+        if disabled is not None:
+            disabletag = 'disabled'
+        required = attrs.get('required', None)
+        requiredtag = ''
+        if required is not None and required:
+            requiredtag = 'required'
+        icon = self.attrs.get('icon', 'glyphicon glyphicon-lock ')
+        ricon = self.attrs.get('ricon', 'glyphicon glyphicon-log-in')
+        placeholder = self.attrs.get('placeholder', '')
+        rplaceholder = self.attrs.get('rplaceholder', '')
+        shtml = """<div id="{id_for_label}-group" class="form-group">
+  <label for="{id_for_label}" class="col-sm-2 control-label">{label}</label>
+  <div class="col-sm-10">
+    <div class="input-group">
+      <input type="password" class="form-control" id="{id_for_label}" {valuetag} placeholder="{placeholder}" name="{name}" {disabletag} {requiredtag}>
+      <span class="input-group-addon"><i class="{icon}"></i></span>
+    </div>
+  </div>
+</div><!-- /.form-group -->
+<div id="{id_for_rlabel}-group" class="form-group">
+  <label for="{id_for_rlabel}" class="col-sm-2 control-label">{rlabel}</label>
+  <div class="col-sm-10">
+    <div class="input-group">
+      <input type="password" class="form-control" id="{id_for_rlabel}" {valuetag} placeholder="{rplaceholder}" name="{rname}" {disabletag} {requiredtag}>
+      <span class="input-group-addon"><i class="{ricon}"></i></span>
+    </div>
+  </div>
+</div><!-- /.form-group -->"""
+        html = shtml.format(id_for_label=id_for_label, label=label, valuetag=valuetag, name=name, disabletag=disabletag,
+                            requiredtag=requiredtag, icon=icon, placeholder=placeholder,
+                            id_for_rlabel=id_for_rlabel, rlabel=rlabel, rname=rname, ricon=ricon, rplaceholder=rplaceholder)
+        return mark_safe(html)
+
+
+class ibadInputBtnWidget(forms.widgets.TextInput):
+    def render(self, name, value, attrs=None):
+        id_for_label = attrs['id']
+        label = self.attrs.get('label', '')
+        valuetag = ''
+        if value is not None:
+            valuetag = 'value="' + value + '"'
+        disabled = attrs.get('disabled', None)
+        disabletag = ''
+        if disabled is not None:
+            disabletag = 'disabled'
+        required = attrs.get('required', None)
+        requiredtag = ''
+        if required is not None and required:
+            requiredtag = 'required'
+        icon = self.attrs.get('icon', 'fa-question-circle')
+        btn = self.attrs.get('btn', 'btn-info')
+        placeholder = self.attrs.get('placeholder', '')
+        shtml = """<div id="{id_for_label}-group" class="form-group">
+  <label for="{id_for_label}" class="col-sm-2 control-label">{label}</label>
+  <div class="col-sm-10">
+    <div class="input-group">
+      <input type="text" class="form-control" id="{id_for_label}" {valuetag} placeholder="{placeholder}" name="{name}" {disabletag} {requiredtag}>
+      <span class="input-group-btn"><button id="{id_for_label}-btn" type="button" class="btn {btn} btn-flat"><i class="{icon}"></i></button></span>
+    </div>
+  </div>
+</div><!-- /.form-group -->"""
+        html = shtml.format(id_for_label=id_for_label, label=label, valuetag=valuetag, name=name, disabletag=disabletag,
+                            requiredtag=requiredtag, icon=icon, placeholder=placeholder, btn=btn)
+        return mark_safe(html)
+
+
 class ibadToggleWidget(forms.widgets.CheckboxInput):
     def render(self, name, value, attrs=None):
         id_for_label = attrs['id']

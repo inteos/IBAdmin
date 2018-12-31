@@ -1,4 +1,6 @@
+{% if perms.jobs.view_job or perms.tasks.view_tasks %}
 <script>
+{% if perms.jobs.view_job %}
   function jobstatusnrRefresh(){
     function onDataReceived(data) {
       if (data.jobsrunning > 0){
@@ -55,6 +57,8 @@
       success: onDataReceived,
     });
   };
+{% endif %}
+{% if perms.tasks.view_tasks %}
   function taskstatuswidgetRefresh(){
     $("#taskstatuswidget").load('{% url 'tasksstatuswidget' %}');
     function onDataReceived(data) {
@@ -75,27 +79,25 @@
       success: onDataReceived,
     });
   };
-{% if jobstatuswidgetRefresh %}
+{% endif %}
+{% if perms.jobs.view_job and jobstatuswidgetRefresh %}
   function jobstatuswidgetRefresh(){
     $("#jobstatuswidget").load('{% url 'jobsstatuswidget' %}');
   };
 {% endif %}
-{% if servicestatuswidgetRefresh %}
-  function servicestatuswidgetRefresh(){
-    $("#servicestatuswidget").load('/servicestatuswidget');
-  };
-{% endif %}
   function autoRefresh(){
+{% if perms.jobs.view_job %}
     jobstatusnrRefresh();
-    taskstatuswidgetRefresh();
-{% if jobstatuswidgetRefresh %}
+  {% if jobstatuswidgetRefresh %}
     jobstatuswidgetRefresh();
+  {% endif %}
 {% endif %}
-{% if servicestatuswidgetRefresh %}
-    servicestatuswidgetRefresh();
+{% if perms.tasks.view_tasks %}
+    taskstatuswidgetRefresh();
 {% endif %}
   };
   $(function(){
     setInterval(autoRefresh, 60000);
   });
 </script>
+{% endif %}

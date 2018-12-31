@@ -453,106 +453,123 @@ def detectlib_common(conn=None, cur=None, tasks=None, progress=0, tapeid=None, l
                 dev = d['dev']
                 if fg:
                     print ('Found dev: ' + str(dev))
+                log += 'Found dev: ' + str(dev) + "\n"
                 break
         if os.path.exists(dev):
-            # 1
-            log += 'Unloading all tapes\n'
-            progress += 5.0
-            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            lib = mtx_statusinfo(dev)
-            log += 'mtx_statusinfo executed\n'
-            progress = step
-            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            # 2
-            drvstep = len(lib['Drives'])
-            for drv in lib['Drives']:
-                if drv['Loaded'] is not None:
-                    drvindx = drv['DriveIndex']
-                    if fg:
-                        print ('Unloading tape: ' + str(drvindx))
-                    log += 'Unloading tape: ' + str(drvindx) + '\n'
-                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-                    mtx_unload(dev=dev, drive=drvindx)
-                    log += 'Unloading done.\n'
-                    progress += step / drvstep
+            if os.access(dev, os.W_OK):
+                # 1
+                log += 'Unloading all tapes\n'
+                progress += 5.0
                 update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            # 3
-            log += 'Getting tapedrv list\n'
-            progress = step * 2
-            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            tapes = gettapedrvlist()
-            tapeslist = []
-            if fg:
-                print ('All tapes', tapes)
-            # 4
-            log += 'Selecting tapes\n'
-            progress = step * 3
-            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            for tape in tapes:
-                (stat, lines) = mt_status(tape['dev'])
-                if not stat:
-                    tapeslist.append(tape)
-            if fg:
-                print ("Selected tapes", tapeslist)
-            # 5
-            log += 'Getting library status\n'
-            progress = step * 4
-            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            lib = mtx_statusinfo(dev)
-            if fg:
-                print ("LIB status:", lib)
-            slot = 0
-            # 6
-            log += 'Selecting library slot to test\n'
-            progress = step * 5
-            update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-            for sl in lib['Slots']:
-                if sl['Loaded'] is not None:
-                    slot = sl['Slot']
-                    if fg:
-                        print ("selected slot", slot)
-                    break
-            if slot == 0:
-                # Error
-                if fg:
-                    print('No available volumes in library found!')
-                log += 'No available volumes in library found!'
-                update_status_error(curtask=cur, taskid=taskid, log=log)
-            else:
-                drvconfig = []
-                # 7,8
-                log += 'Mapping tape drives to library index\n'
-                progress = step * 6
+                lib = mtx_statusinfo(dev)
+                log += 'mtx_statusinfo executed\n'
+                progress = step
                 update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                # 2
+                drvstep = len(lib['Drives'])
                 for drv in lib['Drives']:
-                    drvindx = drv['DriveIndex']
-                    if fg:
-                        print ("test drvindx", drvindx)
-                    mtx_load(dev=dev, drive=drvindx, slot=slot)
-                    log += 'Testing tape drive: ' + str(drvindx) + '\n'
-                    progress += drvstep
-                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
-                    for tape in tapeslist:
-                        (stat, lines) = mt_status(tape['dev'])
+                    if drv['Loaded'] is not None:
+                        drvindx = drv['DriveIndex']
                         if fg:
-                            print ("load status", stat)
-                        if stat:
-                            if fg:
-                                print ("Got it!", drv, tape)
-                            drvconfig.append({
-                                'DriveIndex': drvindx,
-                                'Tape': tape,
-                            })
-                            break
-                    mtx_unload(dev=dev, drive=drvindx)
+                            print ('Unloading tape: ' + str(drvindx))
+                        log += 'Unloading tape: ' + str(drvindx) + '\n'
+                        update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                        mtx_unload(dev=dev, drive=drvindx)
+                        log += 'Unloading done.\n'
+                        progress += step / drvstep
+                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                # 3
+                log += 'Getting tapedrv list\n'
+                progress = step * 2
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                tapes = gettapedrvlist()
+                tapeslist = []
                 if fg:
-                    print (drvconfig)
-                update_status_out(curtask=cur, outlog=str(drvconfig), taskid=taskid)
-                return log, drvconfig
+                    print ('All tapes', tapes)
+                # 4
+                log += 'Selecting tapes\n'
+                progress = step * 3
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                for tape in tapes:
+                    stat = mt_status(tape['dev'])
+                    if fg:
+                        print ("mt status: " + str(stat))
+                    if stat['status'] is None:
+                        log += stat['log']
+                        update_status_error(curtask=cur, taskid=taskid, log=log)
+                        conn.commit()
+                        return log, []
+                    if not stat['status']:
+                        tapeslist.append(tape)
+                if fg:
+                    print ("Selected tapes", tapeslist)
+                # 5
+                log += 'Getting library status\n'
+                progress = step * 4
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                lib = mtx_statusinfo(dev)
+                if fg:
+                    print ("LIB status:", lib)
+                slot = 0
+                # 6
+                log += 'Selecting library slot to test\n'
+                progress = step * 5
+                update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                for sl in lib['Slots']:
+                    if sl['Loaded'] is not None:
+                        slot = sl['Slot']
+                        if fg:
+                            print ("selected slot", slot)
+                        break
+                if slot == 0:
+                    # Error
+                    if fg:
+                        print('No available volumes in library found!')
+                    log += 'No available volumes in library found!\n'
+                    update_status_error(curtask=cur, taskid=taskid, log=log)
+                else:
+                    drvconfig = []
+                    # 7,8
+                    log += 'Mapping tape drives to library index\n'
+                    progress = step * 6
+                    update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                    for drv in lib['Drives']:
+                        drvindx = drv['DriveIndex']
+                        if fg:
+                            print ("test drvindx", drvindx)
+                        mtx_load(dev=dev, drive=drvindx, slot=slot)
+                        log += 'Testing tape drive: ' + str(drvindx) + '\n'
+                        progress += drvstep
+                        update_status(curtask=cur, taskid=taskid, progress=progress, log=log)
+                        for tape in tapeslist:
+                            stat = mt_status(tape['dev'])
+                            if fg:
+                                print ("load status", str(stat))
+                            if stat['status'] is None:
+                                log += stat['log']
+                                update_status_error(curtask=cur, taskid=taskid, log=log)
+                                conn.commit()
+                                return log, []
+                            if stat:
+                                if fg:
+                                    print ("Got it!", drv, tape)
+                                drvconfig.append({
+                                    'DriveIndex': drvindx,
+                                    'Tape': tape,
+                                })
+                                break
+                        mtx_unload(dev=dev, drive=drvindx)
+                    if fg:
+                        print (drvconfig)
+                    update_status_out(curtask=cur, outlog=str(drvconfig), taskid=taskid)
+                    return log, drvconfig
+            else:
+                print("Permission denied: " + str(dev))
+                log += "Permission denied: " + str(dev) + "\n"
+                update_status_error(curtask=cur, taskid=taskid, log=log)
         else:
-            if fg:
-                print('No valid device for library found!')
-            log = 'No valid device for library found! dev=' + str(dev)
+            print('No valid device for library found!')
+            log += 'No valid device for library found! dev=' + str(dev) + "\n"
             update_status_error(curtask=cur, taskid=taskid, log=log)
     conn.commit()
     return log, []

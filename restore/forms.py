@@ -10,9 +10,9 @@ REPLACE = (
 )
 
 
-class RestoreFilesForm(forms.Form):
+class RestoreForm(forms.Form):
     def __init__(self, clients=(), *args, **kwargs):
-        super(RestoreFilesForm, self).__init__(*args, **kwargs)
+        super(RestoreForm, self).__init__(*args, **kwargs)
         self.fields['restoreclient'].choices = clients
 
     where = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Where', 'icon': 'fa fa-map', 'placeholder': 'Original location'}))
@@ -23,17 +23,33 @@ class RestoreFilesForm(forms.Form):
     client = forms.CharField(required=True, widget=forms.HiddenInput())
 
 
-class RestoreProxmoxForm(forms.Form):
-    def __init__(self, clients=(), *args, **kwargs):
+class RestoreFilesForm(RestoreForm):
+    def __init__(self, *args, **kwargs):
+        super(RestoreFilesForm, self).__init__(*args, **kwargs)
+
+
+class RestoreProxmoxForm(RestoreForm):
+    def __init__(self, *args, **kwargs):
         super(RestoreProxmoxForm, self).__init__(*args, **kwargs)
-        self.fields['restoreclient'].choices = clients
 
     localrestore = forms.BooleanField(required=False, label='Restore to directory')
-    where = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Where', 'icon': 'fa fa-map', 'placeholder': 'i.e. /tmp/bacula/restores'}))
-    comment = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Job comment', 'icon': 'fa fa-commenting-o', 'placeholder': '...'}))
-    restoreclient = forms.ChoiceField(required=True, label='Restore host', widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
-    replace = forms.ChoiceField(label='Replace mode', choices=REPLACE, required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
     proxmoxstorage = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Proxmox storage', 'icon': 'fa fa-database', 'placeholder': 'Original storage'}))
     proxmoxpool = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Proxmox resource pool', 'icon': 'fa fa-tags', 'placeholder': 'No pool'}))
-    rselected = forms.CharField(required=True, widget=forms.HiddenInput())
-    client = forms.CharField(required=True, widget=forms.HiddenInput())
+
+
+class RestoreVMwareForm(RestoreForm):
+    def __init__(self, *args, **kwargs):
+        super(RestoreVMwareForm, self).__init__(*args, **kwargs)
+
+    localrestore = forms.BooleanField(required=False, label='Restore to directory')
+    datastore = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Restore to Datastore', 'icon': 'fa fa-database', 'placeholder': 'Default'}))
+    restoreesx = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'Restore to Host', 'icon': 'fa fa-server', 'placeholder': 'Default'}))
+
+
+class RestoreXenserverForm(RestoreForm):
+    def __init__(self, *args, **kwargs):
+        super(RestoreXenserverForm, self).__init__(*args, **kwargs)
+
+    localrestore = forms.BooleanField(required=False, label='Restore to directory')
+    xenpreserve = forms.BooleanField(required=False, label='Preserve guest configuration')
+    xenstorage = forms.CharField(required=False, widget=ibadInputWidget(attrs={'label': 'XenServer storage', 'icon': 'fa fa-database', 'placeholder': 'Original storage'}))

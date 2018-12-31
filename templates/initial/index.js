@@ -1,5 +1,5 @@
 <script>
-  $('#{{ form.storage.id_for_label }}').change(function(){
+  function update_storage(){
     var storage = $('#{{ form.storage.id_for_label }}').val();
     if (storage == 'file'){
       $('#divarchdir').show();
@@ -21,7 +21,9 @@
       $('#sbutton').html('Next <i class="fa fa-chevron-right"></i>');
       $('#initsetup').attr('action', "{% url 'initiallibdetect' %}");
     }
-  });
+  };
+  $('#{{ form.storage.id_for_label }}').change(function(){update_storage();});
+  $(function(){update_storage();});
   $("#initsetup").validate({
     rules: {
       {{ form.admrpass.name }}: {
@@ -56,6 +58,10 @@
       {{ form.archivedir.name }}: "You have to provide archive directory name which exist on system.",
       {{ form.dedupdir.name }}: "You have to provide deduplication index directory name which exist on system.",
     },
+    submitHandler: function(form) {
+      $('#initialwait').show();
+      form.submit();
+    },
     highlight: function(element) {
         $(element).closest('.form-group').addClass('has-error');
         $(element).closest('.form-group').removeClass('has-success');
@@ -74,4 +80,12 @@
         }
     }
   });
+{% if displayalert == 3 %}
+  $(function(){
+    var interval = setInterval( function () {
+        clearInterval(interval);
+        $('#displayalert').fadeOut(3000);
+    }, 5000);
+  });
+{% endif %}
 </script>

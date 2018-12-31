@@ -1,0 +1,39 @@
+[% contentheader='Jobs' %]
+[% PROCESS pages/head.html %]
+[% INCLUDE widgets/jobstatus.html %]
+<div class="row">
+  [%# <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12"> %]
+  <div class="col-xs-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-plus"></i>
+        <h3 class="box-title">Add New Windows SystemState Backup</h3>
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="addform" method="post" action="[% c.uri_for('addsstatdo') %]">
+        <div class="box-body">
+        [% INCLUDE widgets/formname.html Name='Job name' %]
+        [% INCLUDE widgets/formappname.html AppNameValue='Windows System State' AppNameIcon='fa-shield' %]
+        [% INCLUDE widgets/formjobretention.html %]
+        [% INCLUDE widgets/formclientsel.html %]
+        [% INCLUDE widgets/formstoragesel.html %]
+        [% INCLUDE widgets/formschedule.html %]
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="add"><!-- pull-right -->
+                <i class="glyphicon glyphicon-plus"></i>Add
+              </button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel">
+                <i class="glyphicon glyphicon-remove"></i>Cancel
+              </button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+[% pagecustomjs = 'jobs/addsstat.js.html' %]
+[% PROCESS pages/tail.html %]

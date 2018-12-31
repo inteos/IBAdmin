@@ -1,0 +1,72 @@
+{% extends "pages/base.html" %}
+{% load static %}
+
+{% block contentwidget %}
+{% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-5 col-md-6">
+    <div class="box box-info">
+      <div class="box-header with-border">
+        <i class="fa fa-bank"></i>
+        <h4 class="box-title">Role Info</h4>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <div class="box-body">
+        <dl class="dl-horizontal">
+          <dt>Role name</dt>
+            <dd class="text-no-overflow">{{ Role.group.name }}</dd>
+          <dt>Description</dt>
+            <dd>{{ Role.description }}</dd>
+          <dt>Label color</dt>
+            <dd><span class="label {{ Role.color|default:'bg-blue' }}">{{ labelcolor }}</span></dd>
+        </dl>
+{% if perms.roles.change_roles %}
+        <div class="row"><hr></div>
+        <form role="form" id="addform" method="post" action="{% url 'departsadd' %}">
+        {% csrf_token %}
+          <div class="form-group">
+            <label for="{{ form.perms.id_for_label }}">{{ form.perms.label }}</label>
+            <div class="input-group">
+              {{ form.perms }}
+              <span class="input-group-btn">
+                <button id="addperm" type="button" class="btn btn-info btn-flat"><i class="fa fa-plus"></i> Add</button>
+              </span>
+            </div>
+          </div>
+        </form>
+{% endif %}
+      </div><!-- /.box-body -->
+{% if Role.internal == False %}
+  {% if perms.roles.change_roles or perms.roles.delete_roles %}
+      <div class="box-footer">
+        <div class="row">
+          <div class="col-sm-12">
+{% if perms.roles.change_roles and Role.internal == False %}
+            <a class="btn btn-app" href="{% url 'rolesedit' Role.group.name %}"><i class="fa fa-wrench"></i>Edit</a>
+{% endif %}
+{% if perms.roles.delete_roles and Role.internal == False %}
+            <a class="btn btn-app" data-toggle="modal" data-target="#roledeleteconfirm" data-name="{{ Role.group.name }}" data-url="{% url 'rolesdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
+  {% endif %}
+{% endif %}
+          </div>
+        </div>
+      </div>
+{% endif %}
+    </div><!-- /.box -->
+  </div>
+  <div class="col-lg-7 col-md-6">
+    <div id="permissionsgroup" class="row">
+    </div>
+  </div>
+</div>
+{% if perms.roles.delete_roles %}
+{% include "widgets/roledeleteconfirm.html" %}
+{% endif %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "roles/info.js" %}
+{% endblock %}

@@ -1,8 +1,14 @@
-"""Generic linux daemon base class for python 2.x.
-        Grabbed from: http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/"""
+"""
+Generic linux daemon base class for python 2.x.
+   Grabbed from: http://www.jejik.com/articles/2007/02/a_simple_unix_linux_daemon_in_python/
+"""
 
-import sys, os, time, atexit
+import sys
+import os
+import time
+import atexit
 from signal import SIGTERM
+
 
 class Daemon:
     """
@@ -116,7 +122,7 @@ class Daemon:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
-                print str(err)
+                print (str(err))
                 sys.exit(1)
 
     def restart(self):

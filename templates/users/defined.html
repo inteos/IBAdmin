@@ -1,0 +1,59 @@
+{% extends "pages/base.html" %}
+
+{% block contentwidget %}
+{% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined Users</h3>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="userslist" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "users/defined.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "users/defined.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-sm-10 center-block">
+{% if perms.auth.add_user %}
+        <a class="btn btn-app" href="{% url 'usersadd' %}"><i class="fa fa-user-plus"></i>Add User</a>
+{% endif %}
+{% if perms.clients.view_clients %}
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+{% endif %}
+{% if perms.jobs.view_jobs %}
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+{% endif %}
+{% if perms.storages.view_storages %}
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+{% endif %}
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% if perms.users.suspend_users %}
+{% include "widgets/userlockconfirm.html" %}
+{% include "widgets/userunlockconfirm.html" %}
+{% endif %}
+{% if perms.auth.delete_user %}
+{% include "widgets/userdeleteconfirm.html" %}
+{% endif %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "users/defined.js" %}
+{% endblock %}

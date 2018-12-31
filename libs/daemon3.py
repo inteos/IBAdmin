@@ -1,6 +1,14 @@
-"""Generic linux daemon base class for python 3.x. Grabbed from: http://www.jejik.com/files/examples/daemon3x.py"""
+"""
+Generic linux daemon base class for python 3.x.
+    Grabbed from: http://www.jejik.com/files/examples/daemon3x.py
+"""
 
-import sys, os, time, atexit, signal
+import sys
+import os
+import time
+import atexit
+import signal
+
 
 class daemon:
     """A generic daemon class.

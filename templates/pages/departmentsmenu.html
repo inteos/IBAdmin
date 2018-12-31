@@ -1,0 +1,22 @@
+{% if perms.departments.view_departments %}
+<!-- Departments admim system menu -->
+<li class="treeview {% if apppath.0 == 'Departments' %}active{% endif %}">
+  <a href="#"><i class="fa fa-industry"></i> <span>Departments</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+{% if perms.departments.add_departments %}
+    {% if apppath.1 == 'Add' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'departsadd' %}"><i class="fa fa-plus"></i> <span>Add Department</span></a>
+    </li>
+{% endif %}
+    {% if departmentsnr %}
+    {% if apppath.1 == 'Defined' %}<li class="active">{% else %}<li>{% endif %}
+      <a href="{% url 'departsdefined' %}"><i class="fa fa-th-list"></i><span>List</span><span class="pull-right-container">
+        <small class="label pull-right bg-teal">{{ departmentsnr }}</small></span></a>
+    </li>
+    {% endif %}
+    {% if departmentdisplay %}
+      {% include "pages/departmentinfomenu.html" %}
+    {% endif %}
+  </ul>
+</li>
+{% endif %}

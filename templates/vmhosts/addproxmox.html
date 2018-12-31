@@ -1,0 +1,51 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+
+{% block contentwidget %}
+{% include "widgets/vmstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-plus"></i>
+        <h3 class="box-title">Add New Proxmox Host Client</h3>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="addform" method="post" action="{% url 'vmsaddproxmox' %}">
+        {% csrf_token %}
+        <div class="box-body">
+          {{ form.name }}
+          {{ form.descr }}
+          {{ form.address }}
+          {% include "widgets/selectdepartmentsform.html" %}
+{% if perms.clients.create_default_job %}
+          <div class="{{ form.defjob.id_for_label }}-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <div class="checkbox icheck">
+                <label>{{ form.defjob }} {{ form.defjob.label }}</label>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+{% endif %}
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="add"><i class="glyphicon glyphicon-plus"></i>Add</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+{% block pagejs %}
+  {% include "vmhosts/addproxmox.js" %}
+{% endblock %}

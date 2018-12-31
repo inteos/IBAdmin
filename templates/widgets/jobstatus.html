@@ -1,3 +1,5 @@
+{% if perms.jobs.view_jobs %}
 <div id="jobstatuswidget" class="row">
 {% include "widgets/jobstatuswidget.html" %}
 </div><!-- /.row -->
+{% endif %}

@@ -1,7 +1,7 @@
 {% extends "initial/base.html" %}
 {% block content %}
 {% load static %}
-    <div class="register-box">
+    <div class="register-box box">
       <div class="register-logo">
         <a href="http://www.inteosbackup.pl/"><img src="{% static 'ibadmin.png' %}"/><b>IBAdmin</b></a>
       </div>
@@ -54,6 +54,9 @@
           </div>
         </form>
       </div><!-- /.form-box -->
+      <div id="initialwait" class="overlay" style="display: none;">
+        <i class="fa fa-refresh fa-spin"></i>
+      </div>
     </div><!-- /.register-box -->
 {% endblock %}
 {% block pagejs %}

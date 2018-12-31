@@ -1,26 +1,13 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
-from .director import *
 from .jobdefs import *
 from .storage import *
+from libs.client import extractclientparams
+from libs.plat import getOStype
+from libs.user import createadminuser
+from ibadmin.ibadlic import *
 from ibadmin.settings import DATABASES
-
-
-def saveLicenseKey(key=None):
-    if key is None:
-        return
-    dircompid = getDIRcompid()
-    dirname = getDIRname()
-    resid = getresourceid(dircompid, dirname, 'Director')
-    license = getparameter(resid, '.IBADLicenseKey')
-    if license is None:
-        if key == '':
-            return
-        addparameter(resid, '.IBADLicenseKey', key)
-    else:
-        if key == '':
-            deleteparameter(resid, '.IBADLicenseKey')
-        updateparameterresid(resid, '.IBADLicenseKey', key)
+from django.http import Http404
 
 
 def createFDDirector(fdcompid=None, dirname=None, name='ibadmin', password='ibadminpassword', descr=''):
@@ -61,227 +48,6 @@ def check_or_createPool(dircompid=None, storage=None, retention=None):
     return poolname
 
 
-def createFSIncludeFile(resid, include):
-    if include is not None:
-        for f in include:
-            addparameterstr(resid, 'File', f)
-
-
-def createFSIncludePlugin(resid, include):
-    if include is not None:
-        for f in include:
-            addparameterstr(resid, 'Plugin', f)
-
-
-def createFSExclude(resid, exclude):
-    if exclude is not None:
-        for f in exclude:
-            addparameterstr(resid, 'File', f)
-
-
-def createDIRFileSetFile(dircompid=None, name='fs-default', vss=False, dedup=False, include=None, exclude=None, descr=''):
-    # create resource
-    resid = createDIRresFileSet(dircompid=dircompid, name=name, descr=descr)
-    # add parameters
-    if vss:
-        addparameterstr(resid, 'EnableVss', 'Yes')
-    # Include {} subresource
-    includeid = createDIRresFSInclude(dircompid, resid, dedup=dedup)
-    createFSIncludeFile(resid=includeid, include=include)
-    # Exclude {} subresource
-    excludeid = createDIRresFSExclude(dircompid, resid)
-    createFSExclude(excludeid, exclude)
-
-
-def createDIRFileSetPlugin(dircompid=None, name='fs-default', include=None, dedup=False, descr=''):
-    # create resource
-    resid = createDIRresFileSet(dircompid=dircompid, name=name, descr=descr)
-    # add parameters
-    # Include {} subresource
-    includeid = createDIRresFSInclude(dircompid, resid, dedup=dedup)
-    createFSIncludePlugin(includeid, include)
-
-
-def createDIRJob(dircompid=None, name='SYS-Default', jd='jd-backup-files', descr='', client=None, pool=None,
-                 storage=None, fileset=None, schedule=None, level=None, maxfullinterval=None, internal=False,
-                 scheduleparam=None, scheduletime=None, scheduleweek=None, schedulemonth=None,
-                 allobjs=None, objsinclude=None, objsexclude=None):
-    # create resource
-    resid = createDIRresJob(dircompid=dircompid, name=name, descr=descr)
-    # add parameters
-    addparameterstr(resid, 'JobDefs', jd)
-    if level is not None:
-        addparameterstr(resid, 'Level', getlevelname(level))
-    if client is not None:
-        addparameterstr(resid, 'Client', client)
-    if storage is not None:
-        addparameterstr(resid, 'Storage', storage)
-    if pool is not None:
-        addparameterstr(resid, 'Pool', pool)
-    if fileset is not None:
-        addparameterstr(resid, 'FileSet', fileset)
-    if schedule is not None:
-        addparameterstr(resid, 'Schedule', schedule)
-    if scheduleparam is not None:
-        addparameter(resid, '.Scheduleparam', scheduleparam)
-    if scheduletime is not None:
-        addparameter(resid, '.Scheduletime', scheduletime)
-    if scheduleweek is not None:
-        addparameter(resid, '.Scheduleweek', scheduleweek)
-    if schedulemonth is not None:
-        addparameter(resid, '.Schedulemonth', schedulemonth)
-    if maxfullinterval is not None:
-        addparameter(resid, 'MaxFullInterval', maxfullinterval)
-    if internal:
-        addparameter(resid, '.InternalJob', 'Yes')
-    if allobjs is not None:
-        addparameter(resid, '.Allobjs', allobjs)
-    if objsinclude is not None:
-        addparameter(resid, '.Objsinclude', objsinclude)
-    if objsexclude is not None:
-        addparameter(resid, '.Objsexclude', objsexclude)
-    addparameter(resid, 'Enabled', 'Yes')
-
-
-def createDIRSchDay(resid=None, params=None):
-    if resid is None or params is None:
-        return
-    level = getlevelname(params['level'])
-    timestr = number2time(params['time'], 0)
-    sch = level + ' at ' + timestr
-    addparameter(resid, 'Run', sch)
-
-
-def createDIRSchHours(resid=None, params=None):
-    if resid is None or params is None:
-        return
-    cycle = params['backuprepeat']
-    if cycle == 'r24':
-        # hack when createDIRSchDay was not fired directly
-        return createDIRSchDay(resid, params)
-    level = getlevelname(params['level'])
-    times = params['time']
-    if cycle == 'r1':
-        # every hour
-        addparameter(resid, 'Run', level + ' hourly at ' + number2time(times, 0))
-        return
-    if cycle == 'r2':
-        # every 2H, so 12 entries
-        for h in range(0, 12):
-            sch = level + ' at ' + number2time(times, h * 2)
-            addparameter(resid, 'Run', sch)
-        return
-    if cycle == 'r3':
-        # every 3H, so 8 entries
-        for h in range(0, 8):
-            sch = level + ' at ' + number2time(times, h * 3)
-            addparameter(resid, 'Run', sch)
-        return
-    if cycle == 'r4':
-        # every 4H, so 6 entries
-        for h in range(0, 6):
-            sch = level + ' at ' + number2time(times, h * 4)
-            addparameter(resid, 'Run', sch)
-        return
-    if cycle == 'r6':
-        # every 6H, so 4 entries
-        for h in range(0, 4):
-            sch = level + ' at ' + number2time(times, h * 6)
-            addparameter(resid, 'Run', sch)
-        return
-    if cycle == 'r8':
-        # every 8H, so 3 entries
-        for h in range(0, 3):
-            sch = level + ' at ' + number2time(times, h * 8)
-            addparameter(resid, 'Run', sch)
-        return
-    if cycle == 'r12':
-        # every 12H, so 2 entries
-        for h in range(0, 2):
-            sch = level + ' at ' + number2time(times, h * 12)
-            addparameter(resid, 'Run', sch)
-        return
-
-
-def createDIRSchWeek(resid=None, params=None):
-    """ 'scheduleweek': u'off:off:off:off:off:off:off:off', """
-    # get required data
-    SCHWEEKDAYS = (
-        'mon',
-        'tue',
-        'wed',
-        'thu',
-        'fri',
-        'sat',
-        'sun',
-    )
-    dlist = params['scheduleweek'].split(':')
-    time = params['time']
-    # insert parameters
-    if dlist[-1] != 'off':
-        # everylevel
-        level = getlevelname(dlist[-1])
-        sch = level + " at " + params['time']
-        addparameter(resid, 'Run', sch)
-    else:
-        for i, lvl in enumerate(dlist[:-1]):
-            if lvl != 'off':
-                level = getlevelname(lvl)
-                sch = level + " " + SCHWEEKDAYS[i] + " at " + time
-                addparameter(resid, 'Run', sch)
-
-
-def createDIRSchMonth(resid=None, params=None):
-    """ 'schedulemonth': u'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off'
-                          ':off:off:off:off:off:off:off:off:off' """
-    # insert parameters
-    dlist = params['schedulemonth'].split(':')
-    time = params['time']
-    if dlist[-1] != 'off':
-        # everylevel
-        level = getlevelname(dlist[-1])
-        sch = level + " at " + time
-        addparameter(resid, 'Run', sch)
-    else:
-        for i, lvl in enumerate(dlist[:-1]):
-            if lvl != 'off':
-                level = getlevelname(lvl)
-                sch = level + " on " + str(i + 1) + " at " + time
-                addparameter(resid, 'Run', sch)
-
-
-def createDIRSchedule(dircompid=None, name='sch-default', cycle='Hours', params=None, descr=''):
-    """
-    Creates a full schedule based on supplied parameters. When cycle is unknown (or None) the a routine has no effect.
-    This means it creates a schedule resource but with no Run schedule parameters.
-    :param dircompid: director component id
-    :param name: name of the schedule
-    :param cycle: defined schedule cycle, allowed values: Hours, Day, Week, Month
-    :param params: schedule parameters as dict, i.e. 'level', 'time', 'scheduleweek', 'schedulemonth', 'backuprepeat'
-    :param descr: description of the resource
-    :return: none
-    """
-    # create resource
-    resid = createDIRresSchedule(dircompid=dircompid, name=name, descr=descr)
-    # add parameters based on cycle
-    if cycle == 'Hours':
-        # c1 - cycle during Day, every xx hours
-        createDIRSchHours(resid, params)
-        return
-    if cycle == 'Day':
-        # used only for single day schedule
-        createDIRSchDay(resid, params)
-        return
-    if cycle == 'Week':
-        # c2 - cycle during Week
-        createDIRSchWeek(resid, params)
-        return
-    if cycle == 'Month':
-        # c3 - cycle during Month
-        createDIRSchMonth(resid, params)
-        return
-
-
 schmaxfulldict = {
     'c1': '1 Week',
     'c2': '1 Week',
@@ -296,7 +62,7 @@ schcycledict = {
 }
 
 
-def createJobFilesForm(dircompid=None, data=None, jd='jd-backup-files'):
+def createJobFilesForm(request, dircompid=None, data=None, jd='jd-backup-files'):
     """{
     'name': u'asd',
     'descr': u'',
@@ -338,7 +104,7 @@ def createJobFilesForm(dircompid=None, data=None, jd='jd-backup-files'):
     # create FileSet
     include = data['include'].splitlines()
     exclude = data['exclude'].splitlines()
-    clientos = getDIRClientOS(dircompid=dircompid, name=data['client'])
+    clientos = getDIRClientOS(request, dircompid=dircompid, name=data['client'])
     vss = updateFSdefaultexclude(exclude=exclude, clientos=clientos)
     fsname = 'fs-' + jobname
     dedup = getStorageisDedup(data['storage'])
@@ -356,7 +122,7 @@ def createJobFilesForm(dircompid=None, data=None, jd='jd-backup-files'):
                  schedulemonth=data['schedulemonth'])
 
 
-def prepareFSProxmoxPlugin(data=None):
+def prepareFSProxmoxPlugin(data=None, abortonerror=False):
     """
 
     :param data:
@@ -365,6 +131,8 @@ def prepareFSProxmoxPlugin(data=None):
         'include': u'asd',
         'allvms': True,
     }
+    :param abortonerror:
+    None/'False' or 'True'
     :return:
     """
     if data is None:
@@ -373,19 +141,136 @@ def prepareFSProxmoxPlugin(data=None):
     plugin = []
     exclude = data['exclude']
     include = data['include'].splitlines()
+    abortstr = ''
+    if abortonerror:
+        abortstr = " abort_on_error"
     if allvms:
         include = []
         if exclude:
-            plugin.append("proxmox: exclude=" + exclude + " abort on error")
+            plugin.append("proxmox: exclude=\\\"" + exclude + "\\\"" + abortstr)
         else:
-            plugin.append("proxmox: abort on error")
+            plugin.append("proxmox:" + abortstr)
     else:
         exclude = ''
+        hosts = ""
         for guest in include:
             if guest.startswith('vmid='):
-                plugin.append("proxmox: vmid=" + guest.split('=')[1] + " abort_on_error")
+                hosts = hosts + " vmid=" + guest.split('=')[1]
             else:
-                plugin.append("proxmox: vm=" + guest + " abort_on_error")
+                hosts = hosts + " vm=" + guest
+        plugin.append("proxmox:" + hosts + abortstr)
+    return plugin, ":".join(a for a in include), exclude
+
+
+def prepareFSXenServerPlugin(data=None, abortonerror=False):
+    """
+
+    :param data:
+    {
+        'exclude': u'',
+        'include': u'asd',
+        'allvms': True,
+    }
+    :param abortonerror:
+    None/'False' or 'True'
+    :return:
+    """
+    if data is None:
+        return None
+    allvms = data['allvms']
+    plugin = []
+    exclude = data['exclude']
+    include = data['include'].splitlines()
+    abortstr = ''
+    if abortonerror:
+        abortstr = " abort_on_error"
+    if allvms:
+        include = []
+        if exclude:
+            plugin.append("xenserver: exclude=\\\"" + exclude + "\\\"" + abortstr)
+        else:
+            plugin.append("xenserver:" + abortstr)
+    else:
+        exclude = ''
+        hosts = ""
+        for guest in include:
+            if guest.startswith('uuid='):
+                hosts = hosts + " uuid=" + guest.split('=')[1]
+            else:
+                hosts = hosts + " vm=" + guest
+        plugin.append("xenserver:" + hosts + abortstr)
+    return plugin, ":".join(a for a in include), exclude
+
+
+def prepareFSVMwarePlugin(data=None, abortonerror=False):
+    """
+
+    :param data:
+    {
+        'exclude': u'',
+        'include': u'asd',
+        'allvms': True,
+    }
+    :param abortonerror:
+    None/'False' or 'True'
+    :return:
+    """
+    if data is None:
+        return None
+    allvms = data['allvms']
+    plugin = []
+    exclude = data['exclude']
+    include = data['include'].splitlines()
+    abortstr = ''
+    if abortonerror:
+        abortstr = " abort_on_error"
+    if allvms:
+        include = []
+        if exclude:
+            plugin.append("vsphere: index host_exclude=\\\"" + exclude + "\\\"" + abortstr)
+        else:
+            plugin.append("vsphere: index" + abortstr)
+    else:
+        exclude = ''
+        hosts = ""
+        for guest in include:
+            hosts = hosts + " host=" + guest
+        plugin.append("vsphere: index" + hosts + abortstr)
+    return plugin, ":".join(a for a in include), exclude
+
+
+def prepareFSKVMPlugin(data=None, abortonerror=False):
+    """
+
+    :param data:
+    {
+        'exclude': u'',
+        'include': u'asd',
+        'allvms': True,
+    }
+    :param abortonerror:
+    None/'False' or 'True'
+    :return:
+    """
+    if data is None:
+        return None
+    allvms = data['allvms']
+    plugin = []
+    exclude = data['exclude']
+    include = data['include'].splitlines()
+    abortstr = ''
+    if abortonerror:
+        abortstr = " abort_on_error"
+    if allvms:
+        include = []
+        if exclude:
+            plugin.append("kvm: host_prefix exclude=\\\"" + exclude + "\\\"" + abortstr)
+        else:
+            plugin.append("kvm: host_prefix " + abortstr)
+    else:
+        exclude = ''
+        hosts = ','.join(h for h in include)
+        plugin.append("kvm: host_prefix host=" + hosts + abortstr)
     return plugin, ":".join(a for a in include), exclude
 
 
@@ -426,11 +311,10 @@ def createJobProxmoxForm(dircompid=None, data=None, jd='jd-backup-proxmox'):
     }
     createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
                       descr='Schedule for Job: ' + data['name'])
-
     # create FileSet
     fsname = 'fs-' + jobname
     dedup = getStorageisDedup(data['storage'])
-    plugin, include, exclude = prepareFSProxmoxPlugin(data)
+    plugin, include, exclude = prepareFSProxmoxPlugin(data, abortonerror=True)
     allvms = data['allvms']
     createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + data['name'],
                            dedup=dedup)
@@ -440,17 +324,177 @@ def createJobProxmoxForm(dircompid=None, data=None, jd='jd-backup-proxmox'):
                  pool=poolname, storage=data['storage'], fileset=fsname, schedule=schname, level='full',
                  scheduleparam=schparam, scheduletime=starttime, scheduleweek=data['scheduleweek'],
                  schedulemonth=data['schedulemonth'], maxfullinterval=schmaxfulldict[data['backupsch']],
-                 allobjs=allvms, objsinclude=include, objsexclude=exclude)
+                 allobjs=allvms, objsinclude=include, objsexclude=exclude, abortonerror=True)
 
 
-def createDefaultClientJob(dircompid=None, name=None, clientos=None, client=None):
-    if name is None:
+def createJobXenServerForm(dircompid=None, data=None, jd='jd-backup-xen'):
+    """{
+    'name': u'asd',
+    'descr': u'',
+    'storage': u'ibadmin-File1',
+    'starttime': datetime.time(18, 55),
+    'backuprepeat': u'r1',
+    'scheduleweek': u'off:off:off:off:off:off:off:off',
+    'schedulemonth': u'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:'
+                      'off:off:off:off:off:off:off:off',
+    'client': u'debian',
+    'exclude': u'',
+    'include': u'guest1\nguest2\n',
+    'backupsch': u'c1',
+    'retention': u'30 days'
+    }"""
+    if data is None:
         return None
     # get required data
     if dircompid is None:
         dircompid = getDIRcompid()
+    jobname = data['name'].encode('ascii', 'ignore')
+    # create Pool
+    poolname = check_or_createPool(dircompid=dircompid, storage=data['storage'], retention=data['retention'])
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = schcycledict[data['backupsch']]
+    starttime = str(data['starttime'])[:-3]
+    params = {
+        'level': 'full',
+        'time': starttime,
+        'scheduleweek': data['scheduleweek'],
+        'schedulemonth': data['schedulemonth'],
+        'backuprepeat': data['backuprepeat'],
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + data['name'])
+    # create FileSet
+    fsname = 'fs-' + jobname
+    dedup = getStorageisDedup(data['storage'])
+    plugin, include, exclude = prepareFSXenServerPlugin(data, abortonerror=True)
+    allvms = data['allvms']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + data['name'],
+                           dedup=dedup)
+    # create Job
+    schparam = data['backupsch'] + ':' + data['backuprepeat']
+    createDIRJob(dircompid=dircompid, name=jobname, jd=jd, descr=data['descr'], client=data['client'],
+                 pool=poolname, storage=data['storage'], fileset=fsname, schedule=schname, level='full',
+                 scheduleparam=schparam, scheduletime=starttime, scheduleweek=data['scheduleweek'],
+                 schedulemonth=data['schedulemonth'], maxfullinterval=schmaxfulldict[data['backupsch']],
+                 allobjs=allvms, objsinclude=include, objsexclude=exclude, abortonerror=True)
+
+
+def createJobVMwareServerForm(dircompid=None, data=None, jd='jd-backup-esx'):
+    """{
+    'name': u'asd',
+    'descr': u'',
+    'storage': u'ibadmin-File1',
+    'starttime': datetime.time(18, 55),
+    'backuprepeat': u'r1',
+    'scheduleweek': u'off:off:off:off:off:off:off:off',
+    'schedulemonth': u'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:'
+                      'off:off:off:off:off:off:off:off',
+    'client': u'debian',
+    'exclude': u'',
+    'include': u'guest1\nguest2\n',
+    'backupsch': u'c1',
+    'retention': u'30 days'
+    }"""
+    if data is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = data['name'].encode('ascii', 'ignore')
+    # create Pool
+    poolname = check_or_createPool(dircompid=dircompid, storage=data['storage'], retention=data['retention'])
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = schcycledict[data['backupsch']]
+    starttime = str(data['starttime'])[:-3]
+    level = data['backuplevel']
+    params = {
+        'level': level,
+        'time': starttime,
+        'scheduleweek': data['scheduleweek'],
+        'schedulemonth': data['schedulemonth'],
+        'backuprepeat': data['backuprepeat'],
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + data['name'])
+    # create FileSet
+    fsname = 'fs-' + jobname
+    dedup = getStorageisDedup(data['storage'])
+    plugin, include, exclude = prepareFSVMwarePlugin(data, abortonerror=True)
+    allvms = data['allvms']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + data['name'],
+                           dedup=dedup)
+    # create Job
+    schparam = data['backupsch'] + ':' + data['backuprepeat']
+    createDIRJob(dircompid=dircompid, name=jobname, jd=jd, descr=data['descr'], client=data['client'],
+                 pool=poolname, storage=data['storage'], fileset=fsname, schedule=schname, level=level,
+                 scheduleparam=schparam, scheduletime=starttime, scheduleweek=data['scheduleweek'],
+                 schedulemonth=data['schedulemonth'], maxfullinterval=schmaxfulldict[data['backupsch']],
+                 allobjs=allvms, objsinclude=include, objsexclude=exclude, abortonerror=True)
+
+
+def createJobKVMForm(dircompid=None, data=None, jd='jd-backup-kvm'):
+    """{
+    'name': u'asd',
+    'descr': u'',
+    'storage': u'ibadmin-File1',
+    'starttime': datetime.time(18, 55),
+    'backuprepeat': u'r1',
+    'scheduleweek': u'off:off:off:off:off:off:off:off',
+    'schedulemonth': u'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:'
+                      'off:off:off:off:off:off:off:off',
+    'client': u'debian',
+    'exclude': u'',
+    'include': u'guest1\nguest2\n',
+    'backupsch': u'c1',
+    'retention': u'30 days'
+    }"""
+    if data is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = data['name'].encode('ascii', 'ignore')
+    # create Pool
+    poolname = check_or_createPool(dircompid=dircompid, storage=data['storage'], retention=data['retention'])
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = schcycledict[data['backupsch']]
+    starttime = str(data['starttime'])[:-3]
+    params = {
+        'level': 'full',
+        'time': starttime,
+        'scheduleweek': data['scheduleweek'],
+        'schedulemonth': data['schedulemonth'],
+        'backuprepeat': data['backuprepeat'],
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + data['name'])
+    # create FileSet
+    fsname = 'fs-' + jobname
+    dedup = getStorageisDedup(data['storage'])
+    plugin, include, exclude = prepareFSKVMPlugin(data, abortonerror=True)
+    allvms = data['allvms']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + data['name'],
+                           dedup=dedup)
+    # create Job
+    schparam = data['backupsch'] + ':' + data['backuprepeat']
+    createDIRJob(dircompid=dircompid, name=jobname, jd=jd, descr=data['descr'], client=data['client'],
+                 pool=poolname, storage=data['storage'], fileset=fsname, schedule=schname, level='full',
+                 scheduleparam=schparam, scheduletime=starttime, scheduleweek=data['scheduleweek'],
+                 schedulemonth=data['schedulemonth'], maxfullinterval=schmaxfulldict[data['backupsch']],
+                 allobjs=allvms, objsinclude=include, objsexclude=exclude, abortonerror=True)
+
+
+def createDefaultClientJob(request, dircompid=None, name=None, clientos=None, client=None):
+    if name is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
     if clientos is None and client is not None:
-        clientos = getDIRClientOS(name=client)
+        clientos = getDIRClientOS(request, name=client)
     include = ['/', '/boot']
     if clientos is not None and clientos.startswith('win'):
         include = ['C:/']
@@ -464,8 +508,8 @@ def createDefaultClientJob(dircompid=None, name=None, clientos=None, client=None
     starttime = '20:00'
     level = 'incr'
     scheduleweek = 'incr:incr:incr:incr:incr:incr:incr:incr'
-    schedulemonth = 'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:' \
-                    'off:off:off:off:off:off:off:off'
+    schedulemonth = 'incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:' \
+                    'incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:off'
     params = {
         'level': level,
         'time': starttime,
@@ -480,14 +524,122 @@ def createDefaultClientJob(dircompid=None, name=None, clientos=None, client=None
     createDIRFileSetFile(dircompid=dircompid, name=fsname, vss=vss, include=include, exclude=exclude,
                          descr='Fileset for Job: ' + jobname)
     # create Job
-    if schcycle is not 'Hours':
-        level = 'Incremental'
-    # schedule form parameters (backupsch, backuprepeat, starttime, scheduleweek, schedulemonth)
     schparam = 'c2:r1'
     createDIRJob(dircompid=dircompid, name=jobname, jd='jd-backup-files', descr='Default Client Backup Job',
                  client=name, pool='Default', storage=storage, fileset=fsname, schedule=schname, level=level,
                  maxfullinterval='1 Week', scheduleparam=schparam, scheduletime=starttime, scheduleweek=scheduleweek,
                  schedulemonth=schedulemonth)
+
+
+def createDefaultProxmoxJob(dircompid=None, clientname=None):
+    if clientname is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = clientname + '-AllVMGuests'
+    storage = getDefaultStorage(dircompid)
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = 'Week'
+    starttime = '20:00'
+    level = 'full'
+    scheduleweek = 'full:full:full:full:full:full:full:full'
+    schedulemonth = 'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:' \
+                    'off:off:off:off:off:off:off:off'
+    params = {
+        'level': level,
+        'time': starttime,
+        'scheduleweek': scheduleweek,
+        'schedulemonth': schedulemonth,
+        'backuprepeat': 'r1',
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + jobname)
+    # create FileSet
+    fsname = 'fs-' + jobname
+    plugin = ['proxmox: abort_on_error']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + jobname)
+    # create Job
+    schparam = 'c2:r1'
+    createDIRJob(dircompid=dircompid, name=jobname, jd='jd-backup-proxmox', descr='Default Backup Job for All VM',
+                 client=clientname, pool='Default', storage=storage, fileset=fsname, schedule=schname, level=level,
+                 maxfullinterval='1 Week', scheduleparam=schparam, scheduletime=starttime, scheduleweek=scheduleweek,
+                 schedulemonth=schedulemonth, allobjs=True, objsinclude='', objsexclude='', abortonerror=True)
+
+
+def createDefaultXenServerJob(dircompid=None, clientname=None):
+    if clientname is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = clientname + '-AllVMGuests'
+    storage = getDefaultStorage(dircompid)
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = 'Week'
+    starttime = '20:00'
+    level = 'full'
+    scheduleweek = 'full:full:full:full:full:full:full:full'
+    schedulemonth = 'off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:off:' \
+                    'off:off:off:off:off:off:off:off'
+    params = {
+        'level': level,
+        'time': starttime,
+        'scheduleweek': scheduleweek,
+        'schedulemonth': schedulemonth,
+        'backuprepeat': 'r1',
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + jobname)
+    # create FileSet
+    fsname = 'fs-' + jobname
+    plugin = ['xenserver: abort_on_error']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + jobname)
+    # create Job
+    schparam = 'c2:r1'
+    createDIRJob(dircompid=dircompid, name=jobname, jd='jd-backup-xen', descr='Default Backup Job for All VM',
+                 client=clientname, pool='Default', storage=storage, fileset=fsname, schedule=schname, level=level,
+                 maxfullinterval='1 Week', scheduleparam=schparam, scheduletime=starttime, scheduleweek=scheduleweek,
+                 schedulemonth=schedulemonth, allobjs=True, objsinclude='', objsexclude='', abortonerror=True)
+
+
+def createDefaultKVMJob(dircompid=None, clientname=None):
+    if clientname is None:
+        return None
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    jobname = clientname + '-AllVMGuests'
+    storage = getDefaultStorage(dircompid)
+    # create Schedule
+    schname = 'sch-' + jobname
+    schcycle = 'Week'
+    starttime = '20:00'
+    level = 'incr'
+    scheduleweek = 'incr:incr:incr:incr:incr:incr:incr:incr'
+    schedulemonth = 'incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:' \
+                    'incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:incr:off'
+    params = {
+        'level': level,
+        'time': starttime,
+        'scheduleweek': scheduleweek,
+        'schedulemonth': schedulemonth,
+        'backuprepeat': 'r1',
+    }
+    createDIRSchedule(dircompid=dircompid, name=schname, cycle=schcycle, params=params,
+                      descr='Schedule for Job: ' + jobname)
+    # create FileSet
+    fsname = 'fs-' + jobname
+    plugin = ['kvm: abort_on_error']
+    createDIRFileSetPlugin(dircompid=dircompid, name=fsname, include=plugin, descr='Fileset for Job: ' + jobname)
+    # create Job
+    schparam = 'c2:r1'
+    createDIRJob(dircompid=dircompid, name=jobname, jd='jd-backup-kvm', descr='Default Backup Job for All VM',
+                 client=clientname, pool='Default', storage=storage, fileset=fsname, schedule=schname, level=level,
+                 maxfullinterval='1 Week', scheduleparam=schparam, scheduletime=starttime, scheduleweek=scheduleweek,
+                 schedulemonth=schedulemonth, allobjs=True, objsinclude='', objsexclude='', abortonerror=True)
 
 
 def createFDFileDaemon(fdcompid=None, name='ibadmin', descr='', address='localhost', os='rhel'):
@@ -520,7 +672,7 @@ def createFDFileDaemon(fdcompid=None, name='ibadmin', descr='', address='localho
 
 
 def createClientNode(dircompid=None, dirname=None, name='ibadmin', address='localhost', os='rhel', descr='',
-                     cluster=None, clusterlist=None, internal=False):
+                     cluster=None, clusterlist=None, internal=False, department=None):
     if cluster is not None and len(cluster):
         # New cluster name
         cl = cluster
@@ -530,11 +682,11 @@ def createClientNode(dircompid=None, dirname=None, name='ibadmin', address='loca
         cl = clusterlist
         encpass = getDIRClientsClusterEncpass(cluster=cl)
     createClient(dircompid=dircompid, dirname=dirname, name=name, address=address, os=os, cluster=cl, descr=descr,
-                 internal=internal, encpass=encpass)
+                 internal=internal, encpass=encpass, department=department)
 
 
 def createClient(dircompid=None, dirname=None, name='ibadmin', address='localhost', os='rhel', descr='',
-                 internal=False, cluster=None, encpass=None):
+                 internal=False, cluster=None, encpass=None, department=None):
     # get required data
     if dircompid is None:
         dircompid = getDIRcompid()
@@ -547,7 +699,7 @@ def createClient(dircompid=None, dirname=None, name='ibadmin', address='localhos
         password = getdecpass(dirname, encpass)
     # insert new Client {} resource into Dir conf
     createDIRClient(dircompid=dircompid, dirname=dirname, name=name, password=password, address=address, os=os,
-                    descr=descr, internal=internal, cluster=cluster)
+                    descr=descr, internal=internal, cluster=cluster, department=department)
     # create a FD component
     fdcompid = createFDcomponent(name=name)
     # insert new FileDaemon {} resource into FD conf
@@ -556,149 +708,147 @@ def createClient(dircompid=None, dirname=None, name='ibadmin', address='localhos
     createFDMessages(fdcompid=fdcompid, dirname=dirname)
 
 
-def createClientAlias(dircompid=None, dirname=None, name='ibadmin', client=None, descr=''):
+def createClientAlias(request, dircompid=None, dirname=None, name='ibadmin', client=None, descr='', department=None):
     if client is None:
         return None
     # get required data
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     if dirname is None:
-        dirname = getDIRname()
-    # TODO wykorzystać funkcje jak w updateClientAlias
-    clientinfo = getDIRClientinfo(name=client)
+        dirname = getDIRname(request)
+    clientinfo = getDIRClientinfo(request, name=client)
+    if clientinfo is None:
+        raise Http404
     clientparams = extractclientparams(clientinfo)
     encpass = clientparams['Password']
     address = clientparams['Address']
-    os = clientparams['OS']
+    clientos = clientparams['OS']
     # insert new Client {} resource into Dir conf
-    createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=os,
-                    descr=descr, alias=client)
+    createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=clientos,
+                    descr=descr, alias=client, department=department)
 
 
-def updateClientAlias(dircompid=None, name='ibadmin', alias='ibadmin'):
+def createVMwareAlias(request, dircompid=None, dirname=None, vcenter='vcenter', name='vcenter', client=None, descr='',
+                      department=None):
+    if client is None:
+        return None
     # get required data
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
+    if dirname is None:
+        dirname = getDIRname(request)
+    clientinfo = getDIRClientinfo(request, name=client)
+    if clientinfo is None:
+        raise Http404
+    clientparams = extractclientparams(clientinfo)
+    encpass = clientparams['Password']
+    address = clientparams['Address']
+    clientos = 'vmware'
+    # insert new Client {} resource into Dir conf
+    createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=clientos,
+                    descr=descr, alias=client, vcenter=vcenter, department=department)
+
+
+def updateClientAlias(request, dircompid=None, name='ibadmin', alias='ibadmin'):
+    # get required data
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
     address = getDIRClientAddress(dircompid=dircompid, name=alias)
     updateparameter(dircompid, name, 'Client', 'Address', address)
     updateparameter(dircompid, name, 'Client', '.Alias', alias)
     encpass = getDIRClientEncpass(dircompid=dircompid, name=alias)
     updateparameter(dircompid, name, 'Client', 'Password', encpass)
-    os = getDIRClientOS(dircompid=dircompid, name=alias)
-    updateparameter(dircompid, name, 'Client', '.OS', os)
+    clientos = getDIRClientOS(request, dircompid=dircompid, name=alias)
+    updateparameter(dircompid, name, 'Client', '.OS', clientos)
 
 
-def createClientService(dircompid=None, dirname=None, name='ibadmin', address='127.0.0.1', cluster=None, descr=''):
+def createClientService(request, dircompid=None, dirname=None, name='ibadmin', address='127.0.0.1', cluster=None, descr='',
+                        department=None):
     if cluster is None:
         return None
     # get required data
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     if dirname is None:
-        dirname = getDIRname()
+        dirname = getDIRname(request)
     client = getDIRClusterClientname(dircompid=dircompid, name=cluster)
-    clientinfo = getDIRClientinfo(name=client)
+    clientinfo = getDIRClientinfo(request, name=client)
+    if clientinfo is None:
+        raise Http404
     clientparams = extractclientparams(clientinfo)
     encpass = clientparams['Password']
     os = clientparams['OS']
     # insert new Client {} resource into Dir conf
     createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=os,
-                    descr=descr, service=cluster)
+                    descr=descr, service=cluster, department=department)
 
 
-def updateDIRClientDescr(dircompid=None, name='ibadmin', descr=''):
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    updateresdescription(dircompid, name, 'Client', descr)
-
-
-def updateDIRStorageDescr(dircompid=None, name=None, descr=''):
+def updateClientDescr(request, dircompid=None, name=None, descr=''):
     # get required data
     if name is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
-    updateresdescription(dircompid, name, 'Storage', descr)
-
-
-def updateClientDescr(dircompid=None, name=None, descr=''):
-    # get required data
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     updateresdescription(dircompid, name, 'Client', descr)
     fdcompid = getFDcompid(name)
     updateresdescription(fdcompid, name, 'FileDaemon', descr)
 
 
-def updateClientCluster(dircompid=None, name=None, cluster=''):
+def updateClientDepartment(request, dircompid=None, name=None, department=None):
+    # get required data
+    if name is None:
+        return None
+    if department is not None and department in ['', ' ', '#']:
+        department = None
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    # TODO: change to common functions
+    param = ConfParameter.objects.filter(resid__compid=dircompid, resid__name=name, resid__type=RESTYPE['Client'],
+                                         name='.Department')
+    if param.count() > 0:
+        # Client-Department already exist
+        depart = param[0]
+        if department is not None:
+            # update parameter
+            depart.value = department
+            depart.save()
+        else:
+            # remove parameter
+            depart.delete()
+    else:
+        if department is not None:
+            # add new Client parameter
+            clientres = ConfResource.objects.get(name=name, type__name='Client')
+            addparameter(clientres.resid, '.Department', department)
+
+
+def updateClientCluster(request, dircompid=None, name=None, cluster=''):
     # get required data
     if name is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     updateparameter(dircompid, name, 'Client', '.ClusterService', cluster)
     # get cluster node info
     client = getDIRClusterClientname(dircompid=dircompid, name=cluster)
-    clientinfo = getDIRClientinfo(name=client)
+    clientinfo = getDIRClientinfo(request, name=client)
     clientparams = extractclientparams(clientinfo)
     encpass = clientparams['Password']
     updateparameter(dircompid, name, 'Client', 'Password', encpass)
 
 
-def updateDIRClientAddress(dircompid=None, name=None, address='localhost'):
-    if name is None:
-        return None
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    updateparameter(dircompid, name, 'Client', 'Address', address)
-
-
-def updateClientAddress(dircompid=None, name=None, address='localhost'):
+def updateClientAddress(request, dircompid=None, name=None, address='localhost'):
     # get required data
     if name is None:
         return None
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     clients = getDIRClientAliases(name=name)
     clients += (name,)
     for cl in clients:
         updateDIRClientAddress(dircompid=dircompid, name=cl, address=address)
     fdcompid = getFDcompid(name)
     updateparameter(fdcompid, name, 'FileDaemon', 'FDAddress', address)
-
-
-def updateDIRJobDescr(dircompid=None, name=None, descr=''):
-    # get required data
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    updateresdescription(dircompid, name, 'Job', descr)
-
-
-def updateDIRDescr(dircompid=None, dirname=None, descr=''):
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    if dirname is None:
-        dirname = getDIRname()
-    updateresdescription(dircompid, dirname, 'Director', descr)
-
-
-def updateDIRadminemail(dircompid=None, dirname=None, email=''):
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    if dirname is None:
-        dirname = getDIRname()
-    emailstr = email + ' = All, !Debug, !Skipped, !Restored'
-    updateparameter(dircompid, 'Standard', 'Messages', 'Mail', emailstr)
-    emailstr = email + ' = All, !Fatal, !Debug, !Skipped, !Restored'
-    updateparameter(dircompid, 'Daemon', 'Messages', 'Mail', emailstr)
 
 
 def updateJobStorage(dircompid=None, name=None, storage='ibadmin'):
@@ -728,7 +878,7 @@ def updateJobClient(dircompid=None, name=None, client='ibadmin'):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    print dircompid, name, client
+    # print dircompid, name, client
     updateparameter(dircompid, name, 'Job', 'Client', client)
 
 
@@ -771,12 +921,12 @@ def updateFSOptionsCompression(dircompid=None, fsname=None, includeid=None, comp
             updateparameterresid(optionid, 'Compression', compr)
 
 
-def updateFSIncludeFile(dircompid=None, fsname=None, include=''):
+def updateFSIncludeFile(request, dircompid=None, fsname=None, include=''):
     if fsname is None:
         return None
     # get and prepare required data
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     includelist = include.splitlines()
     resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
     includeid = getsubresourceid(resid=resid, typename='Include')
@@ -785,14 +935,14 @@ def updateFSIncludeFile(dircompid=None, fsname=None, include=''):
     createFSIncludeFile(resid=includeid, include=includelist)
 
 
-def updateFSExclude(dircompid=None, fsname=None, exclude='', client=None):
+def updateFSExclude(request, dircompid=None, fsname=None, exclude='', client=None):
     if fsname is None:
         return None
     # get and prepare required data
     if dircompid is None:
-        dircompid = getDIRcompid()
+        dircompid = getDIRcompid(request)
     excludelist = exclude.splitlines()
-    clientos = getDIRClientOS(dircompid=dircompid, name=client)
+    clientos = getDIRClientOS(request, dircompid=dircompid, name=client)
     updateFSdefaultexclude(exclude=excludelist, clientos=clientos)
     resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
     excludeid = getsubresourceid(resid=resid, typename='Exclude')
@@ -801,7 +951,7 @@ def updateFSExclude(dircompid=None, fsname=None, exclude='', client=None):
     createFSExclude(resid=excludeid, exclude=excludelist)
 
 
-def updateFSIncludePlugin(dircompid=None, fsname=None, include=[]):
+def updateFSIncludePlugin(dircompid=None, fsname=None, include=()):
     if fsname is None:
         return None
     # get and prepare required data
@@ -812,6 +962,82 @@ def updateFSIncludePlugin(dircompid=None, fsname=None, include=[]):
     query = ConfParameter.objects.filter(resid=includeid)
     query.delete()
     createFSIncludePlugin(resid=includeid, include=include)
+
+
+def updateFSProxmoxPlugin(dircompid=None, job=None, fsname=None, abortonerror=None):
+    if job is None:
+        return None
+    jobname = job['Name']
+    if fsname is None:
+        fsname = 'fs-' + jobname
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    data = {
+        'include': job['Objsinclude'],
+        'exclude': job['Objsexclude'],
+        'allvms': job['Allobjs'],
+    }
+    plugin = prepareFSProxmoxPlugin(data, abortonerror)[0]
+    updateFSIncludePlugin(dircompid=dircompid, fsname=fsname, include=plugin)
+
+
+def updateFSXenServerPlugin(dircompid=None, job=None, fsname=None, abortonerror=None):
+    if job is None:
+        return None
+    jobname = job['Name']
+    if fsname is None:
+        fsname = 'fs-' + jobname
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    data = {
+        'include': job['Objsinclude'],
+        'exclude': job['Objsexclude'],
+        'allvms': job['Allobjs'],
+    }
+    plugin = prepareFSXenServerPlugin(data, abortonerror)[0]
+    updateFSIncludePlugin(dircompid=dircompid, fsname=fsname, include=plugin)
+
+
+def updateFSVMwarePlugin(dircompid=None, job=None, fsname=None, abortonerror=None):
+    if job is None:
+        return None
+    jobname = job['Name']
+    if fsname is None:
+        fsname = 'fs-' + jobname
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    data = {
+        'include': job['Objsinclude'],
+        'exclude': job['Objsexclude'],
+        'allvms': job['Allobjs'],
+    }
+    plugin = prepareFSVMwarePlugin(data, abortonerror)[0]
+    updateFSIncludePlugin(dircompid=dircompid, fsname=fsname, include=plugin)
+
+
+def updateFSKVMPlugin(dircompid=None, job=None, fsname=None, abortonerror=None):
+    if job is None:
+        return None
+    jobname = job['Name']
+    if fsname is None:
+        fsname = 'fs-' + jobname
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    data = {
+        'include': job['Objsinclude'],
+        'exclude': job['Objsexclude'],
+        'allvms': job['Allobjs'],
+    }
+    plugin = prepareFSKVMPlugin(data, abortonerror)[0]
+    updateFSIncludePlugin(dircompid=dircompid, fsname=fsname, include=plugin)
 
 
 def updateJobEnabled(dircompid=None, name=None, enabled=True):
@@ -886,23 +1112,6 @@ def updateJobRunAfter(dircompid=None, name=None, runafter=''):
             # disabled already
             return
         param.delete()
-
-
-def deleteDIRFileSet(dircompid=None, fsname=None):
-    if fsname is None:
-        return None
-    # get and prepare required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
-    # delete options subresource of include subresource
-    includeid = getsubresourceid(resid=resid, typename='Include')
-    deletesubresource(includeid, 'Options')
-    deletesubresource(resid, 'Include')
-    # delete exclude subresource
-    deletesubresource(resid, 'Exclude')
-    # delete fileset resource
-    deleteresource(resid)
 
 
 def updateJobRetention(dircompid=None, name=None, retention=None):
@@ -1002,80 +1211,6 @@ def updateScheduletime(dircompid=None, name=None, jobname=None, level='', startt
     updateparameterresid(resid=jresid, name='.Scheduletime', value=schtime)
 
 
-def deleteDIRSchedule(dircompid=None, schname=None):
-    if schname is None:
-        return None
-    # get and prepare required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    resid = getresourceid(compid=dircompid, name=schname, typename='Schedule')
-    deleteresource(resid)
-
-
-def deleteDIRJob(dircompid=None, name=None, job=None):
-    if name is None and job is None:
-        return None
-    # get and prepare required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    if job is not None:
-        name = job.name
-        resid = job.resid
-    else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Job')
-    # delete FileSet
-    fsname = 'fs-' + name
-    deleteDIRFileSet(dircompid=dircompid, fsname=fsname)
-    # delete Schedule
-    schname = 'sch-' + name
-    deleteDIRSchedule(dircompid=dircompid, schname=schname)
-    # delete Job resource and parameters
-    deleteresource(resid)
-
-
-def disableDIRJob(dircompid=None, name=None, job=None):
-    if name is None and job is None:
-        return None
-    # get and prepare required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    if job is not None:
-        resid = job.resid
-    else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Job')
-    # change Enabed parameter to No
-    updateparameterresid(resid=resid, name='Enabled', value='No')
-    addparameter(resid=resid, name='.Disabledfordelete', value='Yes')
-
-
-def disableDIRClient(dircompid=None, name=None, client=None):
-    if name is None and client is None:
-        return None
-    # get and prepare required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    if client is not None:
-        resid = client.resid
-    else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Client')
-    addparameter(resid=resid, name='.Disabledfordelete', value='Yes')
-    addparameter(resid=resid, name='Enabled', value='No')
-
-
-def deleteDIRClient(dircompid=None, name=None, client=None):
-    if name is None and client is None:
-        return None
-    # get and prepare required data
-    if dircompid is None:
-        dircompid = getDIRcompid()
-    if client is not None:
-        resid = client.resid
-    else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Client')
-    # delete Client resource and parameters
-    deleteresource(resid)
-
-
 def deleteFDClient(name=None):
     if name is None:
         return None
@@ -1109,8 +1244,7 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
     createDIRMessages(dircompid=dircompid, name='Standard', email=email, log='bacula.log',
                       descr='Standard Job Messages')
     # create DIR Messages Daemon Resource
-    createDIRMessages(dircompid=dircompid, name='Daemon', email=email, log='daemon.log', descr='Daemon Messages',
-                      fatal=False)
+    createDIRMessages(dircompid=dircompid, name='Daemon', log='daemon.log', descr='Daemon Messages')
     # create Admin Schedule
     scheduletimeadmin = '05:00'
     createDIRSchedule(dircompid=dircompid, name='sch-admin', cycle='Day', params={'level': 'full',
@@ -1155,8 +1289,13 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
                  descr='Internal administration job for system maintanance',
                  scheduleparam=onceaday, scheduletime=scheduletimeadmin)
     # create Restore Job
-    createDIRJob(dircompid=dircompid, name='Restore', jd='jd-restore', descr='Internal Restore Job', internal=True)
+    createDIRJob(dircompid=dircompid, name='Restore', jd='jd-restore', descr='Internal Restore Job',
+                 internal=True, mcj=8)
     # create Catalog backup Job
     createDIRJob(dircompid=dircompid, name='SYS-Backup-Catalog', jd='jd-backup-catalog', client=name, internal=True,
                  pool='Default', storage=storname, level='Full', descr='Internal job for backup Catalog database',
                  scheduleparam=onceaday, scheduletime=scheduletime)
+    # create default roles
+
+    # create admin user
+    createadminuser(email, password)

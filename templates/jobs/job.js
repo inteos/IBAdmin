@@ -13,43 +13,48 @@ $(function () {
       { "width": "30px", "sClass": "vertical-align text-center" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdataar(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdata(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "orderable": false, "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "orderable": false, "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return bytestext(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderstatuslabel(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlabel(data)} },
       { "width": "96px", "orderable": false, "sClass": "vertical-align text-center", <!-- 32px for every button -->
         "render": function (data,type,row){
-          var tmp;
-          if (data[3] == 'R' || data[3] == 'C'){
-            tmp = '{% url 'jobsstatus_rel' %}';
-          } else {
-            tmp = '{% url 'jobslog_rel' %}';
-          }
           var btn = '<button class="btn btn-sm btn-default" type="button" ';
-          var blog = btn + 'onclick="location.href=\''+tmp+data[0]+'\';"><i class="fa fa-info-circle"></i></button>\n';
-          var ret = '<div class="btn-group">' + blog;
+          var ret = '';
           if (data[3] == 'R' || data[3] == 'C'){
-            var bcan = btn + 'data-toggle="modal" data-target="#canceljobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidcancel_rel' %}"><i class="fa fa-minus-circle"></i></button>\n';
-            ret += bcan;
+{% if perms.jobs.status_jobs %}
+            ret += btn + 'onclick="location.href=\'{% url 'jobsstatus_rel' %}'+data[0]+'\';"><i class="fa fa-info-circle"></i></button>\n';
+{% endif %}
+          } else {
+            ret += btn + 'onclick="location.href=\'{% url 'jobslog_rel' %}'+data[0]+'\';"><i class="fa fa-info-circle"></i></button>\n';
           }
+{% if perms.jobs.cancel_jobs %}
+          if (data[3] == 'R' || data[3] == 'C'){
+            ret += btn + 'data-toggle="modal" data-target="#canceljobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidcancel_rel' %}"><i class="fa fa-minus-circle"></i></button>\n';
+          }
+{% endif %}
           if (data[3] == 'R'){
-            var bstp = btn + 'data-toggle="modal" data-target="#stopjobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidstop_rel' %}"><i class="fa fa-pause"></i></button>\n';
-            ret += bstp;
-          } else if (data[3] != 'C') {
+{% if perms.jobs.stop_jobs %}
+            ret += btn + 'data-toggle="modal" data-target="#stopjobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidstop_rel' %}"><i class="fa fa-pause"></i></button>\n';
+{% endif %}
+          } else
+          if (data[3] != 'C') {
             if (data[2] == 'B'){
-              var bres = btn;
               if (data[3] == 'T' || data[3] == 'I'){
-                  bres += 'onclick="location.href=\'{% url 'restorejobid_rel' %}'+data[0]+'\';"><i class="fa fa-cloud-upload"></i></button>\n';
+{% if perms.jobs.restore_jobs %}
+                  ret += btn + 'onclick="location.href=\'{% url 'restorejobid_rel' %}'+data[0]+'\';"><i class="fa fa-cloud-upload"></i></button>\n';
+{% endif %}
                 } else {
-                  bres += 'data-toggle="modal" data-target="#restartjobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh" data-toggle="tooltip" data-original-title="Restart"></i></button>\n';
+{% if perms.jobs.restart_jobs %}
+                  ret += btn + 'data-toggle="modal" data-target="#restartjobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidrestart_rel' %}"><i class="fa fa-refresh" data-toggle="tooltip" data-original-title="Restart"></i></button>\n';
+{% endif %}
                 }
-              ret += bres;
             }
-            var bdel = btn + 'data-toggle="modal" data-target="#deletejobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash"></i></button>\n';
-            ret +=  bdel;
-          }
-          ret += '</div>';
-          return ret;
+{% if perms.jobs.delete_jobs %}
+            ret += btn + 'data-toggle="modal" data-target="#deletejobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash"></i></button>\n';
+{% endif %}
+          };
+          return '<div class="btn-group">' + ret + '</div>';
         },
       },
     ],

@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="box box-info">
   <div class="box-header">
     <i class="fa {{ Storage.MediaType|mediaicon }}"></i>
@@ -44,14 +48,23 @@
       <div class="col-sm-10 center-block">
         <a class="btn btn-app" href="{% url 'storageinfo' Storage.Name %}"><i class="fa fa-info-circle"></i>Info</a>
         {% if Storage.MType == 'Dedu' %}
+{% if perms.storages.dedup_vacuum %}
+        <a class="btn btn-app disabled" data-toggle="modal" data-target="#dedupvacuum" data-name="{{ Storage.Name }}"><i class="fa fa-magic"></i>Vacuum</a>
+{% endif %}
+{% if perms.storages.view_dedup %}
         <a class="btn btn-app" href="{% url 'storagededup' Storage.Name %}"><i class="fa fa-cubes"></i>Dedup Engine</a>
         {% endif %}
+{% endif %}
+{% if Storage.Alias or user.is_superuser and user.is_staff %}
         <a class="btn btn-app" href="{% url 'storageedit' Storage.Name %}"><i class="fa fa-edit"></i>Edit</a>
+{% endif %}
+{% if user.is_superuser and user.is_staff %}
         {% if Storage.MType == 'Tape' %}
         <a class="btn btn-app" data-toggle="modal" data-target="#labelconfirm" data-name="{{ Storage.StorageDirDevice }}" data-url="{% url 'storagelabel' Storage.Name %}"><i class="fa fa-tags"></i>Label tapes</a>
         {% endif %}
         <!--<a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
         <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+{% endif %}
       </div>
     </div>
     <div class="box-group" id="statusdevicesbox">

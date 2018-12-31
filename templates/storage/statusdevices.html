@@ -19,6 +19,7 @@
       <div class="btn-group">
         <button class="btn btn-sm btn-default disabled" disabled type="button" onclick="location.href='{% url 'storageinfo' st.Name %}';">
           <i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>
+      {% if user.is_superuser and user.is_staff %}
         {% if dev.Status == 'Mounted' %}
         <button class="btn btn-sm btn-default" data-dev="umount" type="button" data-name="{{ dev.Name }}" data-slot="{{ dev.Slot }}">
           <i class="glyphicon glyphicon-open" data-toggle="tooltip" data-original-title="Unmount"></i></button>
@@ -30,6 +31,7 @@
           <i class="fa fa-toggle-on" data-toggle="tooltip" data-original-title="Disable"></i>
         {% endif %}
           </button>
+      {% endif %}
       </div>
     </td>
   </tr>

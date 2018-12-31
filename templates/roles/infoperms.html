@@ -1,0 +1,31 @@
+{% for ct in Perms %}
+  <div class="col-lg-6 col-md-12">
+    <div class="box {% cycle 'box-primary' 'box-danger' 'box-success' 'box-warning' 'box-info' 'box-default' %}"><!-- collapsed-box -->
+      <div class="box-header">
+        <i class="fa fa-bar-chart-o"></i>
+        <h3 class="box-title">{{ ct.name }}</h3>
+        <div class="box-tools pull-right">
+          <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div><!-- /.box-tools -->
+      </div><!-- /.box-header -->
+      <div class="box-body">
+      {% if ct.perms %}
+        <ul class="todo-list">
+          {% for p in ct.perms %}
+          <li>
+            <span class="text">{{ p.1 }}</span>
+{% if perms.roles.change_roles %}
+            <div class="tools">
+              <i class="fa fa-trash-o perms-delete" data-applabel="{{ ct.applabel }}" data-codename="{{ p.0 }}" data-toggle="tooltip" data-original-title="Remove"></i>
+            </div>
+{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <i>No permissions in this group.</i>
+      {% endif %}
+      </div>
+    </div>
+  </div>
+{% endfor %}

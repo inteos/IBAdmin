@@ -1,19 +1,98 @@
+{% if perms.virtual.view_vmware or perms.virtual.view_proxmox or perms.virtual.view_xen or perms.virtual.view_kvm or perms.virtual.view_hyperv %}
+{% load ibadcolors %}
 <!-- VM menu -->
-          <li class="treeview {% if apppath.0 == 'Virtual' %}active{% endif %}">
-            <a href="#"><i class="fa fa-building"></i> <span>Virtual machines</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
-            <ul class="treeview-menu">
-              {% if vmguestsnr %}
-                <li{% if apppath.1 == 'Add' %} class="active"{% endif %}>
-                <a href="/vms/add"><i class="fa fa-plus"></i> <span>New VM Guest</span></a></li>
-                <li{% if apppath.1 == '' %} class="active"{% endif %}>
-                  <a href="/vms"><i class="fa fa-th-list"></i> <span>List</span><span class="pull-right-container">
-                    <small class="label pull-right bg-teal">{{ vmguestsnr }}</small></span>
-                  </a></li>
-                {% if clientstatusdisplay %}
-                  {% include "clients/client.html" %}
-                {% endif %}
-              {% endif %}
-              <li{% if apppath.1 == 'AddVM' %} class="active"{% endif %}>
-              <a href="/clients/add"><i class="fa fa-plus"></i> <span>New VM Host</span></a></li>
-            </ul>
+<li class="treeview {% if apppath.0 == 'Virtual' %}active{% endif %}">
+  <a href="#"><i class="fa fa-server"></i> <span>Virtual</span><span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
+  <ul class="treeview-menu">
+    {% if perms.virtual.add_vmware or perms.virtual.add_vcenter or perms.virtual.add_proxmox or perms.virtual.add_xen or perms.virtual.add_kvm %}
+      <li{% if apppath.1 == 'Add' %} class="active"{% endif %}>
+        <a href="#"><i class="fa fa-plus"></i>New Virtual<span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i></span></a>
+        <ul class="treeview-menu">
+          {% if perms.virtual.add_vcenter %}
+            {% if vmhostsdetectvsphere %}
+              {% if apppath.2 == 'vCenter' %}<li class="active">{% else %}<li>{% endif %}
+                <a href="{% url 'vmsaddvcenter' %}"><i class="fa fa-globe"></i><span>VMware vCenter</span></a></li>
+            {% endif %}
+          {% endif %}
+          {% if perms.virtual.add_proxmox %}
+            {% if apppath.2 == 'Proxmox' %}<li class="active">{% else %}<li>{% endif %}
+              <a href="{% url 'vmsaddproxmox' %}"><i class="fa fa-cube"></i><span>Proxmox Host</span></a></li>
+          {% endif %}
+          {% if perms.virtual.add_xen %}
+            {% if apppath.2 == 'XenServer' %}<li class="active">{% else %}<li>{% endif %}
+              <a href="{% url 'vmsaddxenserver' %}"><i class="fa fa-cube"></i><span>XenServer Host</span></a></li>
+          {% endif %}
+          {% if perms.virtual.add_kvm %}
+            {% if apppath.2 == 'KVM' %}<li class="active">{% else %}<li>{% endif %}
+              <a href="{% url 'vmsaddkvmhost' %}"><i class="fa fa-cube"></i><span>KVM Host</span></a></li>
+          {% endif %}
+        </ul>
+      </li>
+    {% endif %}
+    <!-- view_vmware -->
+    {% if perms.virtual.view_vmware %}
+      {% if vmwarehostnr > 0 or vcenterhostsnr > 0%}
+      <li{% if apppath.1 == 'VMware'%} class="active"{% endif %}>
+        <a href="{% url 'vmsvcenterdefined' %}"><i class="fa fa-th-list"></i> <span>VMware</span><span class="pull-right-container">
+          <small class="label pull-right {{ 'vmware'|OSbgcolor }}"{% if vmwarehostnr < 1 %} style="display: none"{% endif %}>{{ vmwarehostnr }}</small></span>
+        </a>
+      </li>
+      {% endif %}
+      {% if apppath.1 == 'vCenter Assign' %}
+      <li class="active">
+        <a href="{% url 'vmsaddvcenterclient' %}"><i class="fa fa-plus-square"></i> vCenter Assign</a>
+      </li>
+      {% endif %}
+      {% if apppath.1 == 'vCenter' %}
+      <li class="active">
+        <a href="#"><i class="fa fa-desktop"></i>vCenter {{ vCenter.name }}<span class="pull-right-container">
+          <i class="fa fa-angle-left pull-right"></i></span></a>
+        <ul class="treeview-menu">
+          {% if apppath.2 == 'Info' or apppath.2 == 'Edit' %}
+          <li{% if apppath.2 == 'Info' %} class="active"{% endif %}>
+            <a href="{% url 'vmsvcenterinfo' vCenter.name %}"><i class="fa fa-info-circle"></i> <span>Info</span></a>
           </li>
+          {% if perms.virtual.change_vcenter %}
+            <li{% if apppath.2 == 'Edit' %} class="active"{% endif %}>
+              <a href="{% url 'vmsvcenteredit' vCenter.name %}"><i class="fa fa-edit"></i> <span>Edit</span></a>
+            </li>
+            {% endif %}
+          {% endif %}
+        </ul>
+      </li>
+      {% endif %}
+    {% endif %}
+    <!-- view_proxmox -->
+    {% if perms.virtual.view_proxmox %}
+      {% if proxmoxhostnr > 0 %}
+      <li{% if apppath.1 == 'Proxmox' %} class="active"{% endif %}>
+        <a href="{% url 'vmsproxmoxdefined' %}"><i class="fa fa-th-list"></i> <span>Proxmox</span><span class="pull-right-container">
+          <small class="label pull-right {{ 'proxmox'|OSbgcolor }}">{{ proxmoxhostnr }}</small></span>
+        </a>
+      </li>
+      {% endif %}
+    {% endif %}
+    <!-- view_xen -->
+    {% if perms.virtual.view_xen %}
+      {% if xenhostnr > 0 %}
+      <li{% if apppath.1 == 'XenServer' %} class="active"{% endif %}>
+        <a href="{% url 'vmsxenserverdefined' %}"><i class="fa fa-th-list"></i> <span>XenServer</span><span class="pull-right-container">
+          <small class="label pull-right {{ 'xen'|OSbgcolor }}">{{ xenhostnr }}</small></span>
+        </a>
+      </li>
+      {% endif %}
+    {% endif %}
+    <!-- view_kvm -->
+    {% if perms.virtual.view_kvm %}
+      {% if kvmhostnr > 0 %}
+      <li{% if apppath.1 == 'KVM' %} class="active"{% endif %}>
+        <a href="{% url 'vmskvmhostdefined' %}"><i class="fa fa-th-list"></i> <span>KVM</span><span class="pull-right-container">
+          <small class="label pull-right {{ 'kvm'|OSbgcolor }}">{{ kvmhostnr }}</small></span>
+        </a>
+      </li>
+      {% endif %}
+    {% endif %}
+  </ul>
+</li>
+{% endif %}

@@ -1,42 +1,43 @@
 {% load ibadtexts %}
 {% load ibadcolors %}
-          <div class="box {{ box|default:'box-info' }}">
-            <div class="box-header with-border">
-              <h3 class="box-title">{{ title }}</h3>
-              <div class="box-tools pull-right">
-                {% include 'pages/minimizebutton.html' %}
-                {% include 'pages/refreshbutton.html' %}
-                <!--button id="{{ id }}remove" type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>-->
-              </div>
-            </div><!-- /.box-header -->
-            <div class="box-body">
-              <div class="table-responsive">
-                <table class="table no-margin">
-                  <thead>
-                  <tr>
-                    <th class="text-center" style="width: 60px">JobId</th>
-                    <th>Name</th>
-                    <th class="text-center">Level</th>
-                    <th class="text-center" style="width: 60px">Status</th>
-                  </tr>
-                  </thead>
-                  <tbody id="{{ id }}">
-                  {% for tr in '1234' %}
-                    <tr>
-                    {% for td in '1234' %}
-                      <td>&nbsp;</td>
-                    {% endfor %}
-                    </tr>
-                  {% endfor %}
-                  </tbody>
-                </table>
-              </div><!-- /.table-responsive -->
-            </div><!-- /.box-body -->
-<!--            <div class="box-footer clearfix text-center">
-              <a href="" class="btn btn-sm btn-info btn-flat">View All Jobs</a>
-            </div><!-- /.box-footer -->
-            <div id="{{ id }}loading" class="overlay">
-              <i class="fa fa-refresh fa-spin"></i>
-            </div>
-          </div>
-          <!-- /.box -->
+<div id="widgetid_{{ id }}" class="box {{ box|default:'box-info' }}">
+  <div class="box-header with-border">
+    <i class="{{ icon|default:'fa fa-server' }}"></i>
+    <h3 class="box-title">{{ title }}</h3>
+    <div class="box-tools pull-right">
+      {% include 'pages/minimizebutton.html' %}
+      {% include 'pages/refreshbutton.html' %}
+      <button id="{{ id }}remove" type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table class="table no-margin">
+        <thead>
+        <tr>
+          <th class="text-center" style="width: 60px">JobId</th>
+          <th>Name</th>
+          <th class="text-center">Level</th>
+          <th class="text-center" style="width: 60px">Status</th>
+        </tr>
+        </thead>
+        <tbody id="{{ id }}">
+        {% for tr in '1234' %}
+          <tr>
+          {% for td in '1234' %}
+            <td>&nbsp;</td>
+          {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div><!-- /.table-responsive -->
+  </div><!-- /.box-body -->
+<!--<div class="box-footer clearfix text-center">
+    <a href="" class="btn btn-sm btn-info btn-flat">View All Jobs</a>
+  </div><!-- /.box-footer -->
+  <div id="{{ id }}loading" class="overlay">
+    <i class="fa fa-refresh fa-spin"></i>
+  </div>
+</div>
+<!-- /.box -->

@@ -3,10 +3,13 @@
 <p>Here you can define a new backup client Alias. Backup client Alias is like a symbolic link or CNAME which points to
     standard Backup Client. To define a new alias backup client you have to input its name which should be unique in
     the system (you will get an error if it is not), description (optional), select an existing backup client (which
-    could be a standalone or cluster node client) from a list and optionally check for creating a default backup Job
-    for this client.</p>
-<p><b>Alias name</b> - name of your new backup client - Alias. It has to be unique in your system.</p>
-<p><b>Description</b> - any description of your backup client.</p>
-<p><b>Alias to</b> - name of the existing Backup Client (standalone or cluster node) to point to.</p>
-<p><b>Create default backup Job</b> - when checked a defaut Job for the Client will be created together with a Client.</p>
+    could be a standalone or cluster node client) from a list, its department and optionally check for creating a
+    default backup Job for this client.</p>
+<dl>
+    <dt>Alias name</dt><dd>name of your new backup client - Alias. It has to be unique in your system.</dd>
+    <dt><b>Description</b><dd>any description of your backup client.</dd>
+    <dt><b>Alias to</b><dd>name of the existing Backup Client (standalone or cluster node) to point to.</dd>
+    <dt><b>Department</b><dd>department name for the client.</dd>
+    <dt><b>Create default backup Job</b><dd>when checked a defaut Job for the Client will be created together with a Client.</dd>
+</dl>
 <p><i class="fa fa-info-circle text-aqua"></i> Default Job will have the name <i>&lt;client_name&gt;-DefaultJob.</i></p>

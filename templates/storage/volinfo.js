@@ -5,7 +5,7 @@ $(function () {
     "serverSide": true,
     "ajax": "{% url 'volumeshistorydata' Volume.volumename %}",
     "language": {
-      "emptyTable": "No Jobs stored yet."
+      "emptyTable": "No Jobs information available."
     },
     "order": [[ 0, 'desc' ]],
     "bAutoWidth": false,
@@ -14,35 +14,42 @@ $(function () {
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderjoblink(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdataar(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdata(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return bytestext(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderstatuslabel(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlabel(data)} },
       { "width": "96px", "orderable": false, "sClass": "vertical-align text-center", <!-- 32px for every button -->
         "render": function (data,type,row){
-          var tmp;
-          if (data[3] == 'R' || data[3] == 'C'){
-            tmp = '{% url 'jobsstatus_rel' %}';
-          } else {
-            tmp = '{% url 'jobslog_rel' %}';
-          };
           var btn = '<button class="btn btn-sm btn-default" type="button" ';
-          var blog = btn + 'onclick="location.href=\''+tmp+data[0]+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
-          var ret = blog;
+          var ret = '';
           if (data[3] == 'R' || data[3] == 'C'){
-            var bcan = btn + 'data-toggle="modal" data-target="#canceljobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidcancel_rel' %}"><i class="fa fa-minus-circle" data-toggle="tooltip" data-original-title="Cancel"></i></button>\n';
-            ret += bcan;
+{% if perms.jobs.status_jobs %}
+            ret += btn + 'onclick="location.href=\'{% url 'jobsstatus_rel' %}'+data[0]+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
+{% endif %}
+          } else {
+{% if perms.jobs.view_jobs %}
+            ret += btn + 'onclick="location.href=\'{% url 'jobslog_rel' %}'+data[0]+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
+{% endif %}
           };
+{% if perms.jobs.cancel_jobs %}
+          if (data[3] == 'R' || data[3] == 'C'){
+            ret += btn + 'data-toggle="modal" data-target="#canceljobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidcancel_rel' %}"><i class="fa fa-minus-circle" data-toggle="tooltip" data-original-title="Cancel"></i></button>\n';
+          };
+{% endif %}
           if (data[3] == 'R'){
-            var bstp = btn + 'data-toggle="modal" data-target="#stopjobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidstop_rel' %}"><i class="fa fa-pause" data-toggle="tooltip" data-original-title="Stop"></i></button>\n';
-            ret += bstp;
-          } else if (data[3] != 'C') {
+{% if perms.jobs.stop_jobs %}
+            ret += btn + 'data-toggle="modal" data-target="#stopjobconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsidstop_rel' %}"><i class="fa fa-pause" data-toggle="tooltip" data-original-title="Stop"></i></button>\n';
+{% endif %}
+          } else
+          if (data[3] != 'C') {
+{% if perms.jobs.restore_jobs %}
             if (data[2] == 'B'){
-              var bres = btn + 'onclick="location.href=\'{% url 'restorejobid_rel' %}'+data[0]+'/\';"><i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Restore"></i></button>\n';
-              ret += bres;
+              ret += btn + 'onclick="location.href=\'{% url 'restorejobid_rel' %}'+data[0]+'/\';"><i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Restore"></i></button>\n';
             }
-            var bdel = btn + 'data-toggle="modal" data-target="#deletejobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
-            ret +=  bdel;
+{% endif %}
+{% if perms.jobs.delete_jobs %}
+            ret += btn + 'data-toggle="modal" data-target="#deletejobidconfirm" data-name="'+data[1]+'" data-jobid="'+data[0]+'" data-url="{% url 'jobsiddelete_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
+{% endif %}
           };
           return '<div class="btn-group">' + ret + '</div>';
         },
@@ -163,22 +170,9 @@ $(function () {
       success: onDataReceived,
     });
   });
-  $('#voldeleteconfirmbutton').on('click', function () {
-    var button = $(this)
-    button.button('loading')
-    var url = button.data('url')
-    function onDataReceived(data) {
-      button.button('Done...');
-      location.href = "{% url 'storagevolumes' %}";
-    };
-    $.ajax({
-      url: url,
-      type: "GET",
-      dataType: "json",
-      success: onDataReceived,
-    });
-  });
 {% include "widgets/confirmbutton.js" with selector='#canceljobconfirmbutton, #stopjobconfirmbutton, #deletejobidconfirmbutton' %}
+{% url 'storagevolumes' as dvhrefurl %}
+{% include "widgets/confirmbuttonhref.js" with selector='#voldeleteconfirmbutton' href=dvhrefurl %}
 });
 {% include 'widgets/confirmmodal1.js' with selector='#volusedconfirm, #volpurgeconfirm, #volopenconfirm, #voldeleteconfirm' %}
 {% include "widgets/confirmmodal2.js" with selector='#deletejobidconfirm, #canceljobconfirm, #stopjobconfirm' %}

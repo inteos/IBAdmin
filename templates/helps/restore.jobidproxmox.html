@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<h4>Restore Proxmox VM data</h4>
+<p>Here you can select Proxmox Guest VMs to restore. All QEMU type guests are marked with <i class="fa fa-desktop"></i>
+icon and all LXC type quests are marked with <i class="fa fa-cube"></i> icon.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You can select any guest vm name to restore then all VMs with this name
+    will be selected to restore.</p>
+<p><i class="fa fa-info-circle text-aqua"></i> You can check what VM ids were stored at a selected vm name by expanding
+    the vm name itself, then you can select a single vmid for restore.</p>
+<p><b>JobIds involved</b> - the list of job ids which will be involved in the restore job.</p>
+<p><b>Restore to directory</b> - when selected the guest vm data will be restored to Proxmox host local directory
+instead of Proxmox appliance. The default is to restore to Proxmox appliance.</p>
+<p><b>Restore host</b> - the Proxmox host selected for restore (default is the original host).</p>
+<p><b>Proxmox storage</b> - when restore to Proxmox appliance it will save restored guest in the selected Proxmox
+    storage (default is to put guest to its original storage).</p>
+<p><b>Proxmox resource pool</b> - you can assign guest vm into a selected Proxmox resource pool on restore (default is
+    no pool).</p>
+<p><b>Where</b> - when <i>Restore to directory</i> is selected then guest vm data will be saved in the selected
+    directory.</p>
+<p><b>Replace mode</b> - when <i>Restore to directory</i> is selected then it manages replace mode for the restore job.</p>
+<p>To start a restore job, select a data to restore and use a Restore button: <img src="{% static 'help/images/ibadmin-restoreb2.png' %}"></p>

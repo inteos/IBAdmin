@@ -1,0 +1,50 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+
+{% block contentwidget %}
+{% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-primary">
+      <div class="box-header">
+        <i class="fa fa-wrench"></i>
+        <h3 class="box-title">Edit KVM GuestVM Backup</h3>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="editform" method="post" action="{% url 'jobseditkvm' form.name.value %}">
+        {% csrf_token %}
+        {{ form.backurl }}
+        <div class="box-body">
+        {{ form.name }}
+        {{ form.descr }}
+        {{ form.retention }}
+        {% include 'widgets/jobformstorage.html' %}
+        {% include 'widgets/jobformclient.html' %}
+        <div id="{{ form.allvms.id_for_label }}-group" class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <div class="checkbox icheck">
+              <label>{{ form.allvms }} {{ form.allvms.label }}</label>
+            </div>
+          </div>
+        </div><!-- /.form-group -->
+        {{ form.include }}
+        {{ form.exclude }}
+        {% include 'widgets/jobformbackupsch.html' %}
+        {% include 'widgets/jobformstarttime.html' %}
+        {% include 'widgets/jobformschedule.html' %}
+        </div><!-- /.box-body -->
+        {% include 'widgets/jobformeditfooter.html' %}
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+
+{% block pagejs %}
+  {% include "jobs/editkvm.js" %}
+{% endblock %}

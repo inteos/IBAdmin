@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-success">
@@ -14,19 +18,8 @@
       <!-- form start -->
       <form class="form-horizontal" id="addform" method="post" action="{% url 'storageaddtape' %}">
         {% csrf_token %}
+        {{ form.backurl }}
         <div class="box-body">
-          <!--<div class="row">
-            <div class="col-xs-12">
-              <div class="alert alert-info alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                <h4><i class="icon fa fa-lightbulb-o"></i>Info</h4>
-                Here <b>IBAdmin</b> will detect a {{ storage }} you selected. It will require to execute tape load/unload
-                operations which will take some time to complete. You can check the operation progress below.<br>
-                By default IBAdmin will automatically <u>initialize</u> all tapes found in library for future use.
-                If you want to make this initialization later you have to deselect the checkbox below.
-              </div>
-            </div>
-          </div>-->
           {{ form.taskid }}
           {{ form.name }}
           {{ form.descr }}
@@ -49,6 +42,7 @@
               </div>
             </div>
           </div><!-- /.form-group -->
+          {% include "widgets/selectdepartmentsform.html" %}
           <div id="detectbox" class="row" style="display:none;">
             <div class="col-md-12">
               <div id="progressbox" class="box box-warning">

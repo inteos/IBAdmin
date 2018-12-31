@@ -42,7 +42,7 @@
     <td class="vertical-align">{{ JobClient.Bytessec|bytestext }}/s</td>
     {% endif %} {% endif %}
     <td class="vertical-align text-center">
-      <span class="badge {{ JobClient.Errors|jobstatus_error_bgcolor }}">{{ JobClient.Errors|default:0 }}</span>
+      <span class="badge {{ JobClient.Errors|default:Job.Errors|jobstatus_error_bgcolor }}">{{ JobClient.Errors|default:Job.Errors|default:0 }}</span>
     </td>
     <td class="text-center vertical-align" style="width: 50px"><span id="statusheaderboxdata" class="label {{ Job.Status|jobstatusbgcolor:Job.Errors }}">{{ Job.Status|jobstatustext:Job.Errors }}</span></td>
   </tr>

@@ -1,0 +1,107 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="row">
+  <div class="col-lg-5 col-md-6">
+    <div class="box box-info">
+      <div class="box-header with-border">
+        <i class="fa fa-bank"></i>
+        <h4 class="box-title">Department Info</h4>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <div class="box-body">
+        <dl class="dl-horizontal">
+          <dt>Department name</dt>
+            <dd class="text-no-overflow">{{ Department.name }}</dd>
+          <dt>Short name</dt>
+            <dd>{{ Department.shortname }}</dd>
+          <dt>Description</dt>
+            <dd>{{ Department.description }}</dd>
+          <dt>Members</dt>
+            <dd>{{ membersnr }}</dd>
+          <dt>Label color</dt>
+            <dd><span class="label {{ Department.color|default:'bg-blue' }}">{{ labelcolor }}</span></dd>
+        </dl>
+{% if perms.departments.add_members %}
+        <hr>
+        <form role="form" id="addform" method="post">
+        {% csrf_token %}
+          <div class="form-group">
+            <label for="{{ form.user.id_for_label }}">{{ form.user.label }}</label>
+            <div class="input-group">
+              {{ form.user }}
+              <span class="input-group-btn">
+                <button id="addmember" type="button" class="btn btn-info btn-flat"><i class="fa fa-user-plus"></i> Add member</button>
+              </span>
+            </div>
+          </div>
+        </form>
+{% endif %}
+      </div><!-- /.box-body -->
+{% if perms.departments.change_departments or perms.departments.delete_departments %}
+      <div class="box-footer">
+        <div class="row">
+          <div class="col-sm-12">
+{% if perms.departments.change_departments %}
+            <a class="btn btn-app" href="{% url 'departsedit' Department.shortname %}"><i class="fa fa-wrench"></i>Edit</a>
+{% endif %}
+{% if perms.departments.delete_departments and deldepart %}
+            <a class="btn btn-app" data-toggle="modal" data-target="#departdeleteconfirm" data-name="{{ Department.name }}" data-url="{% url 'departsmakedelete' Department.shortname %}"><i class="fa fa-trash"></i>Delete</a>
+{% endif %}
+          </div>
+        </div>
+      </div>
+{% endif %}
+    </div><!-- /.box -->
+  </div>
+  <div class="col-lg-7 col-md-6">
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="box box-warning">
+          <div class="box-header with-border">
+            <i class="fa fa-users"></i>
+            <h4 class="box-title">Admin Members</h4>
+            <div class="box-tools pull-right">
+              {% include "widgets/helpbutton.html" with box=1 id='helpadminbutton' %}
+              {% include "widgets/refreshbutton.html" with box=1 id='adminsrefresh' %}
+            </div>
+          </div><!-- /.box-header -->
+          <div id="adminsbox" class="box-body no-padding">
+          <br><br>
+          </div>
+          <div id="adminsloading" class="overlay">
+            <i class="fa fa-refresh fa-spin"></i>
+          </div>
+        </div><!-- /.box -->
+      </div>
+      <div class="col-lg-6">
+        <div class="box box-success">
+          <div class="box-header with-border">
+            <i class="fa fa-users"></i>
+            <h4 class="box-title">Standard Members</h4>
+            <div class="box-tools pull-right">
+              {% include "widgets/helpbutton.html" with box=1 id='helpuserbutton' %}
+              {% include "widgets/refreshbutton.html" with box=1 id='usersrefresh' %}
+            </div>
+          </div><!-- /.box-header -->
+          <div id="usersbox" class="box-body no-padding">
+          <br><br>
+          </div>
+          <div id="usersloading" class="overlay">
+            <i class="fa fa-refresh fa-spin"></i>
+          </div>
+        </div><!-- /.box -->
+      </div>
+    </div>
+  </div>
+</div>
+{% if perms.departments.delete_departments %}
+{% include "widgets/departdeleteconfirm.html" %}
+{% endif %}
+{% include 'widgets/errorprocessingajax.html' %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "departments/info.js" %}
+{% endblock %}

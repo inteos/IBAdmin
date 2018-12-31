@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-success">
@@ -14,6 +18,7 @@
       <!-- form start -->
       <form class="form-horizontal" id="addform" method="post" action="{% url 'storageadddisk' %}">
         {% csrf_token %}
+        {{ form.backurl }}
         <div class="box-body">
           {{ form.name }}
           {{ form.descr }}
@@ -28,6 +33,7 @@
             </div>
           </div><!-- /.form-group -->
           {{ form.archivedir }}
+          {% include "widgets/selectdepartmentsform.html" %}
         </div><!-- /.box-body -->
         <div class="box-footer">
           <div class="row">

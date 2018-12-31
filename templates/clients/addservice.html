@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/osstatus.html" with osstatusvis=1 %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-success">
@@ -14,6 +18,7 @@
       <!-- form start -->
       <form class="form-horizontal" id="addform" method="post" action="{% url 'clientsaddservice' %}">
         {% csrf_token %}
+        {{ form.backurl }}
         <div class="box-body">
           {{ form.name }}
           {{ form.descr }}
@@ -27,6 +32,8 @@
             </div>
           </div><!-- /.form-group -->
           {{ form.address }}
+          {% include "widgets/selectdepartmentsform.html" %}
+{% if perms.clients.create_default_job %}
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox icheck">
@@ -34,6 +41,7 @@
               </div>
             </div>
           </div><!-- /.form-group -->
+{% endif %}
         </div><!-- /.box-body -->
         <div class="box-footer">
           <div class="row">

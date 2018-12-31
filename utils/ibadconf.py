@@ -1,7 +1,6 @@
 #!/opt/ibadengine/bin/python
 from __future__ import print_function
 import sys
-import os
 import psycopg2
 import psycopg2.extras
 import time
@@ -21,7 +20,7 @@ def get_parameters(conn, resid, level, component):
             if level:
                 indent += "  " * level
             if row['enc']:
-                #print (indent + "# C:"+component)
+                # print (indent + "# C:"+component)
                 out = getdecpass(component, row['value'])
                 cyt = 1
             else:
@@ -36,11 +35,13 @@ def get_parameters(conn, resid, level, component):
 
 def printhelp():
     print(" Possible parameters are:")
-    print(" -d          Director configuration.")
-    print(" -c          Bacula console configuration.")
-    print(" -f <name>   File Daemon configuration.")
-    print(" -s <name>   Storage Daemon configuration.")
-    print(" -h          Print this help.")
+    print(" -d [name]       Director configuration.")
+    print(" -c [name]       Bacula console configuration.")
+    print(" -f <name>       File Daemon configuration.")
+    print(" -s <name>       Storage Daemon configuration.")
+    print(" <ctype> -l      Lists available component names.")
+    print(" -r <restype>    Lists <restype> names in Director.")
+    print(" -h              Print this help.")
     print()
 
 
@@ -52,45 +53,67 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if sys.argv[1] == "-h":
-        print("IBAdmin - Inteos Bacula Administration App - (c) 2017 Inteos sp. z o.o.")
+        print("IBAdmin - Inteos Bacula Administration App - (c) 2015-2018 Inteos sp. z o.o.")
         printhelp()
         sys.exit(0)
 
-    comptype = sys.argv[1]
-    if comptype == '-d':
-        comptype = 'D'
-        name = ''
-    elif comptype == '-f':
-        comptype = 'F'
-        if len(sys.argv) > 2:
-            name = sys.argv[2]
-        else:
-            print("No FileDaemon component name to generate configuration!")
-            sys.exit(1)
-    elif comptype == '-s':
-        comptype = 'S'
-        if len(sys.argv) > 2:
-            name = sys.argv[2]
-        else:
-            print("No StorageDaemon component name to generate configuration!")
-            sys.exit(1)
-    elif comptype == '-c':
-        comptype = 'C'
-        if len(sys.argv) > 2:
-            name = sys.argv[2]
-        else:
-            name = ''
+    res = None
+    listing = False
+    comptype = None
+    name = None
+    strunc = False
+    sdedup = False
+    if sys.argv[1] == '-r':
+        if len(sys.argv) < 3:
+            print("No resource name to list!")
+            sys.exit(2)
+        res = sys.argv[2]
+    elif sys.argv[1] == '-strunc':
+        strunc = True
+    elif sys.argv[1] == '-sdedup':
+        sdedup = True
     else:
-        print("Unknown component type.")
-        printhelp()
-        sys.exit(1)
+        comptype = sys.argv[1]
+        if comptype == '-d':
+            comptype = 'D'
+            if len(sys.argv) > 2:
+                name = sys.argv[2]
+            else:
+                name = ''
+        elif comptype == '-f':
+            comptype = 'F'
+            if len(sys.argv) > 2:
+                name = sys.argv[2]
+            else:
+                print("No FileDaemon component name to generate configuration!")
+                sys.exit(1)
+        elif comptype == '-s':
+            comptype = 'S'
+            if len(sys.argv) > 2:
+                name = sys.argv[2]
+            else:
+                print("No StorageDaemon component name to generate configuration!")
+                sys.exit(1)
+        elif comptype == '-c':
+            comptype = 'C'
+            if len(sys.argv) > 2:
+                name = sys.argv[2]
+            else:
+                name = ''
+        else:
+            print("Unknown component type.")
+            printhelp()
+            sys.exit(1)
+        if name == '-l':
+            listing = True
+            name = ''
 
     # load config
     sys.path.append('/opt/ibadmin')
     from ibadmin.settings import DATABASES
     from libs.conf import getdecpass
 
-    #log = open('/tmp/ibadconfd_'+str(os.getpid())+'.log', 'w')
+    # log = open('/tmp/ibadconfd_'+str(os.getpid())+'.log', 'w')
     log = None
     dbname = DATABASES['default']['NAME']
     dbuser = DATABASES['default']['USER']
@@ -99,9 +122,11 @@ if __name__ == "__main__":
     dbport = DATABASES['default']['PORT']
 
     connectionok = 5
+    conn = None
     while connectionok:
         try:
-            conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost + " port=" + dbport)
+            conn = psycopg2.connect("dbname=" + dbname + " user=" + dbuser + " password=" + dbpass + " host=" + dbhost
+                                    + " port=" + dbport)
         except:
             if log is not None:
                 log.write('Problem connecting to database! retrying ...\n')
@@ -117,10 +142,53 @@ if __name__ == "__main__":
     if log is not None:
         log.write('Connection to database ok.\n')
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if res is not None:
+        cur.execute("select R.name from config_confcomponent C, config_confresource R, config_confrtype T where "
+                    "C.compid=R.compid and R.type=T.typeid and T.name=%s and C.type='D';", (res,))
+        while 1:
+            row = cur.fetchone()
+            if row is None:
+                conn.close()
+                sys.exit(0)
+            print(str(row['name']))
+
+    if strunc:
+        cur.execute("select R.name from config_confcomponent C, config_confresource R, config_confparameter P where "
+                    "C.type='D' and C.compid=R.compid and R.resid=P.resid and P.name='MediaType' and (value like "
+                    "'File%' or value like 'Dedup%');")
+        while 1:
+            row = cur.fetchone()
+            if row is None:
+                conn.close()
+                sys.exit(0)
+            print(str(row['name']))
+
+    if sdedup:
+        cur.execute("select R.name from config_confcomponent C, config_confresource R, config_confparameter P where "
+                    "C.type='D' and C.compid=R.compid and R.resid=P.resid and P.name='MediaType' and value like "
+                    "'Dedup%' and not R.resid in (select resid from config_confparameter where name='.Alias');")
+        while 1:
+            row = cur.fetchone()
+            if row is None:
+                conn.close()
+                sys.exit(0)
+            print(str(row['name']))
+
+    if listing:
+        print ("Listing component type: " + comptype)
+        cur.execute("select name from config_confcomponent where type=%s;", (comptype, ))
+        while 1:
+            row = cur.fetchone()
+            if row is None:
+                conn.close()
+                sys.exit(0)
+            print (" " + str(row['name']))
+
     cur2 = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur3 = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    if len(name) == 0:
+    if len(name) == 0 and comptype in ('D', 'C'):
         cur.execute("select name from config_confcomponent where type='D';")
         row = cur.fetchone()
         if row is None:
@@ -136,7 +204,7 @@ if __name__ == "__main__":
     cur.execute("select * from config_confcomponent where type=%s and name=%s;", (comptype, name))
     row = cur.fetchone()
     if row is None:
-        print("Cannot find component " + name + " of type " + comptype + " in configuration.")
+        print("Cannot find component '" + name + "' of type " + comptype + " in configuration.")
         if log is not None:
             log.write("Cannot find component " + name + " of type " + comptype + " in configuration.\n")
             log.close()
@@ -169,7 +237,8 @@ if __name__ == "__main__":
         get_parameters(conn, resid, 1, component)
         # Now find any subresource
         cur2.execute(
-            "select R.resid, T.name as resource, T.equ from config_confrtype T, config_confresource R where T.typeid=R.type and sub=%s order by R.type",
+            "select R.resid, T.name as resource, T.equ from config_confrtype T, config_confresource R where "
+            "T.typeid=R.type and sub=%s order by R.type",
             (resid,))
         while 1:
             row2 = cur2.fetchone()
@@ -182,7 +251,8 @@ if __name__ == "__main__":
             print ("  " + row2['resource'] + equ)
             # now any subsequent subresource - we support 2 nested subresources only
             cur3.execute(
-                "select R.resid, T.name as resource, T.equ from config_confrtype T,config_confresource R where T.typeid=R.type and sub=%s order by R.resid",
+                "select R.resid, T.name as resource, T.equ from config_confrtype T,config_confresource R where "
+                "T.typeid=R.type and sub=%s order by R.resid",
                 (resid1,))
             while 1:
                 row3 = cur3.fetchone()

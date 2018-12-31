@@ -81,10 +81,15 @@
           clearInterval(intervalId);
         }
       },
+      error: function(request,status,error){
+        clearInterval(intervalId);
+        {% include 'widgets/errorprocessingajax.js' %}
+      },
     });
   };
   $('#detectlibbutton').click(function (){
     $('#detectlibbutton').addClass('disabled').attr("disabled", true);
+    $('.messagesdiv').addClass('messagesbox');  // TODO: it is not working as no one waits on this event
     $('#detectbox').slideDown();
     var lib = $('#{{ form.tapelist.id_for_label }}').val();
     $.ajax({
@@ -96,6 +101,9 @@
         $('#{{ form.taskid.id_for_label }}').val(taskid);
         refreshProgress();
         intervalId = setInterval(refreshProgress, 1000);
+      },
+      error: function(request,status,error){
+        {% include 'widgets/errorprocessingajax.js' %}
       },
     });
   });

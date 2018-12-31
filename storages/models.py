@@ -152,3 +152,25 @@ class Mediatype(models.Model):
     class Meta:
         managed = False
         db_table = 'mediatype'
+
+
+class Permissions(models.Model):
+    class Meta:
+        managed = False
+        permissions = (
+            ('view_storages', 'Can view storages'),
+            ('add_storages', 'Can add alias storages'),
+            ('change_storages', 'Can change alias storages'),
+            ('delete_storages', 'Can delete alias storages'),
+            ('status_storages', 'Can status storages'),
+            ('advanced_storages', 'Can change advanced properties'),
+            ('view_dedup', 'Can view dedup engine'),
+            ('dedup_vacuum', 'Can vacuum dedup engine'),
+            ('label_tapes', 'Can label tapes in tape library'),
+            ('view_volumes', 'Can view volumes'),
+            ('change_volumes', 'Can change volumes status'),
+            ('recycle_volumes', 'Can recycle volumes'),
+            ('delete_volumes', 'Can delete volumes'),
+            ('comment_volumes', 'Can comment volumes'),
+            ('view_volumelogs', 'Can view volume logs'),
+        )

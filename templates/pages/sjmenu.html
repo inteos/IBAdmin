@@ -1,6 +1,6 @@
 <li class="active">
   <a href="#"><i class="fa fa-cubes"></i>Job<i class="fa fa-angle-left pull-right"></i></a>
   <ul class="treeview-menu">
-    <li class="active"><a href="{% url 'statsjob' Name %}"><i class="fa fa-bar-chart"></i>{{ Name }}</a></li>
+    <li class="active"><a href="{% url 'statsjob' Name %}"><i class="fa fa-bar-chart"></i>{{ Name|truncatechars:24 }}</a></li>
   </ul>
 </li>

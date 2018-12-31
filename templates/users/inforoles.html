@@ -1,0 +1,16 @@
+{% if Roles %}
+  <ul class="todo-list">
+    {% for r in Roles %}
+    <li class="{{ r.roles.color|default:'bg-blue' }}">
+      <a href="{% url 'rolesinfo' r.name %}"><span class="text text-white">{{ r.name|truncatechars:40 }}</span></a>
+{% if perms.users.change_users %}
+      <div class="tools">
+        <i class="fa fa-trash-o widget-delete roles-delete" data-rolename="{{ r.name }}" data-toggle="tooltip" data-original-title="Remove"></i>
+      </div>
+{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No Roles granted.</p>
+{% endif %}

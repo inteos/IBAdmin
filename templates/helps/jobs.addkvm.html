@@ -1,0 +1,24 @@
+{% load staticfiles %}
+<h4>New KVM GuestVM Job</h4>
+<p>Here you can define a new job for KVM Guest VM backup.</p>
+<p>
+<ul class="list-unstyled">
+    <li><b>Job name</b> - name of your new job. It has to be unique in your system.</li>
+    <li><b>Description</b> - any description of your job.</li>
+    <li><b>Backup Retention</b> - a time how long job will be preserved after backup.</li>
+    <li><b>Backup Storage</b> - where your job will stored.</li>
+    <li><b>Backup Client</b> - where your job will executed.</li>
+    <li><b>Include All VM in backup</b> - when checked all guests will be saved.</li>
+    <li><b>GuestVM to Backup</b> - what guests you need to backup.</li>
+    <li><b>Exclude from Backup</b> - what guests you want to exclude from backup. This option is available in 'All VM'
+        backup mode only.</li>
+    <li><b>Backup Schedule</b> - defines a backup cycle.</li>
+    <li><b>Start Backup Time</b> - when your job should start.</li>
+    <li><b>Backup Repeat</b> - how many times your backup will run during a day.</li>
+    <li><b>Backup Level</b> - level of your backup job.</li>
+    <li><b>Days of Week</b> - what level is required on any day of the week.</li>
+    <li><b>Days of Month</b> - what level is required on any day of the month.</li>
+</ul>
+</p>
+<p><i class="fa fa-info-circle text-aqua"></i> <span class="label label-default">Everyday</span> - forces a selected
+    level on every day of the week or month.</p>

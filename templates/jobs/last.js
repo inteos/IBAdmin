@@ -15,10 +15,10 @@ $(function () {
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderclientlink(data)} },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align" },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align", "render": function (data,type,row){ return bytestext(data)} },
-      { "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderstatuslabel(data[0], data[1])} },
+      { "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlabel(data)} },
       { "width": "96px", "orderable": false, "sClass": "vertical-align text-center", // 32px for every button
         "render": function ( data, type, row ) {
           var btn = '<button class="btn btn-sm btn-default" type="button" ';

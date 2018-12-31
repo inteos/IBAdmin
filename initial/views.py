@@ -1,36 +1,22 @@
 # -*- coding: UTF-8 -*-
+from __future__ import unicode_literals
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 from config.models import *
 from config.conf import initialize
 from config.confinfo import getDIRname
+from libs.init import *
 from tasks.models import Tasks
-from subprocess import call
 from django.db import transaction
 from libs.system import *
+from libs.plat import *
+from django.contrib.auth import authenticate, login as auth_login
 from libs.tapelib import detectlibs
 from libs.task import prepareTask
 from .forms import *
 import ast
 import traceback
-
-
-def disableall(form):
-    for key, value in form.fields.items():
-        value.disabled = True
-
-
-def preparestorages():
-    storages = (('file', 'Disk based File storage'),)
-    if detectdedup():
-        storages += (('dedup', 'Disk based Global Deduplication storage'),)
-    else:
-        storages += (('dedup', {'label': 'Disk based Global Deduplication storage', 'disabled': True}),)
-    libs = detectlibs()
-    for l in libs:
-        storages += (('tape' + l['id'], l['name'] + l['id']),)
-    return storages
 
 
 def index(request):
@@ -63,7 +49,7 @@ def index(request):
                    <a href="https://inteos.freshservice.com/solution/articles/26674">Inteos support</a>
                    <br><b>Catalog: %s vs. supported: %s</b><br>""" % (versionid, CATVERSUPPORTED)
     else:
-        isconfigured = getDIRname()
+        isconfigured = getDIRname(request)
         # isconfigured = None
         if isconfigured is not None:
             disableall(form)
@@ -99,6 +85,9 @@ def taskprogress(request):
 
 
 def libdetect(request):
+    isconfigured = getDIRname(request)
+    if isconfigured is not None:
+        return redirect('initial')
     storages = preparestorages()
     forminitial = InitialForm(data=request.POST, storages=storages)
     if forminitial.is_valid():
@@ -135,38 +124,6 @@ def libdetect(request):
     })
 
 
-def stopallservices():
-    # stop all services
-    call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-dir'])
-    call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-sd'])
-    call([SUDOCMD, SYSTEMCTL, 'stop', 'bacula-fd'])
-    call([SUDOCMD, SYSTEMCTL, 'stop', 'ibadstatd'])
-
-
-def createconfigfiles(dirname='ibadmin'):
-    # create config files
-    with open('/opt/bacula/etc/bacula-dir.conf', 'w') as f:
-        f.write('@|"/opt/ibadmin/utils/ibadconf.py -d"\n')
-        f.close()
-    with open('/opt/bacula/etc/bacula-sd.conf', 'w') as f:
-        f.write('@|"/opt/ibadmin/utils/ibadconf.py -s ' + dirname + '"\n')
-        f.close()
-    with open('/opt/bacula/etc/bacula-fd.conf', 'w') as f:
-        f.write('@|"/opt/ibadmin/utils/ibadconf.py -f ' + dirname + '"\n')
-        f.close()
-    with open('/opt/bacula/etc/bconsole.conf', 'w') as f:
-        f.write('@|"/opt/ibadmin/utils/ibadconf.py -c"\n')
-        f.close()
-
-
-def startallservices():
-    # start all services
-    call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-dir'])
-    call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-sd'])
-    call([SUDOCMD, SYSTEMCTL, 'start', 'bacula-fd'])
-    call([SUDOCMD, SYSTEMCTL, 'start', 'ibadstatd'])
-
-
 def initialsetup(request):
     storages = preparestorages()
     form = InitialForm(data=request.POST, storages=storages)
@@ -187,7 +144,10 @@ def initialsetup(request):
                 # create config files
                 initialize(name=dirname, descr=descr, email=email, password=admpass, stortype=storage, address=address,
                            archdir=archdir, dedupdir=dedupdir, dedupidxdir=dedupidxdir)
+                postinitial(request)
             startallservices()
+            user = authenticate(username='admin', password=admpass)
+            auth_login(request, user)
             return redirect('home')
         except Exception as err:
             # redisplay initial
@@ -234,9 +194,12 @@ def initialsetup2(request):
                     # create config files
                     initialize(name=dirname, descr=descr, email=email, password=admpass, stortype='tape',
                                address=address, tapelib=tapelib)
+                    postinitial(request)
                 startallservices()
                 if tapeinit:
                     prepareTask(name="Initializing tape library", proc=4, params='tape', log='Starting...')
+                user = authenticate(username='admin', password=admpass)
+                auth_login(request, user)
                 return redirect('home')
             except Exception as err:
                 # redisplay initial

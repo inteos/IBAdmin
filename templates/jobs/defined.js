@@ -12,10 +12,10 @@ $(function () {
     "columns": [
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderjoblink(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderclientlink(data)} },
-      { "sClass": "vertical-align", "render": function (data,type,row){ return renderdatadis(data[0],data[1])} },
+      { "orderable": false, "sClass": "vertical-align", "render": function (data,type,row){ return renderdatadis(data[0],data[1])} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderdatana(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderstoragelink(data)} },
-      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "sClass": "vertical-align" },
       { "width": "160px", "orderable": false, "sClass": "vertical-align text-center", // 32px for every button
         "render": function ( data, type, row ) {
@@ -23,17 +23,26 @@ $(function () {
           var binf = btn + 'onclick="location.href=\'{% url 'jobsinfo_rel' %}'+data[0]+'/\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
           var brun = btn + 'data-toggle="modal" data-target="#runjobconfirm" data-name="'+data[0]+'" data-url="{% url 'jobsrun_rel' %}"><i class="fa fa-play" data-toggle="tooltip" data-original-title="Run"></i></button>\n';
           var bres = btn + 'onclick="location.href=\'{% url 'restorejob_rel' %}'+data[0]+'/\';"><i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Restore"></i></button>\n';
-          var bedi = btn + 'onclick="location.href=\'{% url 'jobsedit_rel' %}'+data[0]+'/\';"><i class="fa fa-wrench" data-toggle="tooltip" data-original-title="Edit"></i></button>\n';
+          var bedi = btn + 'onclick="location.href=\'{% url 'jobsedit_rel' %}'+data[0]+'/?b={% url 'jobsdefined' %}\';"><i class="fa fa-wrench" data-toggle="tooltip" data-original-title="Edit"></i></button>\n';
           var bdel = btn + 'data-toggle="modal" data-target="#deletejobconfirm" data-name="'+data[0]+'" data-url="{% url 'jobsdelete_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
           var ret = binf;
+{% if perms.jobs.run_jobs %}
           if (data[1] != 'Restore'){
-            ret += brun;
-            if (data[1] != 'Admin'){
-              ret += bres;
-            };
-          };
+            ret += btn + 'data-toggle="modal" data-target="#runjobconfirm" data-name="'+data[0]+'" data-url="{% url 'jobsrun_rel' %}"><i class="fa fa-play" data-toggle="tooltip" data-original-title="Run"></i></button>\n';
+          }
+{% endif %}
+{% if perms.jobs.restore_jobs %}
+          if (data[1] != 'Restore' && data[1] != 'Admin'){
+            ret += btn + 'onclick="location.href=\'{% url 'restorejob_rel' %}'+data[0]+'/\';"><i class="fa fa-cloud-upload" data-toggle="tooltip" data-original-title="Restore"></i></button>\n';
+          }
+{% endif %}
           if (data[2] != 'Yes'){
-            ret += bedi + bdel;
+{% if perms.jobs.change_jobs %}
+            ret += btn + 'onclick="location.href=\'{% url 'jobsedit_rel' %}'+data[0]+'/\';"><i class="fa fa-wrench" data-toggle="tooltip" data-original-title="Edit"></i></button>\n';
+{% endif %}
+{% if perms.jobs.delete_jobs %}
+            ret += btn + 'data-toggle="modal" data-target="#deletejobconfirm" data-name="'+data[0]+'" data-url="{% url 'jobsdelete_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
+{% endif %}
           }
           return '<div class="btn-group">' + ret + '</div>';
         },

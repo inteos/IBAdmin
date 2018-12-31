@@ -1,0 +1,14 @@
+{% if messages %}
+{% load ibadtexts %}
+<div class="row">
+  {% for message in messages %}
+    <div class="col-xs-12 messagesdiv {{ message|messagesbox }}">
+      <div class="alert {{ message|messagealert }} alert-dismissible">
+        <button type="button" class="close" data-hide="alert" aria-hidden="true">&times;</button>
+        <h4><i class="icon fa {{ message.level|messageico }}"></i>{{ message|messagesubject }}</h4>
+        <p>{{ message|safe }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}

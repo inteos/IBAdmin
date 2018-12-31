@@ -1,18 +1,18 @@
 <script>
-{% include 'pages/cpuutilwidget.js' with id='cpuutilwidget' %}
-{% include 'pages/backupsizewidget.js' with id='backupsizewidget' %}
-{% include 'pages/lastjobswidget.js' with id='lastjobswidget' %}
-{% include 'pages/runningjobswidget.js' with id='runningjobswidget' %}
-{% include 'pages/servicestatus.js' with id='servicestatuswidget' %}
-{% include 'pages/alljobswidget.js' with id='alljobswidget' %}
+{% for w in Section1 %}
+{% include w.widget.templatejs with id=w.widget.widgetid %}
+{% endfor %}
+{% for w in Section2 %}
+{% include w.widget.templatejs with id=w.widget.widgetid %}
+{% endfor %}
 
   function fetchData() {
-    fetchDatacpuutilwidget();
-    fetchDatabackupsizewidget();
-    fetchDatalastjobswidget();
-    fetchDatarunningjobswidget();
-    fetchDataservicestatuswidget();
-    fetchDataalljobswidget();
+    {% for w in Section1 %}
+    fetchData{{ w.widget.widgetid }}();
+    {% endfor %}
+    {% for w in Section2 %}
+    fetchData{{ w.widget.widgetid }}();
+    {% endfor %}
   };
 
   // flot init and refresh calls
@@ -20,5 +20,23 @@
     fetchData();
     setInterval(fetchData, 60000);
   });
+
+  $('.connectedSortable').sortable({
+    placeholder: 'sort-highlight',
+    connectWith: '.connectedSortable',
+    handle: '.box-header, .nav-tabs, .status-service',
+    forcePlaceholderSize: true,
+    zIndex: 999999,
+    update: function(){
+      var data = $(this).sortable('serialize');
+      var sectionid = $(this).attr('id');
+      var url = "{% url 'changewidgets_rel' %}" + sectionid + '/?' + data
+      $.ajax({
+        url: url,
+        type: "GET",
+      });
+    }
+  });
+  $('.connectedSortable .box-header, .connectedSortable .nav-tabs-custom, .connectedSortable .status-service').css('cursor', 'move');
 </script>
 {% include "pages/refresh.js" with jobstatuswidgetRefresh=1 %}

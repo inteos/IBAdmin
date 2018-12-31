@@ -1,11 +1,15 @@
+{% if perms.stats.view_job_stats and jobstatsdisplay or perms.stats.view_backup_stats or perms.stats.view_system_stats or perms.stats.view_daemons_stats %}
 <!-- Statistics menu -->
 <li class="treeview{% if apppath.0 == 'Statistics' %} active{% endif %}">
   <a href="#"><i class="fa fa-bar-chart"></i> <span>Statistics</span><span class="pull-right-container">
     <i class="fa fa-angle-left pull-right"></i></span></a>
   <ul class="treeview-menu">
+{% if perms.stats.view_job_stats %}
     {% if jobstatsdisplay %}
       {% include "pages/sjmenu.html" %}
     {% endif %}
+{% endif %}
+{% if perms.stats.view_backup_stats %}
     <li{% if apppath.1 == 'Backup' %} class="active"{% endif %}><a href="#"><i class="fa fa-archive"></i> <span>Backup</span>
     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
       <ul class="treeview-menu">
@@ -15,6 +19,9 @@
         <li{% if apppath.2 == 'Sizes' %} class="active"{% endif %}><a href="{% url 'statsbackupsizes' %}"><i class="fa fa-area-chart"></i><span>Sizes</span></a></li>
       </ul>
     </li>
+{% endif %}
+{% if user.is_superuser and user.is_staff %}
+{% if perms.stats.view_system_stats %}
     <li{% if apppath.1 == 'System' %} class="active"{% endif %}><a href="#"><i class="fa fa-server"></i><span>System</span>
     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
       <ul class="treeview-menu">
@@ -26,6 +33,8 @@
         <li{% if apppath.2 == 'Network' %} class="active"{% endif %}><a href="{% url 'statssystemnet' %}"><i class="fa fa-exchange"></i><span>Network</span></a></li>
       </ul>
     </li>
+{% endif %}
+{% if perms.stats.view_daemons_stats %}
     <li{% if apppath.1 == 'Daemons' %} class="active"{% endif %}><a href="#"><i class="fa fa-sellsy"></i><span>Daemons</span>
     <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span></a>
       <ul class="treeview-menu">
@@ -33,5 +42,8 @@
         <li{% if apppath.2 == 'Clients' %} class="active"{% endif %}><a href="{% url 'statsclients' %}"><i class="fa fa-laptop"></i><span>Clients</span></a></li>
       </ul>
     </li>
+{% endif %}
+{% endif %}
   </ul>
 </li>
+{% endif %}

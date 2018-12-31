@@ -5,6 +5,7 @@
     var url = button.data('url');
     var taskid = 0;
     var rpintervalId;
+    {% include 'widgets/onErrorReceivedbutton.js' %}
     function closeProgress(){
       clearInterval(rpintervalId);
       $('#labelconfirmprogress').on('hidden.bs.modal', function (){
@@ -23,6 +24,7 @@
                 $('#storagevolumesnrval').html(nr);
             }
         },
+        error: onErrorReceived,
       });
     };
     function refreshProgress(){
@@ -42,6 +44,7 @@
             closeProgress();
           }
         },
+        error: onErrorReceived,
       });
     };
     function onDataReceived(data) {
@@ -63,5 +66,6 @@
       type: "GET",
       dataType: "json",
       success: onDataReceived,
+      error: onErrorReceived,
     });
   });

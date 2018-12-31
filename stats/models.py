@@ -67,3 +67,14 @@ class StatStatus(models.Model):
     nvalue = models.BigIntegerField(blank=True, null=True)
     fvalue = models.FloatField(blank=True, null=True)
     svalue = models.TextField(blank=True, null=True)
+
+
+class Permissions(models.Model):
+    class Meta:
+        managed = False
+        permissions = (
+            ('view_backup_stats', 'Can view backup statistics'),
+            ('view_system_stats', 'Can view system statistics'),
+            ('view_daemons_stats', 'Can view daemons statistics'),
+            ('view_job_stats', 'Can view job statistics'),
+        )

@@ -1,0 +1,52 @@
+{% extends "users/baselogin.html" %}
+{% block content %}
+{% load static %}
+<div class="login-box">
+  <div class="login-logo">
+    <a href="http://www.inteosbackup.pl/"><img src="{% static 'ibadmin.png' %}"/><b>IBAdmin</b></a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="login-box-body">
+    <p class="login-box-msg">Sign in to start your session</p>
+    {% include 'pages/messages.html' %}
+    <form id="login" method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      {% if nexturl %}<input type="hidden" name="next" value="{{ nexturl }}">{% endif %}
+      <div class="form-group has-feedback">
+        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+        <span class="glyphicon glyphicon-user form-control-feedback"></span>
+      </div><!-- /.form-group -->
+      <div class="form-group has-feedback">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div><!-- /.form-group -->
+      <div class="row">
+        <div class="col-xs-8">
+{% comment %}
+          <div class="checkbox icheck">
+            <label>
+              <input type="checkbox"> Remember Me
+            </label>
+          </div>
+{% endcomment %}
+        </div>
+        <!-- /.col -->
+        <div class="col-xs-4">
+          <button type="submit" class="btn btn-primary btn-block btn-flat">Login</button>
+        </div>
+        <!-- /.col -->
+      </div>
+    </form>
+{% comment %}
+    <i class="fa fa-expeditedssl"></i> <a href="#" class="disabled">I forgot my password</a><br>
+    <i class="fa fa-user-plus"></i> <a href="#" class="disabled">Ask His Majesty Admin for access</a>
+{% endcomment %}
+  </div>
+  <!-- /.login-box-body -->
+</div>
+<!-- /.login-box -->
+
+{% endblock %}
+{% block pagejs %}
+  {% include "users/login.js" %}
+{% endblock %}

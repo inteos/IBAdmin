@@ -1,0 +1,138 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+
+{% block contentwidget %}
+{% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-5 col-md-6">
+    <!-- Profile Image -->
+    <div class="box box-info">
+      <div class="box-body box-profile">
+        <img class="profile-user-img img-responsive img-circle" src="{% static 'dist/img/avatar.png' %}" alt="User Avatar">
+        <h3 class="profile-username text-center text-no-overflow">{{ User.first_name|fullname:User.last_name|default:User.username }}</h3>
+        <p class="text-muted text-center">{% if User.first_name|fullname:User.last_name %}{{ User.username }}{% else %}&nbsp;{% endif %}</p>
+
+        <ul class="list-group list-group-unbordered">
+          <li class="list-group-item">
+            <i class="fa fa-user-secret"></i> User type <span class="pull-right badge {{ User.is_superuser|usertypecolor:User.is_staff }}">{{ User.is_superuser|usertypetext:User.is_staff }}</span>
+          </li>
+          <li class="list-group-item">
+            <i class="fa fa-envelope"></i> email <span class="pull-right badge bg-purple">{{ User.email }}</span>
+          </li>
+          <li class="list-group-item">
+            <i class="fa fa-history"></i> Last login <span class="pull-right badge bg-aqua">{{ User.last_login|date:'d M Y h:i'|default:'Never logged' }}</span>
+          </li>
+          <li class="list-group-item">
+            <i class="fa fa-gear"></i> User created <span class="pull-right badge bg-green">{{ User.date_joined|date:'d M Y' }}</span>
+          </li>
+        </ul>
+        <a class="btn btn-primary btn-xs btn-block" href="{% url 'usersprofileedit' %}">Edit Profile</a>
+      </div><!-- /.box-body -->
+    </div><!-- /.box -->
+{% if not user.is_superuser or not user.is_staff %}
+    <div class="box box-success">
+      <div class="box-header with-border">
+        <h3 class="box-title">Your resources</h3>
+        {% include "widgets/helpbutton.html" with box=0 id='userres' %}
+      </div><!-- /.box-header -->
+      <div class="box-body">
+        <strong><i class="fa fa-bank margin-r-5"></i> Departments</strong>
+        <p class="text-muted">
+          {% for d in Departments %}
+          <span class="label {{ d.color|default:'bg-blue' }}">{{ d.name|truncatechars:60 }}</span>
+          {% empty %}
+          No departments member.
+          {% endfor %}
+        </p>
+{% if perms.clients.view_clients %}
+        <div class="row"><hr></div>
+        <strong><i class="fa fa-laptop margin-r-5"></i> Clients</strong>
+        {% if Clients|length > 0 %}
+          <p class="text-muted">You have access to the following Clients.</p>
+          {% if Clients|length > 5 %}
+          <p>
+            {% for client in Clients %}
+            <a class="label {{ client.OS|OSbgcolor }}" href="{% url 'clientsinfo' client.Name %}">{{ client.Name|truncatechars:60 }}</a>
+            {% endfor %}
+          </p>
+          {% else %}
+          <ul class="list-group list-group-unbordered">
+            {% for client in Clients %}
+            <li class="list-group-item">
+              <a href="{% url 'clientsinfo' client.Name %}">{{ client.Name|truncatechars:40 }}</a> <span class="badge pull-right {{ client.OS|OSbgcolor }}"><i class="fa {{ client.OS|OSicon }}"></i> {{ client.OS|OStext }} </span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        {% else %}
+        <p class="text-muted">No Clients available.</p>
+        {% endif %}
+{% endif %}
+{% if not User.is_superuser %}
+        <div class="row"><hr></div>
+        <strong><i class="fa fa-puzzle-piece margin-r-5"></i> Roles</strong>
+        <p class="text-muted">
+          {% for r in user.groups.all %}
+          <span class="label {{ r.roles.color|default:'bg-blue' }}">{{ r.name|truncatechars:60 }}</span>
+          {% empty %}
+          No Roles assigned.
+          {% endfor %}
+        </p>
+{% endif %}
+      </div>
+      <!-- /.box-body -->
+    </div><!-- /.box -->
+{% endif %}
+  </div>
+  <div class="col-lg-7 col-md-6">
+    <!-- Custom Tabs -->
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#dashboard" data-toggle="tab">Dashboard</a></li>
+        <li><a href="#stats" data-toggle="tab">Statistics</a></li>
+        <li><a href="#jobstats" data-toggle="tab">Job Statistics</a></li>
+        <li class="pull-right"><a id="helpbutton" class="text-muted" data-toggle="popover" title="Help" data-content="No help available for this topic."><i class="fa fa-question" data-toggle="tooltip" data-original-title="Help"></i></a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active no-padding" id="dashboard">
+          <p><b>Widgets:</b></p>
+          <table class="table" style="margin-bottom: 0px;">
+            <tbody>
+            {% for w in Dashboard %}
+            <tr>
+              <td>
+                <h4><i class="{{ w.widget.icon }} margin-r-5"></i> {{ w.widget.name }}</h4>
+              </td>
+              <td class="vertical-align" style="width: 80px;">
+                <input class="pull-right widgetswitch" name="enabled" type="checkbox" {% if w.enabled %}checked="checked" {% endif %}data-toggle="toggle" data-size="small" data-widgetid="{{ w.widget.widgetid }}" />
+              </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="stats">
+          <p><br><i class="fa fa-ship"></i> Work in progress...<br></p>
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="jobstats">
+          <p><br><i class="fa fa-ship"></i> Work in progress...<br></p>
+        </div>
+        <!-- /.tab-pane -->
+      </div>
+      <!-- /.tab-content -->
+    </div>
+    <!-- nav-tabs-custom -->
+  </div>
+</div>
+{% endblock %}
+
+{% block pagejs %}
+  {% include "users/profile.js" %}
+{% endblock %}

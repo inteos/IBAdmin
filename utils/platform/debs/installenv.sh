@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# IBAdmin full clean installation script
+# (c) 2015-2018 by Inteos Sp. z o.o.
+# All right reserved
 
 # Update OS
 apt-get -y update
@@ -26,9 +29,10 @@ virtualenv --system-site-packages /opt/ibadengine
 # enable it in current shell
 . /opt/ibadengine/bin/activate
 # install required python packages
+pip install --upgrade pip
 pip install --upgrade django==1.10
-pip install --upgrade python-dateutil
-pip install --upgrade pytz
+pip install --upgrade python-dateutil==2.7.2
+pip install --upgrade pytz==2018.4
 /opt/ibadmin/manage.py migrate
 # initialize required system configuration and scripts
 cp /opt/ibadmin/utils/ibadmin.conf /etc/apache2/conf-enabled/

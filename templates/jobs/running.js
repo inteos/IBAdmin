@@ -14,7 +14,7 @@ $(function () {
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderjoblink(data)} },
       { "sClass": "vertical-align", "render": function (data,type,row){ return renderclientlink(data)} },
       { "sClass": "vertical-align" },
-      { "width": "50px", "orderable": false, "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderlevelbadge(data[0],data[1])} },
+      { "width": "50px", "orderable": false, "sClass": "vertical-align text-center", "render": function (data,type,row){ return renderbadge(data)} },
       { "width": "96px", "orderable": false, "sClass": "vertical-align text-center", <!-- 32px for every button -->
         "render": function (data,type,row){
           var btn = '<button class="btn btn-sm btn-default" type="button" ';

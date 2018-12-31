@@ -55,13 +55,6 @@
             {{ form.dedupdir }}
             <span class="fa fa-cubes form-control-feedback"></span>
           </div><!-- /.form-group -->
-{% comment %}
-          <div class="checkbox icheck">
-            <label>
-              <input type="checkbox" id="checkimp" name="checkimp" disabled> Import current flat Bacula configuration</a>
-            </label>
-          </div><!-- /.icheck -->
-{% endcomment %}
           <div class="row">
             <div class="col-xs-4 pull-right">
               <button id="sbutton" type="submit" name="save" value="1" class="btn btn-primary btn-block btn-flat"{% if disableall %} disabled{% endif %}>Save</button>
@@ -69,6 +62,9 @@
           </div>
         </form>
       </div><!-- /.form-box -->
+      <div id="initialwait" class="overlay" style="display: none;">
+        <i class="fa fa-refresh fa-spin"></i>
+      </div>
     </div><!-- /.register-box -->
 {% endblock %}
 {% block pagejs %}

@@ -1,0 +1,63 @@
+{% extends "pages/base.html" %}
+{% load ibadtexts %}
+{% load ibadcolors %}
+
+{% block contentwidget %}
+{% include "widgets/vmstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box box-success">
+      <div class="box-header">
+        <i class="fa fa-plus"></i>
+        <h3 class="box-title">Add New VMware vCenter</h3>
+        {% include "widgets/helpbutton.html" with box=0 %}
+      </div><!-- /.box-header -->
+      <!-- form start -->
+      <form class="form-horizontal" id="addform" method="post" action="{% url 'vmsaddvcenter' %}">
+        {% csrf_token %}
+        <div class="box-body">
+          {{ form.name }}
+          {{ form.descr }}
+          {{ form.username }}
+          <div class="form-group">
+            <label for="{{ form.password.id_for_label }}" class="col-sm-2 control-label">{{ form.password.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.password }}
+                <span class="input-group-addon"><i id="{{ form.password.id_for_label }}icon" class="fa fa-lock"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          {{ form.address }}
+          {{ form.url }}
+          {{ form.thumbprint }}
+          <div id="{{ form.client.id_for_label }}-group" class="form-group">
+            <label for="{{ form.client.id_for_label }}" class="col-sm-2 control-label">{{ form.client.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.client }}
+                <span class="input-group-addon"><i class="fa fa-server"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
+          {% include "widgets/selectdepartmentsform.html" %}
+        </div><!-- /.box-body -->
+        <div class="box-footer">
+          <div class="row">
+           <div class="col-lg-12">
+              <button type="submit" value="1" class="btn btn-app" name="add"><i class="glyphicon glyphicon-plus"></i>Add</button>
+              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
+           </div>
+          </div>
+        </div>
+      </form>
+    </div><!-- /.box -->
+  </div>
+</div>
+{% endblock %}
+{% block pagejs %}
+  {% include "vmhosts/addvcenter.js" %}
+{% endblock %}

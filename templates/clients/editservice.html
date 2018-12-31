@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/osstatus.html" with osstatusvis=1 %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-primary">
@@ -14,6 +18,7 @@
       <!-- form start -->
       <form class="form-horizontal" id="editform" method="post" action="{% url 'clientseditservice' form.name.value %}">
         {% csrf_token %}
+        {{ form.backurl }}
         <div class="box-body">
           {{ form.name }}
           {{ form.descr }}
@@ -27,6 +32,15 @@
             </div>
           </div><!-- /.form-group -->
           {{ form.address }}
+          <div id="{{ form.departments.id_for_label }}-group" class="form-group">
+            <label for="{{ form.departments.id_for_label }}" class="col-sm-2 control-label">{{ form.departments.label }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+              {{ form.departments }}
+                <span class="input-group-addon"><i class="fa fa-bank"></i></span>
+              </div>
+            </div>
+          </div><!-- /.form-group -->
         </div><!-- /.box-body -->
         <div class="box-footer">
           <div class="row">

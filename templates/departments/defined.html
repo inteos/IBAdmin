@@ -1,0 +1,54 @@
+{% extends "pages/base.html" %}
+{% block content %}
+{% include "widgets/jobstatus.html" %}
+<div class="box box-info">
+  <div class="box-header with-border">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined Departments</h3>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="departmentslist" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "departments/defined.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "departments/defined.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-sm-12 center-block">
+{% if perms.departments.add_departments %}
+        <a class="btn btn-app" href="{% url 'departsadd' %}"><i class="fa fa-plus"></i>Add Department</a>
+{% endif %}
+{% if perms.users.add_users %}
+        <a class="btn btn-app" href="{% url 'usersadd' %}"><i class="fa fa-user-plus"></i>Add User</a>
+{% endif %}
+{% if perms.clients.view_clients %}
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+{% endif %}
+{% if perms.jobs.view_jobs %}
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+{% endif %}
+{% if perms.storages.view_storages %}
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+{% endif %}
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% if perms.departments.delete_departments %}
+{% include "widgets/departdeleteconfirm.html" %}
+{% endif %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "departments/defined.js" %}
+{% endblock %}

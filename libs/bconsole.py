@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 from subprocess import Popen, PIPE
-from .utils import safe_unicode
+from .utils import *
 import re
-import utils
+import time
 
 
 def bconsolecommand(cmd, api=False, timeout=True, touni=True):
@@ -30,10 +30,10 @@ def bconsolecommand(cmd, api=False, timeout=True, touni=True):
             lines.append(oututf8)
     else:
         lines = nlines
-    #oututf8 = safe_unicode(out)
+    # oututf8 = safe_unicode(out)
     # .decode('utf-8')
     bconsole.wait()
-    #lines = oututf8.splitlines()
+    # lines = oututf8.splitlines()
     return lines
 
 
@@ -190,7 +190,11 @@ def getClientrunningJobs(client):
         if line != '':
             # line = line.replace(' ', '')
             line = line.replace('Bytes/sec', 'Bytessec')
-            (name, value) = line.split('=', 1)
+            try:
+                (name, value) = line.split('=')
+            except ValueError:
+                name = ''
+                value = ''
             name = name.replace(' ', '')
             if name == 'Type':
                 name = 'JobType'
@@ -674,14 +678,16 @@ def bvfs_lsfiles_path(path, jobids):
 
 
 def bvfs_lsdirs_pathid(pathid, jobids):
-    out = bconsolecommand('.bvfs_lsdirs pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False, touni=False)[6:]
+    out = bconsolecommand('.bvfs_lsdirs pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False,
+                          touni=False)[6:]
     if len(out) > 0:
         return out
     return None
 
 
 def bvfs_lsfiles_pathid(pathid, jobids):
-    out = bconsolecommand('.bvfs_lsfiles pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False, touni=False)[6:]
+    out = bconsolecommand('.bvfs_lsfiles pathid="' + str(pathid) + '" jobid=' + str(jobids), timeout=False,
+                          touni=False)[6:]
     if len(out) > 0:
         return out
     return None
@@ -691,7 +697,9 @@ def bvfs_lsdirs_root(jobids):
     return bvfs_lsdirs_path('""', jobids)
 
 
-def bvfs_restore_prepare(pathids, fileids, jobids, pathtable):      # OK
+def bvfs_restore_prepare(pathids, fileids, jobids, pathtable=None):
+    if pathtable is None:
+        pathtable = 'b20' + time.strftime(str('%Y%m%d%H%M%S')) + getrandomnumber(6)
     pathidstr = ''
     if pathids is not None and pathids != '':
         pathidstr = ' dirid=' + str(pathids)
@@ -700,27 +708,51 @@ def bvfs_restore_prepare(pathids, fileids, jobids, pathtable):      # OK
         fileidstr = ' fileid=' + str(fileids)
     out = bconsolecommand('.bvfs_restore' + fileidstr + pathidstr + ' jobid=' + str(jobids) + ' path=' + str(pathtable),
                           timeout=False)[-1]
+    status = True
     if out != 'OK':
-        return out
-    return True
+        status = False
+    return status, pathtable, out
 
 
-def bvfs_restore_cleanup(pathtable='b2111'):
-    out = bconsolecommand('.bvfs_cleanup path=' + str(pathtable))[6:]
+def bvfs_restore_cleanup(pathtable=None):
+    status = False
+    out = None
+    if pathtable is not None:
+        status = True
+        out = bconsolecommand('.bvfs_cleanup path=' + str(pathtable))[6:]
+        if len(out) > 0:
+            status = False
+    return status, out
+
+
+def getrestoreobjectid(jobids=None):
+    if jobids is None:
+        return None
+    out = getbconsolefilter("llist pluginrestoreconf jobid=" + str(jobids), "restoreobjectid")
+    rid = None
     if len(out) > 0:
-        return out
-    return True
+        rid = out[0].split(',')[1]
+    return rid
 
 
-def doRestore(client, restoreclient, where=None, replace='always', comment=None, pathtable='b2111'):
+def doRestore(client, restoreclient, where=None, replace='always', comment=None, pathtable=None, conffile=None,
+              robjid=None):
+    if pathtable is None:
+        return None
     wherestr = ''
     if where is not None and where != '':
         wherestr = ' where="' + where + '"'
     commentstr = ''
     if comment is not None and comment != '':
         commentstr = ' comment="' + comment + '"'
-    cmd = 'restore client=\"' + str(client) + '\" restoreclient=\"' + str(restoreclient) + '\" file=?' + \
-          str(pathtable) + ' replace=' + replace + wherestr + commentstr + ' yes'
+    putstr = ''
+    prcstr = ''
+    if conffile is not None and conffile != '' and robjid is not None and robjid != '':
+        rkey = "r" + str(robjid) + "k" + getrandomnumber()
+        putstr = "@putfile " + rkey + " " + conffile + "\n"
+        prcstr = ' pluginrestoreconf="' + robjid + ':' + rkey + '"'
+    cmd = putstr + 'restore client=\"' + str(client) + '\" restoreclient=\"' + str(restoreclient) + '\" file=?' + \
+        str(pathtable) + prcstr + ' replace=' + replace + wherestr + commentstr + ' yes'
     out = bconsolecommand(cmd, timeout=False)
     return out
 
@@ -792,3 +824,20 @@ def doLabel(storage=None, volume=None, drive=0, slot=0):
             if '3920 Cannot label Volume' in line:
                 return False, line
     return False, bconsole
+
+
+def get_lsplugin(client=None, plugin=None, path='/'):
+    """
+    *.ls plugin=proxmox: client=proxmox path=vmid
+    Connecting to Client proxmox at 192.168.0.81:9102
+    -rw-r-----   1 root     root       680735539 2018-09-17 23:51:01  103 -> testvm1
+    """
+    if client is not None and plugin is not None:
+        out = bconsolecommand(".ls client=\""+str(client)+"\" plugin=\""+str(plugin)+"\" path=\""+str(path)+"\"",
+                              timeout=False)
+        out = out[6:]
+        if out[-1].startswith('2000 OK'):
+            out = out[:-1]
+        return out
+    return None
+

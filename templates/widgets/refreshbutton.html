@@ -1,7 +1,7 @@
 {% if not box %}
 <div class="pull-right box-tools">
 {% endif %}
-<button id="{{ id|default:'listrefresh' }}" type="button" class="btn btn-box-tool"><i class="fa fa-refresh" data-toggle="tooltip" data-original-title="Refresh"></i></button>
+<button id="{{ id|default:'listrefresh' }}" type="button" class="btn btn-box-tool"{%if disabled %} disabled{% endif %}><i class="fa fa-refresh" data-toggle="tooltip" data-original-title="Refresh"></i></button>
 {% if not box %}
 </div>
 {% endif %}

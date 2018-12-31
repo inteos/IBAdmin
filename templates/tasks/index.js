@@ -15,7 +15,7 @@ $(function () {
       { "sClass": "vertical-align" },
       { "sClass": "vertical-align" },
       { "orderable": false, "sClass": "vertical-align text-center", "render": function (data,type,row){ return rendertaskprogressbar(data);} },
-      { "width": "50px", "orderable": false, "sClass": "vertical-align text-center", "render": function (data,type,row){ return rendertaskstatusbadge(data, 'badge');} },
+      { "width": "50px", "orderable": false, "sClass": "vertical-align text-center", "render": function (data,type,row){ return rendertaskstatusbadge(data, "badge");} },
       { "width": "64px", "orderable": false, "sClass": "vertical-align text-center",
         "render": function (data,type,row){
           var btn = '<button class="btn btn-sm btn-default" type="button" ';

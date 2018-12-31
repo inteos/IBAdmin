@@ -1,0 +1,22 @@
+{% load staticfiles %}
+<h4>New VMware vCenter</h4>
+<p>Here you can define a new VMware vCenter. It will be used for managing a VMware Guest VM backups.
+    To define a new VMware vCenter you have to input its name which should be unique in the system
+    (you will get an error if it is not), description (optional), access credentials, address and url which could be an
+    IP or DNS name (if application cannot resolve DNS name you cannot define a new vCenter). For successful
+    authorization we need to provide a vCenter SSL/TLS thumbprint which could be automatically checked using
+    <img src="{% static 'help/images/ibadmin-thumbprintscanb1.png' %}"> button. If vCenter thumbprint detection goes
+    fine you should get a button: <img src="{% static 'help/images/ibadmin-thumbprintokb1.png' %}">. Then you can select
+    a backup client proxy (which should be any client with RHEL or VMware client OS defined) and its department.</p>
+<dl>
+    <dt>Name</dt><dd>name of your vCenter. It has to be unique in your system.</dd>
+    <dt>Description</dt><dd>any description of your vCenter.</dd>
+    <dt>Username/Password</dt><dd>access credentials for your vCenter.</dd>
+    <dt>Address</dt><dd>IP address or FQDN of your vCenter. It has to be a valid (resolved) address.</dd>
+    <dt>URL</dt><dd>a valid VMware API access url used for managing backup operations.</dd>
+    <dt>Thumbprint</dt><dd>a valid vCenter url thumbprint used for plugin to connect.</dd>
+    <dt>Client Proxy</dt><dd>any available backup client for RHEL or VMware defined OS.</dd>
+    <dt>Department</dt><dd>department name for vCenter.</dd>
+</dl>
+<p><i class="fa fa-info-circle text-aqua"></i> Every selected Client Proxy will get a dedicated vCenter backup client
+    alias with the name <i>vmware-&lt;vcenter_name&gt;-&lt;client_name&gt;</i>.</p>

@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^dedupdata/(?P<name>.*)/$', views.dedupdata, name='storagededupdata'),
     url(r'^label/(?P<storage>.*)/$', views.labeltape, name='storagelabel'),
 
-    url(r'^name/$', views.name, name='storagename'),
+    url(r'^name/$', views.sdname, name='storagename'),
     url(r'^address/$', views.address, name='storageaddress'),
     url(r'^archivedir$', views.archivedir, name='storagearchivedir'),
 
@@ -33,8 +33,8 @@ urlpatterns = [
     url(r'^addalias/$', views.addalias, name='storageaddalias'),
 
     url(r'^tapelibdetect/$', views.tapedetectlib, name='storagetapedetect_rel'),
-    url(r'^tapelibdetect/(?P<id>.*)/$', views.tapedetectlib, name='storagetapedetect'),
-    url(r'^tapelibrescan/(?P<name>.*)/(?P<id>.*)/$', views.taperescanlib, name='storagetaperescan'),
+    url(r'^tapelibdetect/(?P<tapeid>.*)/$', views.tapedetectlib, name='storagetapedetect'),
+    url(r'^tapelibrescan/(?P<name>.*)/(?P<tapeid>.*)/$', views.taperescanlib, name='storagetaperescan'),
     url(r'^tapelibrescan/(?P<name>.*)/$', views.taperescanlib, name='storagetaperescan_rel'),
     url(r'^taskprogress/$', views.detectprogress, name='storagetapetaskprogress_rel'),
     url(r'^taskprogress/(?P<taskid>.*)/$', views.detectprogress, name='storagetapetaskprogress'),

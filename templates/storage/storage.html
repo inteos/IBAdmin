@@ -1,19 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
-{% if storagealert %}
-<div class="row">
- <div class="col-xs-12">
-  <div id="restartinfo" class="alert alert-warning alert-dismissible">
-    <button type="button" class="close" data-hide="alert" aria-hidden="true">&times;</button>
-    <h4><i class="icon fa fa-check"></i>{{ storagealertheader }}</h4>
-    <p>You have to <a href="{% url 'daemonindex' %}">restart the Storage service</a> if you want to use this storage. You could be unable to run successful jobs without it.</p>
-  </div>
- </div>
-</div>
-{% endif %}
+{% endblock %}
+
+{% block content %}
 <div class="box box-primary">
   <div class="box-header">
     <i class="fa {{ Storage.MediaType|mediaicon }}"></i>
@@ -28,16 +21,19 @@
           <th>Storage Address</th>
           <th class="text-center">Media Type</th>
           {% if Storage.Alias %}
-          <th class="text-center">Alias</th>
+            <th class="text-center">Alias</th>
           {% else %}
-          {% if Storage.MType == 'Tape' %}
-          <th>Device</th>
-          {% else %}
-          <th>Directory</th>
-          {% if Storage.MType == 'Dedu' %}
-          <th>Index</th>
+            {% if Storage.MType == 'Tape' %}
+              <th>Device</th>
+            {% else %}
+              <th>Directory</th>
+              {% if Storage.MType == 'Dedu' %}
+                <th>Index</th>
+              {% endif %}
+            {% endif %}
           {% endif %}
-          {% endif %}
+          {% if Storage.Departments %}
+            <th class="text-center">Departments</th>
           {% endif %}
           <th>Description</th>
           <th class="text-center">Status</th>
@@ -48,12 +44,19 @@
           <td class="vertical-align text-center storage-media-type"><span class="badge {{ Storage.MediaType|mediacolor }}">
             <i class="fa {{ Storage.MediaType|mediaicon }}"></i></span>{{ Storage.MediaType }}</td>
           {% if Storage.Alias %}
-          <td class="vertical-align text-center"><i class="fa fa-external-link-square"></i> {{ Storage.Alias }}</td>
+            <td class="vertical-align text-center"><i class="fa fa-external-link-square"></i> {{ Storage.Alias }}</td>
           {% else %}
-          <td>{{ Storage.StorageDirDevice }}</td>
-          {% if Storage.MType == 'Dedu' %}
-          <td>{{ Storage.StorageDirDedupidx }}</td>
+            <td>{{ Storage.StorageDirDevice }}</td>
+            {% if Storage.MType == 'Dedu' %}
+              <td>{{ Storage.StorageDirDedupidx }}</td>
+            {% endif %}
           {% endif %}
+          {% if Storage.Departments %}
+            <td class="text-center">
+              {% for dept in Storage.Departments %}
+                <span class="label {{ dept.color|default:'bg-blue' }}">{{ dept.name }}</span>
+              {% endfor %}
+            </td>
           {% endif %}
           <td>{{ Storage.Descr }}</td>
           <td class="text-center" style="width: 100px"><span class="label {{ Storage.Status|statusbgcolor }}">{{ Storage.Status|statustext }}</span></td>
@@ -63,12 +66,23 @@
     <hr>
     <div class="row">
       <div class="col-sm-10 center-block">
+{% if perms.storages.status_storages %}
         <a class="btn btn-app" href="{% url 'storagestatus' Storage.Name %}"><i class="fa fa-external-link"></i>Status</a>
+{% endif %}
         {% if Storage.MType == 'Dedu' %}
+{% if perms.storages.dedup_vacuum %}
         <a class="btn btn-app disabled" data-toggle="modal" data-target="#dedupvacuum" data-name="{{ Storage.Name }}"><i class="fa fa-magic"></i>Vacuum</a>
+{% endif %}
+{% if perms.storages.view_dedup %}
         <a class="btn btn-app" href="{% url 'storagededup' Storage.Name %}"><i class="fa fa-cubes"></i>Dedup Engine</a>
+{% endif %}
         {% endif %}
+{% if Storage.Alias or user.is_superuser and user.is_staff %}
+  {% if perms.storages.change_storages %}
         <a class="btn btn-app" href="{% url 'storageedit' Storage.Name %}"><i class="fa fa-edit"></i>Edit</a>
+  {% endif %}
+{% endif %}
+{% if user.is_superuser and user.is_staff %}
         {% if Storage.InternalStorage != 'Yes' %}
         <a class="btn btn-app disabled" data-toggle="modal" data-target="#deleteconfirm" data-name="{{ Storage.Name }}"><i class="fa fa-trash"></i>Delete</a>
         {% endif %}
@@ -77,9 +91,10 @@
         {% endif %}
         <!--<a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
         <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+{% endif %}
       </div>
     </div>
-
+{% if perms.jobs.view_jobs %}
     <div class="box-group" id="storageinfo">
       <!-- we are adding the .panel class so bootstrap.js collapse plugin detects it -->
       <div class="panel box box-primary">
@@ -104,13 +119,16 @@
         </div>
       </div><!-- panel -->
     </div>
-
+{% endif %}
   </div><!-- /.box-body -->
 </div><!-- /.box -->
+{% if perms.jobs.view_jobs %}
 {% include "widgets/cancelconfirm.html" %}
 {% include "widgets/stopconfirm.html" %}
 {% include "widgets/deletejobidconfirm.html" %}
+{% endif %}
 {% include "widgets/labelconfirm.html" %}
+
 {% endblock %}
 
 {% block pagejs %}

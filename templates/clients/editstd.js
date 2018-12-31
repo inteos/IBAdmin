@@ -15,7 +15,7 @@
       address: {
         required: true,
         remote: {
-          url: "{% url 'clientsaddress' %}"
+          url: "{% url 'addressresolution' %}"
         }
       }
     },

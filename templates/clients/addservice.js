@@ -26,7 +26,7 @@
       {{ form.address.name }}: {
         required: true,
         remote: {
-          url: "{% url 'clientsaddress' %}"
+          url: "{% url 'addressresolution' %}"
         }
       },
     },

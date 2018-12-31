@@ -1,0 +1,48 @@
+{% extends "pages/base.html" %}
+
+{% block contentwidget %}
+{% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined Roles</h3>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="roleslist" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "roles/defined.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "roles/defined.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-sm-10 center-block">
+        <a class="btn btn-app" href="{% url 'rolesadd' %}"><i class="fa fa-user-plus"></i>Add Role</a>
+        <a class="btn btn-app" href="{% url 'usersdefined' %}"><i class="fa fa-users"></i>Users list</a>
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% if perms.roles.delete_roles %}
+{% include "widgets/roledeleteconfirm.html" %}
+{% endif %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "roles/defined.js" %}
+{% endblock %}

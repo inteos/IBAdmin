@@ -1,0 +1,8 @@
+{% if perms.jobs.restore_jobs %}
+<!-- Restore menu -->
+{% if apppath.0 == 'Restore' %}
+<li class="treeview active">
+    <a href="#"><i class="fa fa-cloud-upload"></i> <span>Restore</span></a>
+</li>
+{% endif %}
+{% endif %}

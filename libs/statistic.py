@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from __future__ import unicode_literals
 from stats.models import *
 from jobs.models import *
 from datetime import *
@@ -73,7 +74,8 @@ def generate_series_fvalue_fast(parname=None, npoints=0, div=1):
 def generate_series_job(name=None, level='F', npoints=0, field=None, div=1):
     if name is None or npoints == 0 or field is None:
         return None
-    query = Job.objects.filter(name=name, level=level, jobstatus__in=['T', 'I']).order_by('-jobid').values()[:npoints][::-1]
+    query = Job.objects.filter(name=name, level=level, jobstatus__in=['T', 'I']).order_by('-jobid')\
+        .values()[:npoints][::-1]
     data = []
     for i, j in enumerate(query):
         data.append([i, j[field] / div])
@@ -84,9 +86,11 @@ def generate_series_jobtime(name=None, level='F', npoints=0, div=1):
     if name is None or npoints == 0:
         return None
     if level == 'R':
-        query = Job.objects.filter(name=name, type='R', jobstatus__in=['T', 'I']).order_by('-jobid').values()[:npoints][::-1]
+        query = Job.objects.filter(name=name, type='R', jobstatus__in=['T', 'I']).order_by('-jobid')\
+                    .values()[:npoints][::-1]
     else:
-        query = Job.objects.filter(name=name, level=level, jobstatus__in=['T', 'I']).order_by('-jobid').values()[:npoints][::-1]
+        query = Job.objects.filter(name=name, level=level, jobstatus__in=['T', 'I']).order_by('-jobid')\
+                    .values()[:npoints][::-1]
     data = []
     for i, j in enumerate(query):
         td = j['endtime'] - j['starttime']
@@ -98,9 +102,11 @@ def generate_series_jobavg(name=None, level='F', npoints=0, div=1):
     if name is None or npoints == 0:
         return None
     if level == 'R':
-        query = Job.objects.filter(name=name, type='R', jobstatus__in=['T', 'I']).order_by('-jobid').values()[:npoints][::-1]
+        query = Job.objects.filter(name=name, type='R', jobstatus__in=['T', 'I']).order_by('-jobid')\
+                    .values()[:npoints][::-1]
     else:
-        query = Job.objects.filter(name=name, level=level, jobstatus__in=['T', 'I']).order_by('-jobid').values()[:npoints][::-1]
+        query = Job.objects.filter(name=name, level=level, jobstatus__in=['T', 'I']).order_by('-jobid')\
+                    .values()[:npoints][::-1]
     data = []
     for i, j in enumerate(query):
         td = (j['endtime'] - j['starttime']).total_seconds()

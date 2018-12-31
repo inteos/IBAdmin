@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="row">
   <div class="col-xs-12">
     <div class="box box-success">
@@ -14,86 +18,20 @@
       <!-- form start -->
       <form class="form-horizontal" id="addform" method="post" action="{% url 'jobsaddfiles' %}">
         {% csrf_token %}
+        {{ form.backurl }}
         <div class="box-body">
         {{ form.name }}
         {{ form.descr }}
         {{ form.retention }}
-        <div id="{{ form.storage.id_for_label }}-group" class="form-group">
-          <label for="{{ form.storage.id_for_label }}" class="col-sm-2 control-label">{{ form.storage.label }}</label>
-          <div class="col-sm-10">
-            <div class="input-group">
-            {{ form.storage }}
-              <span class="input-group-addon"><i class="fa fa-database"></i></span>
-            </div>
-          </div>
-        </div><!-- /.form-group -->
-        <div id="{{ form.client.id_for_label }}-group" class="form-group">
-          <label for="{{ form.client.id_for_label }}" class="col-sm-2 control-label">{{ form.client.label }}</label>
-          <div class="col-sm-10">
-            <div class="input-group">
-            {{ form.client }}
-              <span class="input-group-addon"><i class="fa fa-desktop"></i></span>
-            </div>
-          </div>
-        </div><!-- /.form-group -->
+        {% include 'widgets/jobformstorage.html' %}
+        {% include 'widgets/jobformclient.html' %}
         {{ form.include }}
         {{ form.exclude }}
-        <div id="{{ form.backupsch.id_for_label }}-group" class="form-group">
-          <label for="{{ form.backupsch.id_for_label }}" class="col-sm-2 control-label">{{ form.backupsch.label }}</label>
-          <div class="col-sm-10">
-            <div class="input-group">
-            {{ form.backupsch }}
-              <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-            </div>
-          </div>
-        </div><!-- /.form-group -->
-        <!-- time Picker -->
-        <div id="{{ form.starttime.id_for_label }}-group" class="form-group">
-          <label for="{{ form.starttime.id_for_label }}" class="col-sm-2 control-label">{{ form.starttime.label }}</label>
-          <div class="col-sm-10">
-            <div class="bootstrap-timepicker">
-              <div class="input-group">
-              {{ form.starttime }}
-                <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
-              </div><!-- /.input group -->
-            </div>
-          </div>
-        </div><!-- /.form group -->
-        <div id="divrepeat">
-          <div id="{{ form.backuprepeat.id_for_label }}-group" class="form-group">
-            <label for="{{ form.backuprepeat.id_for_label }}" class="col-sm-2 control-label">{{ form.backuprepeat.label }}</label>
-            <div class="col-sm-10">
-              <div class="input-group">
-              {{ form.backuprepeat }}
-                <span class="input-group-addon"><i class="fa fa-repeat"></i></span>
-              </div>
-            </div>
-          </div><!-- /.form-group -->
-          <div class="form-group">
-            <label for="{{ form.backuplevel.id_for_label }}" class="col-sm-2 control-label">{{ form.backuplevel.label }}</label>
-            <div class="col-sm-10">
-              <div class="input-group">
-              {{ form.backuplevel }}
-                <span class="input-group-addon"><i class="fa fa-bars"></i></span>
-              </div>
-            </div>
-          </div><!-- /.form-group -->
-        </div><!-- /.divrepeat -->
-        <div id="divweekdays">
-          {{ form.scheduleweek }}
-        </div><!-- /.divweekdays -->
-        <div id="divmonthdays" ><!-- style="display: none" -->
-          {{ form.schedulemonth }}
-        </div>
+        {% include 'widgets/jobformbackupsch.html' %}
+        {% include 'widgets/jobformstarttime.html' %}
+        {% include 'widgets/jobformschedule.html' %}
         </div><!-- /.box-body -->
-        <div class="box-footer">
-          <div class="row">
-           <div class="col-lg-12">
-              <button type="submit" value="1" class="btn btn-app" name="add"><i class="glyphicon glyphicon-plus"></i>Add</button>
-              <button type="submit" value="1" class="btn btn-app cancel" name="cancel"><i class="glyphicon glyphicon-remove-circle"></i>Cancel</button>
-           </div>
-          </div>
-        </div>
+        {% include 'widgets/jobformaddfooter.html' %}
       </form>
     </div><!-- /.box -->
   </div>

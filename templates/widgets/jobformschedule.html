@@ -1,0 +1,28 @@
+<div id="divrepeat">
+  <div id="{{ form.backuprepeat.id_for_label }}-group" class="form-group">
+    <label for="{{ form.backuprepeat.id_for_label }}" class="col-sm-2 control-label">{{ form.backuprepeat.label }}</label>
+    <div class="col-sm-10">
+      <div class="input-group">
+      {{ form.backuprepeat }}
+        <span class="input-group-addon"><i class="fa fa-repeat"></i></span>
+      </div>
+    </div>
+  </div><!-- /.form-group -->
+{% if not DisableLevelInput %}
+  <div class="form-group">
+    <label for="{{ form.backuplevel.id_for_label }}" class="col-sm-2 control-label">{{ form.backuplevel.label }}</label>
+    <div class="col-sm-10">
+      <div class="input-group">
+      {{ form.backuplevel }}
+        <span class="input-group-addon"><i class="fa fa-bars"></i></span>
+      </div>
+    </div>
+  </div><!-- /.form-group -->
+{% endif %}
+</div><!-- /.divrepeat -->
+<div id="divweekdays">
+  {{ form.scheduleweek }}
+</div><!-- /.divweekdays -->
+<div id="divmonthdays" ><!-- style="display: none" -->
+  {{ form.schedulemonth }}
+</div>

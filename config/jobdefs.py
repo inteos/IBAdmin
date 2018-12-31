@@ -1,9 +1,5 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
-from libs.conf import *
-from libs.client import extractclientparams
-from libs.plat import getOStype
-from libs.system import getdevsymlink
 from .conflib import *
 from .confinfo import *
 
@@ -11,6 +7,8 @@ from .confinfo import *
 def createDIRJobDefs(dircompid=None, name='jd-default', descr='', btype='Backup', fileset=None, level=None, pool=None,
                      schedule=None, storage=None, client=None, priority=10, dirjob=None, beforejob=None, afterjob=None,
                      allowduplicatejob='No', writebootstrap='/opt/bacula/bsr/%c-%n.bsr', accurate=True):
+    if dircompid is None:
+        dircompid = getDIRcompid()
     # create new JobDefs {} resource
     resid = createDIRresJobDefs(dircompid, name, descr)
     # add parameters
@@ -87,6 +85,12 @@ def createDIRJobDefsXEN(dircompid=None):
                      accurate=False)
 
 
+def createDIRJobDefsKVM(dircompid=None):
+    # create JobDefs
+    createDIRJobDefs(dircompid=dircompid, name='jd-backup-kvm', descr='Backup KVM Defs', level='Incremental',
+                     accurate=False)
+
+
 def createDIRJobDefsPGSQL(dircompid=None):
     # create JobDefs
     createDIRJobDefs(dircompid=dircompid, name='jd-backup-pgsql', descr='Backup PostgreSQL Defs', level='Incremental')
@@ -112,6 +116,7 @@ def createDIRAllJobDefs(dircompid=None):
     createDIRJobDefsProxmox(dircompid)
     createDIRJobDefsXEN(dircompid)
     createDIRJobDefsESX(dircompid)
+    createDIRJobDefsKVM(dircompid)
     createDIRJobDefsPGSQL(dircompid)
     createDIRJobDefsMySQL(dircompid)
     createDIRJobDefsOracle(dircompid)
@@ -123,7 +128,17 @@ def checkDIRProxmoxJobDef(dircompid=None):
         createDIRJobDefsProxmox(dircompid)
 
 
-def checkDIRESXJobDef(dircompid=None):
+def checkDIRVMwareJobDef(dircompid=None):
     if getDIRJobDefs(dircompid, 'jd-backup-esx') is None:
         createDIRJobDefsESX(dircompid)
+
+
+def checkDIRXenServerJobDef(dircompid=None):
+    if getDIRJobDefs(dircompid, 'jd-backup-xen') is None:
+        createDIRJobDefsXEN(dircompid)
+
+
+def checkDIRKVMJobDef(dircompid=None):
+    if getDIRJobDefs(dircompid, 'jd-backup-kvm') is None:
+        createDIRJobDefsKVM(dircompid)
 

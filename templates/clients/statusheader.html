@@ -7,6 +7,10 @@
           <td>{{ Client.Started }}</td>
           <td class="text-center">{{ Client.RunJobs }}</td>
           <td class="text-center">{{ Client.JobsRunning }}</td>
-          <td>{% autoescape off %}{{ Client.Plugins }}{% endautoescape %}</td>
+          <td>
+            {% for plugin in Client.Plugins %}
+              <span class="badge {{ plugin|plugintypecolor }}">{{ plugin|plugintypetext }}</span><br>
+            {% endfor %}
+          </td>
           <td class="text-center" style="width: 100px"><span class="label {{ Client.Status|statusbgcolor }}">{{ Client.Status|statustext }}</span></td>
         </tr>

@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
-
+from __future__ import unicode_literals
 from .restype import RESTYPE
 from .confinfo import *
 
@@ -255,7 +254,8 @@ def createSDresAutochanger(sdcompid=None, name='File', descr=''):
 def updateparameter(compid, resname, restype, name, value):
     if compid is None or resname is None or restype is None or name is None or value is None:
         return None
-    param = ConfParameter.objects.get(resid__compid_id=compid, resid__name=resname, resid__type__name=restype, name=name)
+    param = ConfParameter.objects.get(resid__compid_id=compid, resid__name=resname, resid__type__name=restype,
+                                      name=name)
     param.value = value
     param.save()
 
@@ -297,3 +297,22 @@ def updateFSdefaultexclude(exclude=[], clientos=None):
             exclude.append('/opt/bacula/working')
         vss = False
     return vss
+
+
+def createFSIncludeFile(resid, include):
+    if include is not None:
+        for f in include:
+            addparameterstr(resid, 'File', f)
+
+
+def createFSIncludePlugin(resid, include):
+    if include is not None:
+        for f in include:
+            addparameterstr(resid, 'Plugin', f)
+
+
+def createFSExclude(resid, exclude):
+    if exclude is not None:
+        for f in exclude:
+            addparameterstr(resid, 'File', f)
+

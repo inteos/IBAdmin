@@ -74,7 +74,7 @@
               {# include "pages/usermessages.html" #}
               {# include "pages/usernotify.html" #}
               {% include "pages/tasks.html" %}
-              {# include "pages/usermenu.html" #}
+              {% include "pages/usermenu.html" %}
               <!-- Control Sidebar Toggle Button -->
               <!-- TODO: disabled until implemented
               <li>
@@ -103,14 +103,22 @@
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
           <li class="header">Control panel</li>
-          <li class="{% if apppath.0 == 'Dashboard' %}active{% endif %}"><a href="{% url 'home' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+          {% if contentheader == 'Dashboard' %}<li class="active">{% else %}<li>{% endif %}
+            <a href="{% url 'home' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+          </li>
           {% include "pages/statsmenu.html" %}
           {% include "pages/jobsmenu.html" %}
+          {% include "pages/restoremenu.html" %}
           {% include "pages/clientsmenu.html" %}
           {% include "pages/storagemenu.html" %}
-          <!-- vmmenu.html -->
+          {% include "pages/usersadmmenu.html" %}
+          {% include "pages/rolesmenu.html" %}
+          {% include "pages/departmentsmenu.html" %}
+          {% if apppath.0 == 'Profile' %}<li class="active">{% else %}<li>{% endif %}
+            <a href="{% url 'usersprofile' %}"><i class="fa fa-lightbulb-o"></i> <span>Profile</span>
+              {% if apppath.0 == 'Profile' and apppath.1 %}<span class="pull-right-container"><small class="label pull-right bg-blue">Edit</small></span>{% endif %}</a>
+          </li>
           {% include "pages/backupmenu.html" %}
-          <!-- hamenu.html -->
           {% include "pages/helpmenu.html" %}
         </ul><!-- /.sidebar-menu -->
       </section>
@@ -121,6 +129,7 @@
   {% block contentwrapper %}
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+    {% block contentheader %}
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
@@ -130,23 +139,25 @@
         {% endif %}
       </h1>
       <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="{% url 'home' %}"><i class="fa fa-dashboard"></i> Home</a></li>
         {% for b in apppath %}
             {% if forloop.last %}
-                <li class="active">{{ b }}</li>
+                <li class="active">{{ b|truncatechars:25 }}</li>
             {% else %}
                 <li><a href="#">{{ b }}</a></li>
             {% endif %}
         {% endfor %}
       </ol>
     </section>
-
+    {% endblock contentheader %}
     <!-- Main content -->
     <section class="content">
-      {# % include 'widgets/alerts.html' % #}
+      {% block contentwidget %}{% endblock %}
+      {% include "pages/messages.html" %}
       {% block content %}{% endblock %}
     </section><!-- /.content -->
     {% include 'widgets/aboutmodal.html' %}
+    {% include 'widgets/errorprocessingajax.html' %}
   </div><!-- /.content-wrapper -->
   {% endblock contentwrapper %}
 
@@ -159,7 +170,7 @@
       Inteos Backup Administration App
     </div>
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2017 <a href="http://inteos.pl/">Inteos Sp. z o.o.</a></strong> All rights reserved.
+    <strong>Copyright &copy; 2015-2019 <a href="http://inteos.pl/">Inteos Sp. z o.o.</a></strong> All rights reserved.
   </footer>
   {% endblock footer %}
 
@@ -232,10 +243,12 @@
     <!-- REQUIRED JS SCRIPTS -->
     <!-- jQuery 2.1.4 -->
     <script src="{% static 'plugins/jQuery/jQuery.min.js' %}"></script>
+    <!-- jQueryUI  -->
+    <script src="{% static 'plugins/jQueryUI/jQueryUI.min.js' %}"></script>
     <!-- Bootstrap 3.3.5 -->
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <!-- Select2 -->
-    <script src="{% static 'plugins/select2/select2.full.min.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.full.js' %}"></script>
     <!-- bootstrap toogle -->
     <script src="{% static 'plugins/toggle/bootstrap-toggle.min.js' %}"></script>
     <!-- iCheck -->
@@ -283,8 +296,9 @@
       });
     </script>
     <!-- IBAdmin application scripts -->
-    <script src="{% static 'ibadmin.js' %}"></script>
+    <script src="{% url 'ibadminjs' %}"></script>
     {% block pagejs %}{% endblock pagejs %}
+    {% include "pages/messages.js" %}
 {% endblock end %}
   </body>
 {% endblock body %}

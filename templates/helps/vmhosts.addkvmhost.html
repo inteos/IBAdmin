@@ -1,0 +1,16 @@
+{% load staticfiles %}
+<h4>New KVM Host Client</h4>
+<p>Here you can define a new standalone KVM host client. It will be defined as a standard single Bacula File Daemon.
+    To define a new KVM backup host client you have to input its name which should be unique in the system
+    (you will get an error if it is not), description (optional), address which could be an IP or DNS name
+    (if application cannot resolve DNS name you cannot add this client), its department and optionally check for
+    creating a default backup Job for this client.</p>
+<dl>
+    <dt>Client name</dt><dd>name of your new backup client. It has to be unique in your system.</dd>
+    <dt>Description</dt><dd>any description of your backup client.</dd>
+    <dt>Address</dt><dd>IP address or FQDN of your backup client. It has to be a valid (resolved) address.</dd>
+    <dt>Department</dt><dd>department name for the client.</dd>
+    <dt>Create default backup Job</dt><dd>when checked a default Job for the Client will be created together with a Client.</dd>
+</dl>
+<p><i class="fa fa-info-circle text-aqua"></i> Default Job will have the name <i>&lt;client_name&gt;-AllVMGuests</i> and
+    will backup all vmguests available in this Proxmox host.</p>

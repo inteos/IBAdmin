@@ -20,26 +20,27 @@ $(function () {
       { "width": "128px", "orderable": false, "sClass": "vertical-align text-center", // 32px for every button
         "render": function (data,type,row){
           var btn = '<button class="btn btn-sm btn-default" type="button" ';
-          var url = '{% url 'storagevolumeinfo_rel' %}';
-          var binf = btn + 'onclick="location.href=\''+url+data[0]+'\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
-          var ret = binf;
+          var ret = '';
+          ret += btn + 'onclick="location.href=\'{% url 'storagevolumeinfo_rel' %}'+data[0]+'\';"><i class="fa fa-info-circle" data-toggle="tooltip" data-original-title="Information"></i></button>\n';
           if (data[1] != 'Cleaning'){
-              var buse = btn + 'data-toggle="modal" data-target="#volusedconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakeused_rel' %}"><i class="fa fa-lock" data-toggle="tooltip" data-original-title="Close"></i></button>\n';
+{% if perms.storages.change_volumes %}
               if (data[1] == 'Append'){
-                ret += buse;
+                ret += btn + 'data-toggle="modal" data-target="#volusedconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakeused_rel' %}"><i class="fa fa-lock" data-toggle="tooltip" data-original-title="Close"></i></button>\n';
               };
-              var bopn = btn + 'data-toggle="modal" data-target="#volopenconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakeappend_rel' %}"><i class="fa fa-unlock-alt" data-toggle="tooltip" data-original-title="Open"></i></button>\n';
               if (data[1] == 'Used'){
-                ret += bopn;
+                ret += btn + 'data-toggle="modal" data-target="#volopenconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakeappend_rel' %}"><i class="fa fa-unlock-alt" data-toggle="tooltip" data-original-title="Open"></i></button>\n';
               };
-              var bpur = btn + 'data-toggle="modal" data-target="#volpurgeconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakepurged_rel' %}"><i class="fa fa-recycle" data-toggle="tooltip" data-original-title="Recycle"></i></button>\n';
+{% endif %}
+{% if perms.storages.recycle_volumes %}
               if (data[1] != 'Purged' && data[1] != 'Recycle'){
-                ret += bpur;
+                ret += btn + 'data-toggle="modal" data-target="#volpurgeconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakepurged_rel' %}"><i class="fa fa-recycle" data-toggle="tooltip" data-original-title="Recycle"></i></button>\n';
               };
-              var bdel = btn + 'data-toggle="modal" data-target="#voldeleteconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakedeletevolume_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
+{% endif %}
+{% if perms.storages.recycle_volumes %}
               if (data[1] != 'Append'){
-                ret += bdel;
+                ret += btn + 'data-toggle="modal" data-target="#voldeleteconfirm" data-name="'+data[0]+'" data-url="{% url 'storagemakedeletevolume_rel' %}"><i class="fa fa-trash" data-toggle="tooltip" data-original-title="Delete"></i></button>\n';
               };
+{% endif %}
           };
           return '<div class="btn-group">'+ret+'</div>';
         },

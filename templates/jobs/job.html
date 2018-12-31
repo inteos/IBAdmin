@@ -1,8 +1,12 @@
 {% extends "pages/base.html" %}
 {% load ibadtexts %}
 {% load ibadcolors %}
-{% block content %}
+
+{% block contentwidget %}
 {% include "widgets/jobstatus.html" %}
+{% endblock %}
+
+{% block content %}
 <div class="box box-primary">
   <div class="box-header">
     <i class="fa fa-cubes"></i>
@@ -21,7 +25,7 @@
           {% if Job.Storage %}<th>Storage</th>{% endif %}
           <th>Schedule</th>
           {% if Job.Type == 'Backup' %}<th>Level</th>{% endif %}
-          <th>Description</th>
+          {% if Job.Type == 'Admin' or Job.Type == 'Restore' %}<th>Description</th>{% endif %}
         </tr>
         <tr>
           <td>{{ Job.Name }}</td>
@@ -33,16 +37,46 @@
             {% elif Job.Scheduleparam %}{{ Job.Scheduleparam|scheduletext }} at {{ Job.Scheduletime }}
             {% else %}<i>Disabled</i>{% endif %}</td>
           {% if Job.Type == 'Backup' %}<td><span class="badge {{ Job.Level|joblevelbgcolor:Job.Type }} text-center">{{ Job.Level|jobleveltext }}</span></td>{% endif %}
-          <td>{{ Job.Descr }}</td>
+          {% if Job.Type == 'Admin' or Job.Type == 'Restore' %}<td>{{ Job.Descr }}</td>{% endif %}
         </tr>
       </table>
     </div>
+    {% if Job.Type != 'Admin' and Job.Type != 'Restore' %}
+    <div class="table-responsive">
+      <div class="row">
+        <div class="col-lg-6 col-xs-12">
+          <table class="table">
+            <tr>
+              <th>Application</th>
+              <th>Description</th>
+              <th class="text-center">Options</th>
+            </tr>
+            <tr>
+              <td><span class="badge {{ Job.JobDefs|jdappcolor }}">{{ Job.JobDefs|jdapptext }}</span></td>
+              <td>{{ Job.Descr }}</td>
+              <td class="text-center">
+                {% if FSData.Options %}
+                {% for o in FSData.Options %}
+                  {% if o.name == 'Dedup' %}
+                    <span class="label bg-maroon"><i class="fa fa-cubes"></i> Client deduplication</span>
+                  {% endif %}
+                  {% if o.name == 'Compression' %}
+                    <span class="label bg-purple"><i class="fa fa-archive"></i> Client compression {{ o.value }}</span>
+                  {% endif %}
+                  {% endfor %}
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
 {% if FSData.Include or FSData.FS or FSData.VMS %}
   </div>
   <div class="box-body">
     <div class="row">
       {% include 'widgets/fsdatainclude.html' %}
-      {% include 'widgets/fsdataoptions.html' %}
     </div>
   </div>
   <div class="box-body no-padding">
@@ -50,14 +84,26 @@
     <hr>
     <div class="row">
       <div class="col-sm-12 center-block">
+{% if perms.jobs.run_jobs %}
         {% if Job.Type != 'Restore' %}<a class="btn btn-app" data-toggle="modal" data-target="#runjobconfirm" data-name="{{ Job.Name }}" data-url="{% url 'jobsrun_rel' %}"><i class="fa fa-play"></i>Run</a>{% endif %}
+{% endif %}
+{% if perms.jobs.restore_jobs %}
         {% if Job.Type == 'Backup' %}<a class="btn btn-app" href="{% url 'restorejob' Job.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>{% endif %}
-        {% if not Job.InternalJob %}
+{% endif %}
+{% if not Job.InternalJob %}
+  {% if perms.jobs.change_jobs %}
         <a href="{% url 'jobsedit' Job.Name %}" class="btn btn-app"><i class="fa fa-wrench"></i>Edit</a>
+  {% endif %}
+  {% if perms.jobs.delete_jobs %}
         <a class="btn btn-app" data-toggle="modal" data-target="#deletejobconfirm" data-name="{{ Job.Name }}" data-url="{% url 'jobsdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
-        {% endif %}
+  {% endif %}
+{% endif %}
+{% if perms.stats.view_job_stats %}
         {% if Job.Type != 'Admin' %}<a href="{% url 'statsjob' Job.Name %}" class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>{% endif %}
+{% endif %}
+{% if perms.jobs.advanced_jobs %}
         {% if Job.Type != 'Restore' %}<a href="{% url 'jobsadvanced' Job.Name %}" class="btn btn-app"><i class="fa fa-cogs"></i>Advanced</a>{% endif %}
+{% endif %}
       </div>
     </div>
     <div class="box-group" id="jobhistory">

@@ -1,18 +1,21 @@
 from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
-from config.models import *
+from .user import *
 from clients.models import Client
 from stats.models import *
 from jobs.models import Job
 from django.db.models import Count
+from config.confinfo import *
 
 
 def getClientStatus_a(name='ibadmin'):
-    """ Status asynchroniczny z tabeli stat_status """
+    """ Asynchronous client status from stat_status table """
     param = 'bacula.client.' + name + '.status'
     try:
-        out = int(StatStatus.objects.get(parid__name=param).nvalue)
-    except:
+        out = StatStatus.objects.get(parid__name=param).nvalue
+    except ObjectDoesNotExist:
+        out = 0
+    if out is None:
         out = 0
     return out
 
@@ -27,12 +30,14 @@ def extractclientparams(clientres):
     return clientparams
 
 
-def getClientsDefinednr():
-    return ConfResource.objects.filter(compid__type='D', type__name='Client').exclude(confparameter__name='.Disabledfordelete').count()
+def getClientsDefinednr(request):
+    if not hasattr(request, "ibadminclientsdefinednr"):
+        request.ibadminclientsdefinednr = getUserClients(request).count()
+    return request.ibadminclientsdefinednr
 
 
-def updateClientsDefinednr(context):
-    val = getClientsDefinednr()
+def updateClientsDefinednr(request, context):
+    val = getClientsDefinednr(request)
     context.update({'clientsnr': val})
 
 
@@ -40,20 +45,24 @@ def updateClientres(clientres):
     name = clientres['Name']
     try:
         uname = Client.objects.get(name=name).uname
-    except:
+    except ObjectDoesNotExist:
         uname = 'Unknown'
     clientres.update({'Uname': uname})
     clientres.update({'Status': getClientStatus_a(name)})
 
 
-def getClientsOSnrlist(all):
-    if all is None or all == 0:
-        all = 1
-    query = ConfParameter.objects.filter(resid__compid__type='D', name='.OS').all().values('value').annotate(osnr=Count('value'))
+def getClientsOSnrlist(request, dircompid=None, allclients=None):
+    if allclients is None or allclients == 0:
+        allclients = 1
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    userclients = getUserClients(request, dircompid=dircompid)
+    query = ConfParameter.objects.filter(resid__in=userclients, name='.OS').all().values('value')\
+        .annotate(osnr=Count('value'))
     offset = 0.0
     clientslist = []
     for os in query:
-        val = os['osnr'] * 100 / all
+        val = os['osnr'] * 100 / allclients
         param = {
             'OS': os['value'],
             'Nr': os['osnr'],
@@ -65,13 +74,9 @@ def getClientsOSnrlist(all):
     return clientslist
 
 
-def updateClientsOSnrlist(context):
-    list = getClientsOSnrlist(context['clientsnr'])
-    context.update({'OSstatuslist': list})
-
-
-def getClientDisabledfordelete(name):
-    return ConfParameter.objects.filter(name='.Disabledfordelete', resid__name=name, resid__type__name='Client').count()
+def updateClientsOSnrlist(request, context):
+    clientlist = getClientsOSnrlist(request, allclients=context.get('clientsnr'))
+    context.update({'OSstatuslist': clientlist})
 
 
 def checkClienthasaliases(name=None):
@@ -96,9 +101,90 @@ def checkClientlastcluster(name=None):
         return False
 
 
-def getClientJobsrunningnr(name=None):
+def checkClientname(name=None):
     if name is None:
-        return 0
-    val = Job.objects.filter(clientid__name=name, jobstatus__in=['R', 'B', 'a', 'i'])
-    return val.count()
+        return True
+    if ConfResource.objects.filter(compid__type='D', type__name='Client', name=name).count() == 1:
+        return False
+    return True
 
+
+def clientparamsaddresskey(clientparams):
+    return getparamskey(clientparams, 'Address')
+
+
+def clientparamsnamekey(clientparams):
+    return clientparams['Name']
+
+
+def clientparamsdescrkey(clientparams):
+    return clientparams['Descr']
+
+
+def clientparamsoskey(clientparams):
+    return getparamskey(clientparams, '.OS')
+
+
+def clientparamsclusterkey(clientparams):
+    return getparamskey(clientparams, '.Cluster')
+
+
+def clientparamsdepartkey(clientparams):
+    return getparamskey(clientparams, '.Department')
+
+
+def jobparamsstatuskey(clientparams):
+    return clientparams['Status']
+
+
+def getDIRClientsListfiltered(request, dircompid=None, cols=(), os=None):
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    # List of the all Clients resources available
+    search = request.GET['search[value]']
+    offset = int(request.GET['start'])
+    limit = int(request.GET['length'])
+    userclients = getUserClients(request, dircompid=dircompid)
+    if os is not None:
+        userclients = userclients.filter(confparameter__name='.OS', confparameter__value=os)
+    total = userclients.count()
+    if search != '':
+        f = Q(name__icontains=search) | Q(description__icontains=search)
+        filtered = userclients.filter(f).count()
+        clientsres = userclients.filter(f).order_by('name')
+    else:
+        filtered = total
+        clientsres = userclients.order_by('name')
+    clientslist = []
+    for cr in clientsres:
+        clientparams = getDIRClientparams(clientres=cr)
+        updateClientres(clientparams)
+        clientslist.append(clientparams)
+    order_col = cols[int(request.GET['order[0][column]'])]
+    order_dir = True if 'desc' == request.GET['order[0][dir]'] else False
+    sclientslist = sorted(clientslist, key=order_col, reverse=order_dir)[offset:offset + limit]
+    return sclientslist, total, filtered
+
+
+def getDIRClientJobsList(request, dircompid=None, client=None):
+    if client is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    # List of the all jobs resources for a client
+    userjobs = getUserJobs(request).filter(confparameter__name='Client', confparameter__value=client)
+    jobslist = []
+    for jr in userjobs:
+        jobparams = getDIRJobparams(request, dircompid=dircompid, jobres=jr)
+        jobslist.append(jobparams)
+    return jobslist
+
+
+def removedepartclient(depart):
+    departs = ConfParameter.objects.filter(name='.Department', value=depart)
+    departs.delete()
+
+
+def changedepartclient(olddepart, newdepart):
+    departs = ConfParameter.objects.filter(name='.Department', value=olddepart)
+    departs.update(value=newdepart)

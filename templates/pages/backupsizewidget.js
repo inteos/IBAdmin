@@ -30,8 +30,10 @@
     });
   };
   {% include 'pages/refreshbutton.js' %}
-  // flot init and refresh calls
-  $(function () {
-    fetchData{{ id }}();
-    setInterval(fetchData{{ id }}, 60000);
+  $('#{{ id }}remove').click(function(){
+    var url = "{% url 'usersprofiledash' 'off' id %}";
+    $.ajax({
+      url: url,
+      type: "GET",
+    });
   });

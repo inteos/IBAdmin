@@ -5,6 +5,9 @@ function clearlog(){
     $('#daemonlogsinfo').show();
     $('#daemonlogs').hide();
 };
+function onErrorReceived(request,status,error){
+    {% include 'widgets/errorprocessingajax.js' %}
+};
 $('#masterbuttonlog, #sdbuttonlog, #fdbuttonlog, #ibadbuttonlog').click(function () {
     var url = $(this).data('url');
     if (displaylog != url){
@@ -106,6 +109,7 @@ $('#masterbuttonstop, #sdbuttonstop, #masterbuttonrestart, #sdbuttonrestart').on
     type: "GET",
     dataType: "json",
     success: onDataReceived,
+    error: onErrorReceived,
   });
 });
 $('#confirmbutton').on('click', function () {
@@ -122,6 +126,7 @@ $('#confirmbutton').on('click', function () {
     type: "GET",
     dataType: "json",
     success: onDataReceived,
+    error: onErrorReceived,
   });
 });
 $('#fdbuttonstop, #ibadbuttonstop, #masterbuttonstart, #sdbuttonstart, #fdbuttonstart, #ibadbuttonstart, #fdbuttonrestart, #ibadbuttonrestart').on('click', function () {
@@ -142,6 +147,7 @@ $('#fdbuttonstop, #ibadbuttonstop, #masterbuttonstart, #sdbuttonstart, #fdbutton
     type: "GET",
     dataType: "json",
     success: onDataReceived,
+    error: onErrorReceived,
   });
 });
 </script>

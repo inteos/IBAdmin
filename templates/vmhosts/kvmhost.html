@@ -1,0 +1,55 @@
+{% extends "pages/base.html" %}
+
+{% block contentwidget %}
+{% include "widgets/vmstatus.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="box box-primary">
+  <div class="box-header">
+    <i class="fa fa-th-list"></i>
+    <h3 class="box-title">Defined KVM Hosts</h3>
+    <div class="box-tools pull-right">
+      {% include "widgets/helpbutton.html" with box=1 %}
+      {% include "widgets/refreshbutton.html" with box=1 %}
+    </div>
+  </div><!-- /.box-header -->
+  <div class="box-body">
+    <div class="table-responsive">
+      <table id="clientslist" class="table table-bordered table-striped table-hover">
+        <thead>
+        {% include "vmhosts/kvmhost.legend.html" %}
+        </thead>
+        <tfoot>
+        {% include "vmhosts/kvmhost.legend.html" %}
+        </tfoot>
+      </table>
+    </div>
+  </div><!-- /.box-body -->
+  <div class="box-footer">
+    <div class="row">
+      <div class="col-sm-10 center-block">
+        {% if perms.virtual.add_kvm %}
+        <a class="btn btn-app" href="{% url 'vmsaddkvmhost' %}"><i class="fa fa-plus"></i>New VM Host</a>
+        {% endif %}
+        {% if perms.clients.view_clients %}
+        <a class="btn btn-app" href="{% url 'clientsdefined' %}"><i class="fa fa-laptop"></i>Clients list</a>
+        {% endif %}
+        {% if perms.jobs.view_jobs %}
+        <a class="btn btn-app" href="{% url 'jobsdefined' %}"><i class="fa fa-cubes"></i>Jobs list</a>
+        {% endif %}
+        {% if perms.storages.view_storages %}
+        <a class="btn btn-app" href="{% url 'storagedefined' %}"><i class="fa fa-database"></i>Storage list</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div><!-- /.box -->
+{% if perms.virtual.delete_kvm %}
+  {% include "widgets/deleteclientconfirm.html" %}
+{% endif %}
+{% endblock %}
+
+{% block pagejs %}
+  {% include "vmhosts/kvmhost.js" %}
+{% endblock %}

@@ -1,7 +1,7 @@
       <div class="info-box">
         <span class="info-box-icon bg-maroon"><i class="fa fa-desktop"></i></span>
         <div class="info-box-content">
-          <span class="info-box-number">File Daemon</span>
+          <span class="info-box-number text-no-overflow">File Daemon</span>
           <span id="FDStatussuccess" class="info-box-text label label-success" {% if not FDStatus %}style="display: none;"{% endif %}>Running</span>
           <span id="FDStatusfailed" class="info-box-text label label-danger" {% if FDStatus %}style="display: none;"{% endif %}><a href="{% url 'daemonindex' %}" class="text-white">Offline</a></span>
         </div><!-- /.info-box-content -->

@@ -1,3 +1,4 @@
+{% if perms.jobs.view_jobs %}
 <!-- Job menu -->
 <li class="treeview {% if apppath.0 == 'Jobs' %}active{% endif %}">
   <a href="#"><i class="fa fa-cubes"></i> <span>Jobs</span><span class="pull-right-container">
@@ -7,42 +8,20 @@
   </span>
   </a>
   <ul class="treeview-menu">
+{% if perms.jobs.add_jobs %}
     <li{% if apppath.1 == 'Add' %} class="active"{% endif %}>
       <a href="#"><i class="fa fa-plus"></i> <span>New Job</span><span class="pull-right-container">
         <i class="fa fa-angle-left pull-right"></i></span></a>
       <ul class="treeview-menu">
         <li{% if apppath.2 == 'Files Backup' %} class="active"{% endif %}>
         <a href="{% url 'jobsaddfiles' %}"><i class="fa fa-file"></i><span>Files Backup</span></a></li>
-<!--        <li{% if apppath.2 == 'SQL Server Backup' %} class="active"{% endif %}>
-        <a href="/job/addsql"><i class="fa fa-database"></i><span>SQL Server Backup</span></a></li>
-        <li{% if apppath.2 == 'SystemState Backup' %} class="active"{% endif %}>
-        <a href="/job/addsstat"><i class="fa fa-shield"></i><span>SystemState Backup</span></a></li>
-        <li{% if apppath.2 == 'Exchange Backup' %} class="active"{% endif %}>
-        <a href="/job/addexch"><i class="fa fa-envelope"></i><span>Exchange Backup</span></a></li>
-        <li{% if apppath.2 == 'asd' %} class="active"{% endif %}>
-        <a href="/job/addvmw"><i class="fa fa-cube"></i><span>Hyper-V Guest Backup</span></a></li>
-        <li{% if apppath.2 == 'PostgreSQL Backup' %} class="active"{% endif %}>
-        <a href="/job/addpsql"><i class="fa fa-database"></i><span>PostgreSQL Backup</span></a></li>
-        <li{% if apppath.2 == 'MySQL Backup' %} class="active"{% endif %}>
-        <a href="/job/addmysql"><i class="fa fa-database"></i><span>MySQL Backup</span></a></li>
-        <li{% if apppath.2 == 'Oracle Backup' %} class="active"{% endif %}>
-        <a href="/job/addoracle"><i class="fa fa-database"></i><span>Oracle Backup</span></a></li>
-        <li{% if apppath.2 == 'asd' %} class="active"{% endif %}>
-        <a href="/job/addvmw"><i class="fa fa-cube"></i><span>VMware Guest Backup</span></a></li>
-        <li{% if apppath.2 == 'asd' %} class="active"{% endif %}>
-        <a href="/job/addvmw"><i class="fa fa-cube"></i><span>KVM Guest Backup</span></a></li>
-        <li{% if apppath.2 == 'Proxmox Backup' %} class="active"{% endif %}>
-        <a href="{% url 'jobsaddproxmox' %}"><i class="fa fa-cube"></i><span>Proxmox Guest Backup</span></a></li>
-        <li{% if apppath.2 == 'asd' %} class="active"{% endif %}>
-        <a href="/job/addds"><i class="fa fa-indent"></i><span>AD/LDAP Backup</span></a></li>-->
       </ul>
     </li>
-    {% if jobsdefinednr %}
+{% endif %}
     <li{% if apppath.1 == 'Defined' %} class="active"{% endif %}>
       <a href="{% url 'jobsdefined' %}"><i class="fa fa-list"></i> <span>List</span><span class="pull-right-container">
-        <small class="label pull-right bg-teal">{{ jobsdefinednr }}</small></span>
+        <small class="label pull-right bg-teal"{% if jobsdefinednr < 1 %} style="display: none"{% endif %}>{{ jobsdefinednr }}</small></span>
       </a></li>
-    {% endif %}
     {% if jobstatusdisplay %}
       {% include "pages/jobinfomenu.html" %}
     {% endif %}
@@ -56,15 +35,15 @@
       </a></li>
     <li{% if apppath.1 == 'Finished' %} class="active"{% endif %}>
       <a href="{% url 'jobsfinished' %}"><i class="fa fa-circle-o text-green"></i><span>Success</span><span class="pull-right-container">
-        <small id="jobsmenusuccess" class="label pull-right bg-green" {% if jobssuccess < 1 %}style="display: none"{% endif %}>{{ jobssuccess }}</small></span>
+        <small id="jobsmenusuccess" class="label pull-right bg-green"{% if jobssuccess < 1 %} style="display: none"{% endif %}>{{ jobssuccess }}</small></span>
       </a></li>
     <li{% if apppath.1 == 'Errors' %} class="active"{% endif %}>
       <a href="{% url 'jobserrors' %}"><i class="fa fa-circle-o text-red"></i><span>Errors</span><span class="pull-right-container">
-        <small id="jobsmenuerror" class="label pull-right bg-red" {% if jobserror < 1 %}style="display: none"{% endif %}>{{ jobserror }}</small></span>
+        <small id="jobsmenuerror" class="label pull-right bg-red"{% if jobserror < 1 %} style="display: none"{% endif %}>{{ jobserror }}</small></span>
       </a></li>
     <li{% if apppath.1 == 'Warning' %} class="active"{% endif %}>
       <a href="{% url 'jobswarning' %}"><i class="fa fa-circle-o text-yellow"></i><span>Warning</span><span class="pull-right-container">
-        <small id="jobsmenuwarning" class="label pull-right bg-yellow" {% if jobswarning < 1 %}style="display: none"{% endif %}>{{ jobswarning }}</small></span>
+        <small id="jobsmenuwarning" class="label pull-right bg-yellow"{% if jobswarning < 1 %} style="display: none"{% endif %}>{{ jobswarning }}</small></span>
       </a></li>
     <li{% if apppath.1 == 'Last' %} class="active"{% endif %}>
       <a href="{% url 'jobslast' %}"><i class="fa fa-circle-o"></i><span>Last</span>
@@ -73,3 +52,4 @@
       </a></li>
   </ul>
 </li>
+{% endif %}

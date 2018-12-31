@@ -8,11 +8,11 @@ class ConfigMiddleware(MiddlewareMixin):
     def process_request(self, request):
         valid = [reverse('initial'), reverse('initialsetup'), reverse('initialsetup2'), reverse('initialarchivedir'),
                  reverse('initiallibdetect'), reverse('initialtaskprogress'), reverse('nodbavailable')]
-        dbstatus = getDIRcompid()
+        dbstatus = getDIRcompid(request)
         if request.path not in valid:
             if dbstatus == -1:
-                print "IBadmin is not configured!!"
+                print ("IBadmin is not configured!!")
                 return redirect('initial')
             if dbstatus is None:
-                print "IBAdmin no DB available!!"
+                print ("IBAdmin no DB available!!")
                 return redirect('nodbavailable')
