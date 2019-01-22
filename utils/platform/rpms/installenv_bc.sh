@@ -1,9 +1,12 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# IBAdmin full clean installation script for rpms
+# (c) 2015-2019 by Inteos Sp. z o.o.
+# All right reserved
 
 # Update OS
 yum -y update
 # Install required packages
-yum -y install postgresql-server python-pip python-virtualenv python-setuptools python-psycopg2 python-crypto mtx mt-st lsscsi httpd mod_wsgi bzip2 bacula-postgresql
+yum -y install postgresql-server python-pip python-virtualenv python-setuptools python-psycopg2 python-crypto mtx mt-st lsscsi httpd mod_wsgi bzip2 bacula-postgresql postgresql-devel
 # prepare empty bacula database
 systemctl stop bacula-dir
 systemctl stop bacula-sd
@@ -29,9 +32,7 @@ virtualenv --system-site-packages /opt/ibadengine
 source /opt/ibadengine/bin/activate
 # install required python packages
 pip install --upgrade pip
-pip install --upgrade django==1.10
-pip install --upgrade python-dateutil==2.7.2
-pip install --upgrade pytz==2018.4
+pip install -r /opt/ibadmin/requirements.txt
 /opt/ibadmin/manage.py migrate
 # initialize required system configuration and scripts
 cp /opt/ibadmin/utils/ibadmin.conf /etc/httpd/conf.d/
