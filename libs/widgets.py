@@ -458,17 +458,12 @@ class SelectWithDisabled(Select):
     To disable an option, pass a dict instead of a string for its label,
     of the form: {'label': 'option label', 'disabled': True}
     """
-    def render_option(self, selected_choices, option_value, option_label):
-        option_value = force_unicode(option_value)
-        if option_value in selected_choices:
-            selected_html = u' selected="selected"'
-        else:
-            selected_html = ''
-        disabled_html = ''
-        if isinstance(option_label, dict):
-            if dict.get(option_label, 'disabled'):
-                disabled_html = u' disabled="disabled"'
-            option_label = option_label['label']
-        return u'<option value="%s"%s%s>%s</option>' % (
-            escape(option_value), selected_html, disabled_html,
-            conditional_escape(force_unicode(option_label)))
+    def create_option(self, *args, **kwargs):
+        options_dict = super(SelectWithDisabled, self).create_option(*args, **kwargs)
+        if isinstance(options_dict['label'], dict):
+            label = options_dict['label']['label']
+            disabled = options_dict['label']['disabled']
+            options_dict['label'] = label
+            if disabled:
+                options_dict['attrs'].update({'disabled': 'disabled'})
+        return options_dict
