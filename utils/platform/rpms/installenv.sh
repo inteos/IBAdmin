@@ -6,7 +6,7 @@
 # Update OS
 yum -y update
 # Install required packages
-yum -y install postgresql-server python-pip python-virtualenv python-setuptools python-psycopg2 python-crypto bacula-enterprise-postgresql mtx mt-st lsscsi httpd mod_wsgi bzip2 postgresql-devel
+yum -y install postgresql-server python-pip python-virtualenv python-setuptools python-psycopg2 python2-crypto bacula-enterprise-postgresql mtx mt-st lsscsi httpd mod_wsgi bzip2 postgresql-devel
 # prepare empty bacula database
 systemctl stop bacula-dir
 systemctl stop bacula-sd
