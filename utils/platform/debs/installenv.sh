@@ -7,7 +7,7 @@
 apt-get -y update
 apt-get -y upgrade
 # Install required packages
-apt-get -y install postgresql python-pip python-virtualenv python-setuptools python-psycopg2 python-crypto bacula-enterprise-postgresql mtx mt-st sudo apache2 libapache2-mod-wsgi lsscsi
+apt-get -y install postgresql python-pip python-virtualenv python-setuptools python-psycopg2 python-crypto bacula-enterprise-postgresql mtx mt-st sudo apache2 libapache2-mod-wsgi lsscsi libpq-dev
 # prepare empty bacula database
 systemctl stop bacula-dir
 systemctl stop bacula-sd
