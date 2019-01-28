@@ -222,7 +222,10 @@ def getUserJobsnames(request, dircompid=None):
     if not hasattr(request, "ibadminjobslistuser"):
         if dircompid is None:
             dircompid = getDIRcompid(request)
-        request.ibadminjobslistuser = getUserJobs(request, dircompid).values('name')
+        ll = []
+        for j in getUserJobs(request, dircompid).values('name'):
+            ll.append(j['name'])
+        request.ibadminjobslistuser = ll
     return request.ibadminjobslistuser
 
 

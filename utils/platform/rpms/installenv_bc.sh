@@ -17,10 +17,12 @@ su - postgres -c "initdb /var/lib/pgsql/data/"
 systemctl enable postgresql
 systemctl start postgresql
 su - postgres -c "dropdb bacula"
+su - postgres -c "dropdb ibadmin"
 su - postgres -c "dropuser bacula"
 su - postgres -c "/opt/bacula/scripts/create_postgresql_database"
 su - postgres -c "/opt/bacula/scripts/make_postgresql_tables"
 su - postgres -c "/opt/bacula/scripts/grant_postgresql_privileges"
+su - postgres -c "createdb ibadmin"
 PWGEN=`ip addr | md5sum | awk '{print $1}'`
 sed -i "s/'PASSWORD': '.*',/'PASSWORD': '$PWGEN',/" /opt/ibadmin/ibadmin/settings.py
 su - postgres -c "psql -c \"alter user bacula with password '$PWGEN';\" bacula"

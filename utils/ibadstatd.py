@@ -148,6 +148,8 @@ class IBStatd(Daemon):
 
 
 if __name__ == "__main__":
+    print ("IBAdmin stats collector daemon is not working in split database configuration. Sorry!")
+    exit(1)
     print("IBAdmin stats collector daemon (c) 2016 Inteos Sp. z o.o.")
     daemon = IBStatd('/tmp/ibadstatd.pid')
     if len(sys.argv) == 2:

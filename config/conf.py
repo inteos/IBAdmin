@@ -1236,9 +1236,9 @@ def initialize(name='ibadmin', descr='', email='root@localhost', password=None, 
     # create DIR Director Resource
     createDIRDirector(dircompid=dircompid, name=name, descr=descr)
     # create DIR Catalog Resource
-    dbname = DATABASES['default']['NAME']
-    dbuser = DATABASES['default']['USER']
-    dbpass = DATABASES['default']['PASSWORD']
+    dbname = DATABASES['bacula']['NAME']
+    dbuser = DATABASES['bacula']['USER']
+    dbpass = DATABASES['bacula']['PASSWORD']
     createDIRCatalog(dircompid=dircompid, dbname=dbname, dbuser=dbuser, dbpassword=dbpass)
     # create DIR Messages Standard Resource
     createDIRMessages(dircompid=dircompid, name='Standard', email=email, log='bacula.log',

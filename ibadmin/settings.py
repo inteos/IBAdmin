@@ -93,6 +93,15 @@ WSGI_APPLICATION = 'ibadmin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ibadmin',
+        'USER': 'bacula',
+        # This needs to be updated during installation
+        'PASSWORD': 'bacula123',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    },
+    'bacula': {
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bacula',
         'USER': 'bacula',
         # This needs to be updated during installation
@@ -102,6 +111,9 @@ DATABASES = {
     }
 }
 
+# Database Routers
+
+DATABASE_ROUTERS = ['ibadmin.routers.BaculaRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
