@@ -219,8 +219,8 @@ def info(request, name):
 
 
 @perm_required('departments.view_departments')
-def infoadmins(request, name):
-    department = get_object_or_404(Departments, name=name)
+def infoadmins(request, shortdname):
+    department = get_object_or_404(Departments, shortname=shortdname)
     admins = Profile.objects.filter(departments=department, user__is_superuser=True).exclude(user__is_staff=True)
     adminnr = admins.count()
     context = {'Users': admins, 'usernr': adminnr}
@@ -228,8 +228,8 @@ def infoadmins(request, name):
 
 
 @perm_required('departments.view_departments')
-def infousers(request, name):
-    department = get_object_or_404(Departments, name=name)
+def infousers(request, shortdname):
+    department = get_object_or_404(Departments, shortname=shortdname)
     users = Profile.objects.filter(departments=department, user__is_superuser=False, user__is_staff=False)
     usernr = users.count()
     context = {'Users': users, 'usernr': usernr}
@@ -237,8 +237,8 @@ def infousers(request, name):
 
 
 @perm_required('departments.add_members')
-def addmember(request, name):
-    department = get_object_or_404(Departments, name=name)
+def addmember(request, shortdname):
+    department = get_object_or_404(Departments, shortname=shortdname)
     status = [False, '']
     if request.method == 'POST':
         userlist = getUserList()
@@ -251,18 +251,19 @@ def addmember(request, name):
                 profile.departments.add(department)
         else:
             messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+            # TODO: add error info to status variable
     return JsonResponse(status, safe=False)
 
 
 @perm_required('departments.delete_members')
-def deletemember(request, name, username):
-    # TODO: change from department.name into department.shortname
-    department = get_object_or_404(Departments, name=name)
+def deletemember(request, shortdname, username):
+    department = get_object_or_404(Departments, shortname=shortdname)
     profile = get_object_or_404(Profile, user__username=username)
     fullname = profile.user.get_full_name() or username
     with transaction.atomic():
         profile.departments.remove(department)
         status = [True, username, fullname]
+    # TODO: add error info to status variable
     return JsonResponse(status, safe=False)
 
 

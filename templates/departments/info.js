@@ -6,7 +6,7 @@
   });
   function adminsrefresh(){
     $("#adminsloading").show();
-    $("#adminsbox").load("{% url 'departsinfoadmins' Department.name %}", function(response,stat,xhr){
+    $("#adminsbox").load("{% url 'departsinfoadmins' Department.shortname %}", function(response,stat,xhr){
       $("#adminsloading").hide();
       if (stat == "error"){
         status = xhr.status;
@@ -17,7 +17,7 @@
   };
   function usersrefresh(){
     $("#usersloading").show();
-    $("#usersbox").load("{% url 'departsinfousers' Department.name %}", function(response,stat,xhr){
+    $("#usersbox").load("{% url 'departsinfousers' Department.shortname %}", function(response,stat,xhr){
       $("#usersloading").hide();
       if (stat == "error"){
         status = xhr.status;
@@ -50,7 +50,7 @@
         };
       };
       {% include 'widgets/onErrorReceivedbutton.js' %}
-      url = "{% url 'departsdeletemember_rel' Department.name %}"+username+'/';
+      url = "{% url 'departsdeletemember_rel' Department.shortname %}"+username+'/';
       $.ajax({
         url: url,
         type: "GET",
@@ -97,7 +97,7 @@
         }; // TODO: add error handling
       };
       $.ajax({
-        url: "{% url 'departsaddmember' Department.name %}",
+        url: "{% url 'departsaddmember' Department.shortname %}",
         type: "POST",
         data: formdata,
         dataType: "json",

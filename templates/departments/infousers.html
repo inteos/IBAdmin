@@ -3,7 +3,7 @@
 <ul class="users-list clearfix">
 {% for usr in Users %}
   <li>
-{% if perms.departments.delete_members %}
+{% if perms.departments.delete_members and usr.user.username != user.username %}
     <a class="fa fa-times pull-right member-delete" data-username="{{ usr.user.username }}" data-toggle="tooltip" data-original-title="Remove"></a>
 {% endif %}
     <div class="users-list-img">

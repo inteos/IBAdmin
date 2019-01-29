@@ -16,10 +16,10 @@ urlpatterns = [
     url(r'^nameother/(?P<name>.*)/$', views.nameother, name='departsnameother'),
     url(r'^shortname/$', views.shortname, name='departsshortname'),
     url(r'^shortnameother/(?P<name>.*)/$', views.shortnameother, name='departsshortnameother'),
-    url(r'^infoadmins/(?P<name>.*)/$', views.infoadmins, name='departsinfoadmins'),
-    url(r'^infousers/(?P<name>.*)/$', views.infousers, name='departsinfousers'),
-    url(r'^addmember/(?P<name>.*)/$', views.addmember, name='departsaddmember'),
-    url(r'^deletemember/(?P<name>.*)/(?P<username>.*)/$', views.deletemember, name='departsdeletemember'),
-    url(r'^deletemember/(?P<name>.*)/$', views.deletemember, name='departsdeletemember_rel'),
+    url(r'^infoadmins/(?P<shortdname>.*)/$', views.infoadmins, name='departsinfoadmins'),
+    url(r'^infousers/(?P<shortdname>.*)/$', views.infousers, name='departsinfousers'),
+    url(r'^addmember/(?P<shortdname>.*)/$', views.addmember, name='departsaddmember'),
+    url(r'^deletemember/(?P<shortdname>.*)/(?P<username>.*)/$', views.deletemember, name='departsdeletemember'),
+    url(r'^deletemember/(?P<shortdname>.*)/$', views.deletemember, name='departsdeletemember_rel'),
 ]
 
