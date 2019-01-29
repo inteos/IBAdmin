@@ -87,6 +87,10 @@ def checkarchivedir(archivedir):
     return os.path.isdir(archivedir)
 
 
+def checkbaculadocsdir():
+    return os.path.isdir("/opt/bacula/docs/html/")
+
+
 def updateservicestatus(context):
     dirstatus = checkservice(name='bacula-dir')
     sdstatus = checkservice(name='bacula-sd')

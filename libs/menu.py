@@ -8,6 +8,7 @@ from .department import updateDepartmentsnr
 from .role import updateRolesnr
 from .vmhosts import updateVMhostsdetectvsphere, updateClientsVMnrlist
 from .ibadmin import IBADVERSION
+from .system import checkbaculadocsdir
 
 
 def updateMenuNumbers(request, context):
@@ -24,4 +25,4 @@ def updateMenuNumbers(request, context):
     updateRolesnr(request, context)
     updateDepartmentsnr(request, context)
     context['ibadminver'] = IBADVERSION
-
+    context['baculadocs'] = checkbaculadocsdir()
