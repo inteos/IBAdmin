@@ -55,7 +55,6 @@ def logout(request):
     return redirect('login')
 
 
-# @permission_required('users.view_users', raise_exception=True)
 @perm_required('users.view_users')
 def defined(request):
     """ Defined Clients table - list """
@@ -121,9 +120,13 @@ def info(request, username):
 
 
 def infodeparts(request, username):
+    user = get_object_or_404(User, username=username)
     profile = get_object_or_404(Profile, user__username=username)
     departments = profile.departments.all()
-    context = {'Departments': departments}
+    context = {
+        'Departments': departments,
+        'User': user,
+    }
     return render(request, 'users/infodeparts.html', context)
 
 
@@ -172,6 +175,8 @@ def addroles(request, username):
 
 @perm_required('departments.delete_members')
 def departdelete(request, username, name):
+    if request.user.username == username:
+        raise PermissionDenied
     department = get_object_or_404(Departments, name=name)
     profile = get_object_or_404(Profile, user__username=username)
     with transaction.atomic():

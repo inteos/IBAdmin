@@ -71,7 +71,7 @@
             <div id="departsbox" class="box-body">
             <br><br>
             </div>
-{% if perms.departments.add_members %}
+{% if perms.departments.add_members and User.username != user.username %}
             <div class="box-footer">
               <form role="form" id="adddepartform" method="post">
               {% csrf_token %}

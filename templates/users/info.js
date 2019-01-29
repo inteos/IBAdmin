@@ -1,10 +1,24 @@
 <!-- page script -->
 <script>
 function refreshDeparts(){
-  $("#departsbox").load("{% url 'usersinfodeparts' User.username %}", function() { $("#departsboxloading").hide(); });
+  $("#departsbox").load("{% url 'usersinfodeparts' User.username %}", function(response,stat,xhr){
+      $("#departsboxloading").hide();
+      if (stat == "error"){
+        status = xhr.status;
+        error = xhr.statusText;
+        {% include 'widgets/errorprocessingajax.js' %}
+      }
+  });
 };
 function refreshRoles(){
-  $("#rolesbox").load("{% url 'usersinforoles' User.username %}", function() { $("#rolesboxloading").hide(); });
+  $("#rolesbox").load("{% url 'usersinforoles' User.username %}", function(response,stat,xhr){
+      $("#rolesboxloading").hide();
+      if (stat == "error"){
+        status = xhr.status;
+        error = xhr.statusText;
+        {% include 'widgets/errorprocessingajax.js' %}
+      }
+  });
 };
 $(function(){
   refreshDeparts();
@@ -83,11 +97,13 @@ $(document).on('click', '.depart-delete', function(){
         );
       };
     };
+    {% include 'widgets/onErrorReceived.js' %}
     url = "{% url 'usersdepartdelete_rel' User.username %}"+departname+'/';
     $.ajax({
       url: url,
       type: "GET",
       success: onDeletemember,
+      error: onErrorReceived,
     });
   };
 });

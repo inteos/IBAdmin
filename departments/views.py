@@ -257,6 +257,8 @@ def addmember(request, shortdname):
 
 @perm_required('departments.delete_members')
 def deletemember(request, shortdname, username):
+    if request.user.username == username:
+        raise PermissionDenied
     department = get_object_or_404(Departments, shortname=shortdname)
     profile = get_object_or_404(Profile, user__username=username)
     fullname = profile.user.get_full_name() or username

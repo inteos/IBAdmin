@@ -3,7 +3,7 @@
     {% for d in Departments %}
     <li class="{{ d.color|default:'bg-blue' }}">
       <span class="text">{{ d.name|truncatechars:40 }}</span>
-{% if perms.departments.delete_members %}
+{% if perms.departments.delete_members and user.username != User.username %}
       <div class="tools">
         <i class="fa fa-trash-o widget-delete depart-delete" data-departname="{{ d.name }}" data-toggle="tooltip" data-original-title="Remove"></i>
       </div>

@@ -49,7 +49,7 @@
           );
         };
       };
-      {% include 'widgets/onErrorReceivedbutton.js' %}
+      {% include 'widgets/onErrorReceived.js' %}
       url = "{% url 'departsdeletemember_rel' Department.shortname %}"+username+'/';
       $.ajax({
         url: url,
