@@ -26,7 +26,7 @@
           {% include "widgets/clientosform.html" %}
           {% include "widgets/selectdepartmentsform.html" %}
 {% if perms.clients.create_default_job %}
-          <div class="form-group">
+          <div id="{{ form.defjob.id_for_label }}" class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <div class="checkbox icheck">
                 <label>{{ form.defjob }} {{ form.defjob.label }}</label>
