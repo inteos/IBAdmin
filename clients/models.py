@@ -26,6 +26,7 @@ class Permissions(models.Model):
             ('add_service_clients', 'Can add cluster service clients'),
             ('add_alias_clients', 'Can add alias clients'),
             ('change_clients', 'Can change clients'),
+            ('advanced_clients', 'Can change clients advanced'),
             ('delete_clients', 'Can delete clients'),
             ('status_clients', 'Can status clients'),
             ('restore_clients', 'Can restore clients'),

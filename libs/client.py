@@ -188,3 +188,12 @@ def removedepartclient(depart):
 def changedepartclient(olddepart, newdepart):
     departs = ConfParameter.objects.filter(name='.Department', value=olddepart)
     departs.update(value=newdepart)
+
+
+def makestdadvanceddata(name, client):
+    data = {
+        'name': name,
+        'enabled': client.get('Enabled', 'Yes') == 'Yes',
+        'genpass': False,
+    }
+    return data

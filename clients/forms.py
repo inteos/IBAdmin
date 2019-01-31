@@ -50,3 +50,9 @@ class ClientAliasForm(ClientForm):
     name = forms.CharField(required=True, widget=ibadInputWidget(attrs={'label': 'Alias name', 'icon': 'fa fa-paw', 'placeholder': 'Name'}))
     client = forms.ChoiceField(label='Alias to', required=True, widget=forms.Select(attrs={'class': 'select2 form-control', 'style': 'width: 100%;'}))
 
+
+class ClientAdvancedForm(forms.Form):
+    name = forms.CharField(required=True, widget=forms.HiddenInput())
+    enabled = forms.BooleanField(label='Client enabled', required=False,
+                                 widget=ibadToggleWidget(attrs={'label': 'Client enabled'}))
+    genpass = forms.BooleanField(label='Generate new client access key on Save', required=False)
