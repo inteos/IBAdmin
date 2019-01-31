@@ -1146,6 +1146,7 @@ def editproxmox(request, name):
     return redirect(backurl, name)
 
 
+@perm_required('jobs.change_jobs')
 def editxenserver(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
@@ -1202,6 +1203,7 @@ def editxenserver(request, name):
     return redirect(backurl, name)
 
 
+@perm_required('jobs.change_jobs')
 def editkvm(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
@@ -1257,6 +1259,7 @@ def editkvm(request, name):
     return redirect(backurl, name)
 
 
+@perm_required('jobs.change_jobs')
 def editvmware(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
@@ -1452,6 +1455,7 @@ def catalogdvanced(request, name):
     return redirect('jobsinfo', name)
 
 
+@perm_required('jobs.advanced_jobs')
 def proxmoxadvanced(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
@@ -1497,6 +1501,7 @@ def proxmoxadvanced(request, name):
     return redirect('jobsinfo', name)
 
 
+@perm_required('jobs.advanced_jobs')
 def xenserveradvanced(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
@@ -1542,6 +1547,7 @@ def xenserveradvanced(request, name):
     return redirect('jobsinfo', name)
 
 
+@perm_required('jobs.advanced_jobs')
 def kvmadvanced(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
@@ -1587,6 +1593,7 @@ def kvmadvanced(request, name):
     return redirect('jobsinfo', name)
 
 
+@perm_required('jobs.advanced_jobs')
 def vmwareadvanced(request, name):
     dircompid = getDIRcompid(request)
     jobres = getDIRJobinfo(request, dircompid=dircompid, name=name)
