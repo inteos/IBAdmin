@@ -7,9 +7,10 @@ import platform
 # Bacula Enterprise 8.6.x - 1018
 # Bacula Enterprise 8.8.x - 1019
 # Bacula Enterprise 10.2 - 1020
+# Bacula Enterprise 12.0 - 1021
 # Bacula Community 7.4.x - 15
 # Bacula Community 9.2.x - 16
-BEECATVERSUPPORTED = (1017, 1018, 1019, 1020)
+BEECATVERSUPPORTED = (1017, 1018, 1019, 1020, 1021)
 BCCATVERSUPPORTED = (15, 16)
 CATVERSUPPORTED = BEECATVERSUPPORTED + BCCATVERSUPPORTED
 BACULACOMMUNITY = False
