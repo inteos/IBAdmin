@@ -275,7 +275,7 @@ def volinfo(request, name):
 def volhistorydata(request, name):
     cols = ['jobid', 'name', 'starttime', 'endtime', 'level', 'jobfiles', 'jobbytes', 'jobstatus', '']
     draw = request.GET['draw']
-    userjobs = getUserJobs(request).values('name')
+    userjobs = getUserJobsnames(request)
     jobidlist = Jobmedia.objects.filter(mediaid__volumename=name, jobid__name__in=userjobs) \
         .distinct('jobid').values('jobid')
     totalquery = Job.objects.filter(jobid__in=jobidlist)
