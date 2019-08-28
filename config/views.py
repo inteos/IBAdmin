@@ -47,14 +47,14 @@ def clientconfig(request, name):
     response = HttpResponse(content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="bacula-fd.conf"'
     temp = loader.get_template('config/bacula-fd.txt')
-    context = Context({
+    context = {
         'Dir': dirres,
         'Dirparams': dirparams,
         'FD': fdres,
         'FDparams': fdparams,
         'Mess': messres,
         'Messparams': messparams,
-    })
+    }
     response.write(temp.render(context))
     return response
 
