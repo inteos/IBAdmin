@@ -1,4 +1,9 @@
 # -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
+
 from __future__ import unicode_literals
 from django.db.models import Max, Q
 from django.db import OperationalError
@@ -6,9 +11,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import *
 from .restype import RESTYPE
 from storages.models import Storage
-# import traceback
-#    print "======================================================="
-#    traceback.print_stack(limit=6)
 
 
 def getDIRcompid(request=None):
