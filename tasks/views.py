@@ -1,4 +1,9 @@
 # -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Q
