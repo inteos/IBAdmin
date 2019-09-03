@@ -1,5 +1,10 @@
-from django.conf.urls import url
+# -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
 
+from django.conf.urls import url
 from . import views
 
 urlpatterns = [
