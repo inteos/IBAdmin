@@ -1,4 +1,9 @@
 # -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
+
 from __future__ import unicode_literals
 from django import forms
 from django.utils.safestring import mark_safe
@@ -6,7 +11,6 @@ from django.utils.html import format_html
 from django.forms.widgets import Select
 from django.utils.encoding import force_unicode
 from django.utils.html import escape, conditional_escape
-# import traceback
 
 
 class ibadInputWidget(forms.widgets.TextInput):

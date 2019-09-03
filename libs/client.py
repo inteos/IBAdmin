@@ -1,9 +1,13 @@
-from __future__ import unicode_literals
 # -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
+
+from __future__ import unicode_literals
 from .user import *
 from clients.models import Client
 from stats.models import *
-from jobs.models import Job
 from django.db.models import Count
 from config.confinfo import *
 
