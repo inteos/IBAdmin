@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # IBAdmin full clean installation script for debs
-# (c) 2015-2019 by Inteos Sp. z o.o.
-# All right reserved
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
 
 # Update OS
 apt-get -y update
