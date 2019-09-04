@@ -8,6 +8,6 @@ IBAdmin is a simple but powerful Bacula Enterprise WebGUI. It is primary dedicat
 * You can read more about IBAdmin in the [following blog](http://bacula.com.pl/category/software/ibadmin) (polish).
 * Here you can read an IBAdmin [Wiki](https://github.com/inteos/IBAdmin/wiki).
 
-[![latest](https://img.shields.io/github/release/inteos/IBadmin.svg)](https://github.com/inteos/IBAdmin/releases/latest)
-[![license](https://img.shields.io/github/license/inteos/IBAdmin.svg)](https://github.com/inteos/IBAdmin/blob/master/LICENSE)
+[![Latest](https://img.shields.io/github/release/inteos/IBadmin.svg)](https://github.com/inteos/IBAdmin/releases/latest)
+[![License](https://img.shields.io/github/license/inteos/IBAdmin.svg)](https://github.com/inteos/IBAdmin/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/inteos/IBAdmin.svg?branch=master)](https://travis-ci.org/inteos/IBAdmin)
