@@ -8,7 +8,7 @@ services: postgresql
 
 env:
   global:
-  - DJANGO="1.10"
+  - DJANGO="1.11"
   - DJANGO_SETTINGS_MODULE="ibadmin.settings"
   - PYTHONPATH="$HOME/builds/inteos/IBAdmin"
   - PIP_USE_MIRRORS=true
