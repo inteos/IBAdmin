@@ -46,19 +46,19 @@ sub setup_env_pgsql
     umask(0077);
 
     if ($args{db_address}) {
-	$ENV{PGHOST}=$args{db_address};
+        $ENV{PGHOST}=$args{db_address};
     }
     if ($args{db_socket}) {
-	$ENV{PGHOST}=$args{db_socket};
+        $ENV{PGHOST}=$args{db_socket};
     }
     if ($args{db_port}) {
-	$ENV{PGPORT}=$args{db_port};
+        $ENV{PGPORT}=$args{db_port};
     }
     if ($args{db_user}) {
-	$ENV{PGUSER}=$args{db_user};
+        $ENV{PGUSER}=$args{db_user};
     }
     if ($args{db_password}) {
-	$ENV{PGPASSWORD}=$args{db_password};
+        $ENV{PGPASSWORD}=$args{db_password};
     }
     $ENV{PGDATABASE}=$args{db_name};
 }
@@ -69,7 +69,7 @@ sub dump_pgsql
     setup_env_pgsql(%args);
     exec("HOME='$wd' pg_dump -c > '$wd/$args{db_name}.sql'");
     print "Error while executing postgres dump $!\n";
-    return 1;		    # in case of error
+    return 1;           # in case of error
 }
 
 sub analyse_pgsql
@@ -80,7 +80,7 @@ sub analyse_pgsql
     my $exitcode = $? >> 8;
     print grep { !/^WARNING:\s+skipping\s\"(pg_|sql_)/ } @output;
     if ($exitcode != 0) {
-	print "Error while executing postgres analyse. Exitcode=$exitcode\n";
+    print "Error while executing postgres analyse. Exitcode=$exitcode\n";
     }
     return $exitcode;
 }
@@ -91,12 +91,12 @@ sub setup_env_mysql
     umask(0077);
     unlink("$wd/.my.cnf");
     open(MY, ">$wd/.my.cnf") 
-	or die "Can't open $wd/.my.cnf for writing $@";
+    or die "Can't open $wd/.my.cnf for writing $@";
 
     $args{db_address} = $args{db_address} || "localhost";
     my $addr = "host=$args{db_address}";
     if ($args{db_socket}) {	# unix socket is fastest than net socket
-	$addr = "socket=\"$args{db_socket}\"";
+    $addr = "socket=\"$args{db_socket}\"";
     }
     my $mode = $args{mode} || 'client';
     print MY "[$mode]
@@ -136,26 +136,26 @@ sub handle_catalog
 {
     my ($mode, %args) = @_;
     if ($args{db_type} eq 'SQLite3') {
-	$ENV{PATH}=":$ENV{PATH}";
-	if ($mode eq 'dump') {
-	    dump_sqlite3(%args);
-	}
+    $ENV{PATH}=":$ENV{PATH}";
+    if ($mode eq 'dump') {
+        dump_sqlite3(%args);
+    }
     } elsif ($args{db_type} eq 'PostgreSQL') {
-	$ENV{PATH}="/usr/bin:$ENV{PATH}";
-	if ($mode eq 'dump') {
-	    dump_pgsql(%args);
-	} else {
-	    analyse_pgsql(%args);
-	}
-    } elsif ($args{db_type} eq 'MySQL') {
-	$ENV{PATH}=":$ENV{PATH}";
-	if ($mode eq 'dump') {
-	    dump_mysql(%args);
-	} else {
-	    analyse_mysql(%args);
-	}
+    $ENV{PATH}="/usr/bin:$ENV{PATH}";
+    if ($mode eq 'dump') {
+        dump_pgsql(%args);
     } else {
-	die "This database type isn't supported";
+        analyse_pgsql(%args);
+    }
+    } elsif ($args{db_type} eq 'MySQL') {
+    $ENV{PATH}=":$ENV{PATH}";
+    if ($mode eq 'dump') {
+        dump_mysql(%args);
+    } else {
+        analyse_mysql(%args);
+    }
+    } else {
+    die "This database type isn't supported";
     }
 }
 
@@ -174,14 +174,14 @@ my %cfg;
 while(my $l = <FP>)
 {
     if ($l =~ /catalog=(.+)/) {
-	if (exists $cfg{catalog} and $cfg{catalog} eq $cat) {
-	    exit handle_catalog($mode, %cfg);
-	}
-	%cfg = ();		# reset
+    if (exists $cfg{catalog} and $cfg{catalog} eq $cat) {
+        exit handle_catalog($mode, %cfg);
+    }
+    %cfg = ();      # reset
     }
 
     if ($l =~ /(\w+)=(.+)/) {
-	$cfg{$1}=$2;
+    $cfg{$1}=$2;
     }
 }
 

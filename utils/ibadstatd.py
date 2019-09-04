@@ -1,7 +1,13 @@
 #!/opt/ibadengine/bin/python
 # -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
+
 from __future__ import print_function
 import sys
+import os
 import time
 import signal
 import psycopg2
@@ -102,7 +108,7 @@ def mainloop(fg=0):
     """
     conn = None
     while cont:
-        if fg:
+        if fg > 1:
             print(time.asctime() + " : Connection ...")
         if conn is None:
             try:
@@ -117,7 +123,7 @@ def mainloop(fg=0):
             conn = None
             time.sleep(10)
             continue
-        if fg:
+        if fg > 1:
             print(time.asctime() + " : Collecting ...")
         # colled the data
         Catalog.collect(conn, fg)
@@ -131,14 +137,15 @@ def mainloop(fg=0):
         # it should be the last collector
         Client.collect(conn, fg)
 
-        if fg:
+        if fg > 1:
             print(time.asctime() + " : Done")
         conn.commit()
-        time.sleep(60)
+        time.sleep(300)
 
-    if fg:
+    if fg > 1:
         print(time.asctime() + " : Finish")
     conn.close()
+    os.remove('/tmp/ibadstatd.pid')
     sys.exit(0)
 
 
@@ -165,9 +172,16 @@ if __name__ == "__main__":
             printhelp()
             sys.exit(2)
     elif len(sys.argv) == 3:
-        if '-f' == sys.argv[1] and 'start' == sys.argv[2]:
-            maininit(fg=1)
-            mainloop(fg=1)
+        pid = str(os.getpid())
+        f = open('/tmp/ibadstatd.pid', 'w')
+        f.write(pid)
+        f.close()
+        if 'start' == sys.argv[2] and sys.argv[1] in ('-f', '-d'):
+            fg = 1
+            if '-d' == sys.argv[1]:
+                fg = 2
+            maininit(fg)
+            mainloop(fg)
             sys.exit(0)
         else:
             printhelp()

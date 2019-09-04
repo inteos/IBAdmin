@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # IBAdmin maintanance script
-# (c) 2015-2018 by Inteos Sp. z o.o.
-# All right reserved
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
 
 echo "=> Pruning volumes ..."
 echo "prune expired volume yes" | /opt/bacula/bin/bconsole
