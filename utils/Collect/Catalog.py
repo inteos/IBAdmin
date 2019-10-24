@@ -36,7 +36,7 @@ def init(conn, fg):
     setparam(cur, "catalog.size.table.files.bytes", 'N', "The size of the file table in catalog", "Bytes", "select pg_relation_size('file') as data;", 1, 1, '#3c8dbc', 'box-primary')
     setparam(cur, "catalog.size.table.log.bytes", 'N', "The size of the log table in catalog", "Bytes", "select pg_relation_size('log') as data;", 1, 1, '#3c8dbc', 'box-primary')
     setparam(cur, "catalog.size.table.stats.bytes", 'N', "The size of the stats table in catalog", "Bytes", "select pg_relation_size('stats_statdata') as data;", 1, 1, '#3c8dbc', 'box-primary')
-    if fg:
+    if fg > 1:
         print (PARAMS)
         print (SQL)
     cur.close()

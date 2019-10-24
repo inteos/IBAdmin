@@ -1,4 +1,9 @@
-# coding=utf-8
+# -*- coding: UTF-8 -*-
+#
+#  Copyright (c) 2015-2019 by Inteos Sp. z o.o.
+#  All rights reserved. See LICENSE file for details.
+#
+
 from __future__ import unicode_literals
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
@@ -54,7 +59,7 @@ def vcenterclientdefineddata(request):
     """ JSON for Proxmox hosts """
     cols = [clientparamsnamekey, clientparamsdescrkey, clientparamsvcenterkey, clientparamsdepartkey,
             jobparamsstatuskey]
-    (clientslist, total, filtered) = getDIRClientsListfiltered(request, cols=cols, os='vmware')
+    (clientslist, total, filtered) = getUserDIRClientsList_filtered(request, cols=cols, os='vmware')
     data = []
     for clientres in clientslist:
         updateClientres(clientres)
@@ -85,7 +90,7 @@ def proxmoxdefineddata(request):
     """ JSON for Proxmox hosts """
     cols = [clientparamsnamekey, clientparamsaddresskey, clientparamsdescrkey, clientparamsdepartkey,
             clientparamsclusterkey, jobparamsstatuskey]
-    (clientslist, total, filtered) = getDIRClientsListfiltered(request, cols=cols, os='proxmox')
+    (clientslist, total, filtered) = getUserDIRClientsList_filtered(request, cols=cols, os='proxmox')
     data = []
     for clientres in clientslist:
         updateClientres(clientres)
@@ -106,7 +111,7 @@ def proxmoxdefineddata(request):
 
 @perm_required('virtual.list_proxmox')
 def proxmoxvmlist(request, name=None):
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     vmlist, err = getproxmoxvmlist(name)
@@ -146,7 +151,7 @@ def xenserverdefineddata(request):
     """ JSON for XenServer hosts """
     cols = [clientparamsnamekey, clientparamsaddresskey, clientparamsdescrkey, clientparamsdepartkey,
             clientparamsclusterkey, jobparamsstatuskey]
-    (clientslist, total, filtered) = getDIRClientsListfiltered(request, cols=cols, os='xen')
+    (clientslist, total, filtered) = getUserDIRClientsList_filtered(request, cols=cols, os='xen')
     data = []
     for clientres in clientslist:
         updateClientres(clientres)
@@ -167,7 +172,7 @@ def xenserverdefineddata(request):
 
 @perm_required('virtual.list_xen')
 def xenservervmlist(request, name=None):
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     vmlist, err = getxenservervmlist(name)
@@ -207,7 +212,7 @@ def kvmhostdefineddata(request):
     """ JSON for KVM hosts """
     cols = [clientparamsnamekey, clientparamsaddresskey, clientparamsdescrkey, clientparamsdepartkey,
             clientparamsclusterkey, jobparamsstatuskey]
-    (clientslist, total, filtered) = getDIRClientsListfiltered(request, cols=cols, os='kvm')
+    (clientslist, total, filtered) = getUserDIRClientsList_filtered(request, cols=cols, os='kvm')
     data = []
     for clientres in clientslist:
         updateClientres(clientres)

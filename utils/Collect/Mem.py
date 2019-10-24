@@ -60,7 +60,7 @@ def init(conn, fg):
 #    setparam(cur, 'VmallocUsed', 'system.mem.vm.used', 'N', 'The total amount of memory of used virtual address space', 'Bytes', 1, 1, '#3c8dbc', 'box-primary')
     setparam(cur, '_Memory_Used', 'system.mem.used', 'N', 'The total amount of memory used', 'Bytes', 1, 1, '#3c8dbc', 'box-primary')
     setparam(cur, '_Memory_Util', 'system.mem.util', 'F', 'The total memory utilisation', 'MEM%', 1, 1, '#3c8dbc', 'box-primary')
-    if fg:
+    if fg > 1:
         print (PARAMS)
     cur.close()
 
@@ -89,7 +89,7 @@ def collect(conn, fg):
             value *= 1049586
         elif 'GB' == units:
             value *= 1024 * 1048576
-        if fg:
+        if fg > 1:
             print (name, value)
         param = PARAMS[name]
         lib.update_stat_n(cur, param, value)
@@ -98,7 +98,7 @@ def collect(conn, fg):
     if SYNTH.get('MemTotal', 0):
         used = SYNTH['MemTotal'] - SYNTH['MemFree']
         util = used * 100.0 / SYNTH['MemTotal']
-        if fg:
+        if fg > 1:
             print (used, util)
         param = PARAMS['_Memory_Used']
         lib.update_stat_n(cur, param, used)

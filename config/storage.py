@@ -16,7 +16,7 @@ def createSDStorage(sdcompid=None, name='ibadmin', address='localhost', dedupdir
     # create resource
     resid = createSDresStorage(sdcompid=sdcompid, name=name, descr=descr)
     # add parameters
-    sdaddrsid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=RESTYPE['SDAddresses'])
+    sdaddrsid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=ResType.SDAddresses)
     addSDStorageAddress(sdcompid=sdcompid, resid=sdaddrsid, address=address)
     # static BEE parameters
     addparameterstr(resid, 'WorkingDirectory', '/opt/bacula/working')
@@ -33,12 +33,12 @@ def addSDStorageAddress(sdcompid=None, resid=None, address='localhost'):
     if sdcompid is None:
         return
     if resid is None:
-        resid = getresourceid(sdcompid, '', 'SDAddresses')
+        resid = getresourceid(sdcompid, name='', restype=ResType.SDAddresses)
     # check if already defined
     isdef = ConfResource.objects.filter(sub=resid, type__name='IP', confparameter__value=address).count()
     if isdef == 0:
         # ok, not available, create
-        ipresid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=RESTYPE['IP'])
+        ipresid = createSDsubresource(sdcompid=sdcompid, resid=resid, rtype=ResType.IP)
         addparameter(ipresid, 'Port', 9103)
         addparameter(ipresid, 'Addr', address)
 
@@ -46,8 +46,8 @@ def addSDStorageAddress(sdcompid=None, resid=None, address='localhost'):
 def deleteSDStorageAddress(sdcompid=None, address='localhost'):
     if sdcompid is None:
         return
-    sdaddrsid = getresourceid(sdcompid, '', 'SDAddresses')
-    resquery = ConfResource.objects.filter(sub=sdaddrsid, type__name='IP', confparameter__value=address)
+    sdaddrsid = getresourceid(sdcompid, name='', restype=ResType.SDAddresses)
+    resquery = ConfResource.objects.filter(sub=sdaddrsid, type=ResType.IP, confparameter__value=address)
     resquery.delete()
 
 
@@ -363,9 +363,9 @@ def extendStoragededup(dircompid=None, dirname=None, sdcompid=None, storname=Non
     createSDAutochanger(sdcompid=sdcompid, name=mediatype, changerdev='/dev/null', changercmd='', devices=devices)
     for dev in devices:
         createSDDevice(sdcompid=sdcompid, dtype=devtype, device=dev)
-    resid = getresourceid(sdcompid, sdcomponent, 'Storage')
-    addparameterstr(resid, 'DedupDirectory', dedupdirn)
-    addparameterstr(resid, 'DedupIndexDirectory', dedupidxdirn)
+    resid = getresourceid(sdcompid, name=sdcomponent, restype=ResType.Storage)
+    addparameterstr(resid, ParamType.DedupDirectory, dedupdirn)
+    addparameterstr(resid, ParamType.DedupIndexDirectory, dedupidxdirn)
 
 
 def createStorageAlias(request, dircompid=None, storname=None, descr='', storage=None, address='localhost',
@@ -374,19 +374,19 @@ def createStorageAlias(request, dircompid=None, storname=None, descr='', storage
         return None
     if dircompid is None:
         dircompid = getDIRcompid(request)
-    storageid = getresourceid(dircompid, storage, 'Storage')
+    storageid = getresourceid(dircompid, name=storage, restype=ResType.Storage)
     sdcomponent = getparameter(storageid, '.StorageComponent')
     sdcompid = getSDcompid(sdcomponent)
     # insert new Storage {} resource into Dir conf
     resid = createDIRresStorage(dircompid=dircompid, name=storname, descr=descr)
     # insert parameters
-    addparameter(resid, '.Alias', storage)
-    addparameterstr(resid, 'Address', address)
+    addparameter(resid, ParamType.ibadAlias, storage)
+    addparameterstr(resid, ParamType.Address, address)
     if department is not None and department not in ('', ' ', '#'):
-        addparameterstr(resid, '.Department', department)
+        addparameterstr(resid, ParamType.ibadDepartment, department)
     # copy other parameters
-    storparams = ConfParameter.objects.filter(resid=storageid).exclude(name='Address').exclude(name='.InternalStorage')\
-        .exclude(name='.Department')
+    storparams = ConfParameter.objects.filter(resid=storageid).exclude(name=ParamType.Address)\
+        .exclude(name='.InternalStorage').exclude(name=ParamType.ibadDepartment)
     for param in storparams:
         if param.name.startswith('.StorageDir'):
             continue
@@ -402,7 +402,7 @@ def updateStorageTapelib(dircompid=None, sdcompid=None, sdcomponent=None, storna
     if dircompid is None:
         dircompid = getDIRcompid()
     if sdcomponent is None:
-        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
+        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type=ResType.Storage, resid__name=storname,
                                          name='.StorageComponent')
         sdcomponent = data.value
     if sdcompid is None:
@@ -434,18 +434,18 @@ def updateStorageArchdir(request, dircompid=None, sdcompid=None, sdcomponent=Non
     if dircompid is None:
         dircompid = getDIRcompid(request)
     if sdcomponent is None:
-        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
+        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type=ResType.Storage, resid__name=storname,
                                          name='.StorageComponent')
         sdcomponent = data.value
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdcomponent)
     archdirn = os.path.abspath(archdir)
     mediatype = getDIRStorageMediatype(name=storname)
-    res = ConfResource.objects.filter(compid_id=sdcompid, type__name='Device', confparameter__name='MediaType',
+    res = ConfResource.objects.filter(compid_id=sdcompid, type=ResType.Device, confparameter__name=ParamType.MediaType,
                                       confparameter__value=mediatype)
-    params = ConfParameter.objects.filter(resid__in=res, name='ArchiveDevice')
+    params = ConfParameter.objects.filter(resid__in=res, name=ParamType.ArchiveDevice)
     params.update(value=archdirn)
-    updateparameter(dircompid, storname, 'Storage', '.StorageDirDevice', archdirn)
+    updateparameter(dircompid, storname, ResType.Storage, '.StorageDirDevice', archdirn)
 
 
 def updateStorageDedupdir(dircompid=None, sdcompid=None, sdcomponent=None, storname=None, dedupdir='/tmp'):
@@ -454,19 +454,19 @@ def updateStorageDedupdir(dircompid=None, sdcompid=None, sdcomponent=None, storn
     if dircompid is None:
         dircompid = getDIRcompid()
     if sdcomponent is None:
-        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
+        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type=ResType.Storage, resid__name=storname,
                                          name='.StorageComponent')
         sdcomponent = data.value
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdcomponent)
     dedupdirn = os.path.abspath(dedupdir)
     mediatype = getDIRStorageMediatype(name=storname)
-    res = ConfResource.objects.filter(compid_id=sdcompid, type__name='Device', confparameter__name='MediaType',
+    res = ConfResource.objects.filter(compid_id=sdcompid, type=ResType.Device, confparameter__name=ParamType.MediaType,
                                       confparameter__value=mediatype)
-    params = ConfParameter.objects.filter(resid__in=res, name='ArchiveDevice')
+    params = ConfParameter.objects.filter(resid__in=res, name=ParamType.ArchiveDevice)
     params.update(value=dedupdirn)
-    updateparameter(sdcompid, sdcomponent, 'Storage', 'DedupDirectory', dedupdirn)
-    updateparameter(dircompid, storname, 'Storage', '.StorageDirDevice', dedupdirn)
+    updateparameter(sdcompid, sdcomponent, ResType.Storage, 'DedupDirectory', dedupdirn)
+    updateparameter(dircompid, storname, ResType.Storage, '.StorageDirDevice', dedupdirn)
 
 
 def updateStorageDedupidxdir(dircompid=None, sdcompid=None, sdcomponent=None, storname=None, dedupidxdir='/tmp'):
@@ -475,14 +475,14 @@ def updateStorageDedupidxdir(dircompid=None, sdcompid=None, sdcomponent=None, st
     if dircompid is None:
         dircompid = getDIRcompid()
     if sdcomponent is None:
-        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', resid__name=storname,
+        data = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type=ResType.Storage, resid__name=storname,
                                          name='.StorageComponent')
         sdcomponent = data.value
     if sdcompid is None:
         sdcompid = getSDcompid(name=sdcomponent)
     dedupidxdirn = os.path.abspath(dedupidxdir)
-    updateparameter(sdcompid, sdcomponent, 'Storage', 'DedupIndexDirectory', dedupidxdirn)
-    updateparameter(dircompid, storname, 'Storage', '.StorageDirDedupidx', dedupidxdirn)
+    updateparameter(sdcompid, sdcomponent, ResType.Storage, ParamType.DedupIndexDirectory, dedupidxdirn)
+    updateparameter(dircompid, storname, ResType.Storage, '.StorageDirDedupidx', dedupidxdirn)
 
 
 def updateSDAddresses(sdcompid=None, address='localhost'):
@@ -492,7 +492,8 @@ def updateSDAddresses(sdcompid=None, address='localhost'):
 def updateStorageAddress(dircompid=None, sdcompid=None, sdcomponent=None, address='localhost'):
     if dircompid is None:
         dircompid = getDIRcompid()
-    params = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type__name='Storage', name='Address')
+    params = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__type=ResType.Storage,
+                                          name=ParamType.Address)
     params.update(value=address)
     if sdcomponent is None:
         res = ConfResource.objects.get(compid_id=dircompid, type__name='Storage',
@@ -525,7 +526,7 @@ def deleteSDAutochanger(sdcompid=None, sdname=None, autoname=None):
         return None
     if sdcompid is None:
         sdcompid = getSDcompid(sdname)
-    resid = getresourceid(compid=sdcompid, name=autoname, typename='Autochanger')
+    resid = getresourceid(compid=sdcompid, name=autoname, restype=ResType.Autochanger)
     # delete Autochanger resource and parameters
     deleteresource(resid)
 
@@ -537,7 +538,8 @@ def deleteSDDevices(sdcompid=None, sdname=None, mediatype=None):
         return None
     if sdcompid is None:
         sdcompid = getSDcompid(sdname)
-    devices = ConfResource.objects.filter(compid_id=sdcompid, type__name='Device', confparameter__name='MediaType',
+    devices = ConfResource.objects.filter(compid_id=sdcompid, type=ResType.Device,
+                                          confparameter__name=ParamType.MediaType,
                                           confparameter__value=mediatype)
     for dev in devices:
         resid = dev.resid

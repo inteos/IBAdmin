@@ -453,26 +453,6 @@ def backupfilesdata(request, jobid):
 
 
 @perm_required('jobs.status_jobs')
-def status(request, jobid=None):
-    """ Jobs Log + Media/Volumes + Files """
-    job = getJobidinfo(request, jobid)
-    if job is None:
-        raise Http404()
-    if job.get('Status', 'C') not in 'CR':
-        return redirect('jobslog', jobid)
-    jobname = job.get('Name', 'Undefined')
-    if getJobDisabledfordelete(name=jobname):
-        return redirect('jobsdefined')
-    job['InternalJob'] = getJobInternal(jobname)
-    context = {'contentheader': 'Job status', 'apppath': ['Jobs', jobname, 'Status', jobid],
-               'jobstatusdisplay': 1, 'Job': job, 'JobClient': [], 'JobProgress': -1}
-    updateJobidLogtext(context, jobid)
-    updateJobidVolumes(context, jobid)
-    updateMenuNumbers(request, context)
-    return render(request, 'jobs/status.html', context)
-
-
-@perm_required('jobs.status_jobs')
 def checkstatusfinished(request, jobid):
     """ JSON if job finished """
     job = getJobidinfo(request, jobid)
@@ -534,8 +514,8 @@ def statusvolumes(request, jobid):
 @perm_required('jobs.delete_jobs')
 def makedelete(request, name):
     """ Delete job definition and job history """
-    userjobs = getUserJobsnames(request)
-    job = get_object_or_404(ConfResource, name=name, type=RESTYPE['Job'], name__in=userjobs)
+    userjobs = getUserJobsNames(request)
+    job = get_object_or_404(ConfResource, name=name, type=ResType.Job, name__in=userjobs)
     isrunning = checkJobisrunning(name=name)
     # 0 - single job, deleted, reload to parameter
     # 1 - job still running, display info modal
@@ -573,7 +553,7 @@ def makedelete(request, name):
 @perm_required('jobs.run_jobs')
 def makerun(request, name):
     """ Uruchamia zadanie o określonej nazwie """
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     job = get_object_or_404(ConfResource, name=name, type__name='Job', name__in=userjobs)
     out = doJobrun(name)
     if len(out) == 0:
@@ -593,7 +573,7 @@ def makerun(request, name):
 @perm_required('jobs.restart_jobs')
 def makerestartid(request, jobid):
     """ Restartuje zadanie o danym jobid """
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     job = get_object_or_404(Job, jobid=jobid, name__in=userjobs)
     out = doRestartJobid(jobid)
     if len(out) == 0:
@@ -613,7 +593,7 @@ def makerestartid(request, jobid):
 @perm_required('jobs.delete_jobid')
 def makedeleteid(request, jobid):
     """ Kasuje pojedyncze zadanie backuowe po JobId """
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     job = get_object_or_404(Job, jobid=jobid, name__in=userjobs)
     out = doDeleteJobid(jobid)
     if len(out) == 0:
@@ -629,7 +609,7 @@ def makedeleteid(request, jobid):
 @perm_required('jobs.cancel_jobs')
 def makecancelid(request, jobid):
     """ Anuluje pojedyncze zadanie backuowe po JobId """
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     job = get_object_or_404(Job, jobid=jobid, name__in=userjobs)
     out = doCancelJobid(jobid)
     # 2001 Job "systemowy.2017-04-30_17.00.37_55" marked to be canceled.
@@ -647,7 +627,7 @@ def makecancelid(request, jobid):
 @perm_required('jobs.stop_jobs')
 def makestopid(request, jobid):
     """ Stopuje pojedyncze zadanie backuowe po JobId """
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     job = get_object_or_404(Job, jobid=jobid, name__in=userjobs)
     out = doStopJobid(jobid)
     # 2001 Job "systemowy.2017-05-01_21.22.47_48" marked to be stopped.
@@ -677,7 +657,7 @@ def jname(request):
 
 @perm_required('jobs.comment_jobs')
 def commentid(request, jobid):
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     job = get_object_or_404(Job, jobid=jobid, name__in=userjobs)
     if request.method == 'GET':
         # get comment text

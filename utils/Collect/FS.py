@@ -59,7 +59,7 @@ def update(cur, fg):
             setparam(cur, 'system.fs.'+mountpoint+'.inode.total', 'N', 'Filesystem '+mountpoint+' number of inodes', 'inode', 1, 1, '#3c8dbc', 'box-primary')
             setparam(cur, 'system.fs.'+mountpoint+'.inode.free', 'N', 'Filesystem '+mountpoint+' free inodes', 'inode', 1, 1, '#3c8dbc', 'box-primary')
             setparam(cur, 'system.fs.'+mountpoint+'.inode.available', 'N', 'Filesystem '+mountpoint+' available inodes for user', 'inode', 1, 1, '#3c8dbc', 'box-primary')
-            if fg:
+            if fg > 1:
                 print ("Added:" + mountpoint)
     mounts.close()
 
@@ -69,7 +69,7 @@ def init(conn, fg):
     update(cur, fg)
     cur.close()
 
-    if fg:
+    if fg > 1:
         print (PARAMS)
         print (FS)
 
@@ -89,7 +89,7 @@ def collect(conn, fg):
         inode_free = data.f_ffree
         inode_avail = data.f_favail
 
-        if fg:
+        if fg > 1:
             print (mountpoint, size_free, size_avail, inode_total, inode_free, inode_avail)
 
         param = PARAMS['system.fs.'+mountpoint+'.size.total']

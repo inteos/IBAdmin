@@ -12,7 +12,7 @@ from .task import updateTasksrunningall
 from .user import updateUsersnr
 from .department import updateDepartmentsnr
 from .role import updateRolesnr
-from .vmhosts import updateVMhostsdetectvsphere, updateClientsVMnrlist
+from .vmhosts import updateVMhostsdetectvsphere, updateUserClientsVMnrlist
 from .ibadmin import IBADVERSION
 from .system import checkbaculadocsdir
 
@@ -26,7 +26,7 @@ def updateMenuNumbers(request, context):
     updateStoragedetectdedup(request, context)
     updateVMhostsdetectvsphere(request, context)
     updateTasksrunningall(request, context)
-    updateClientsVMnrlist(request, context)
+    updateUserClientsVMnrlist(request, context)
     updateUsersnr(request, context)
     updateRolesnr(request, context)
     updateDepartmentsnr(request, context)

@@ -103,7 +103,7 @@ def init(conn, fg):
     setparam(cur, 'system.cpu.loadavg.1m', 'F', 'CPU load average in 1 min', 'Proc', 3, 4, '#3c8dbc', 'box-primary')
     setparam(cur, 'system.cpu.loadavg.5m', 'F', 'CPU load average in 5 min', 'Proc', 3, 4, '#3c8dbc', 'box-primary')
     setparam(cur, 'system.cpu.loadavg.15m', 'F', 'CPU load average in 15 min', 'Proc', 3, 4, '#3c8dbc', 'box-primary')
-    if fg:
+    if fg > 1:
         print (PARAMS)
     cur.close()
 
@@ -111,7 +111,7 @@ def init(conn, fg):
 def collect(conn, fg):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     (ready, util, user, system, iowait) = cpustat()
-    if fg:
+    if fg > 1:
         print(ready, util, user, system, iowait)
     if ready:
         param = PARAMS['system.cpu.util']
@@ -124,7 +124,7 @@ def collect(conn, fg):
         lib.update_stat_f(cur, param, iowait)
 
     (ready, l1, l5, l15) = loadavgstat()
-    if fg:
+    if fg > 1:
         print(ready, l1, l5, l15)
     if ready:
         param = PARAMS['system.cpu.loadavg.1m']

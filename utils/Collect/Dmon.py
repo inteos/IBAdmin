@@ -36,7 +36,7 @@ def init(conn, fg):
     setparam(cur, "bacula.daemon.bacula-sd.status", 'N', "Status of bacula-sd service", "Status", 1, 6, '#605ca8', 'box-primary')
     setparam(cur, "bacula.daemon.bacula-fd.status", 'N', "Status of bacula-fd service", "Status", 1, 6, '#3c8dbc', 'box-primary')
     setparam(cur, "ibadmin.daemon.ibadstatd.status", 'N', "Status of IBAdmin ibadstatd service", "Status", 1, 6, '#ff851b', 'box-primary')
-    if fg:
+    if fg > 1:
         print (PARAMS)
     cur.close()
 
@@ -48,7 +48,7 @@ def collect(conn, fg):
     status = systemctl.stdout.read().rstrip()
     if 'active' == status:
         run = 1
-    if fg:
+    if fg > 1:
         print (status, run)
     param = PARAMS["bacula.daemon.bacula-dir.status"]
     lib.update_stat_n(cur, param, run)
@@ -57,7 +57,7 @@ def collect(conn, fg):
     status = systemctl.stdout.read().rstrip()
     if 'active' == status:
         run = 1
-    if fg:
+    if fg > 1:
         print (status, run)
     param = PARAMS["bacula.daemon.bacula-sd.status"]
     lib.update_stat_n(cur, param, run)
@@ -66,7 +66,7 @@ def collect(conn, fg):
     status = systemctl.stdout.read().rstrip()
     if 'active' == status:
         run = 1
-    if fg:
+    if fg > 1:
         print (status, run)
     param = PARAMS["bacula.daemon.bacula-fd.status"]
     lib.update_stat_n(cur, param, run)

@@ -15,7 +15,8 @@ from libs.storage import getDIRStorageNames
 from libs.plat import *
 from libs.bconsole import *
 from subprocess import call
-from config.conf import *
+from config.confinfo import *
+from config.client import *
 from .forms import *
 from jobs.models import Log
 from users.decorators import *
@@ -131,9 +132,7 @@ def configsave(request):
                         updateDIRadminemail(email=form.cleaned_data['email'])
                 directorreload()
         else:
-            # TODO zrobic obsługę błędów albo i nie
-            print form.is_valid()
-            print form.errors.as_data()
+            messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
     return JsonResponse(restartinfo, safe=False)
 
 

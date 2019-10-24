@@ -15,8 +15,8 @@ import re
 from datetime import *
 
 
-JOBRUNNINGSTATUS = ['R', 'B', 'a', 'i']
-JOBQUEUEDSTATUS = ['C', 'F', 'S', 'd', 't', 'p']
+JOBRUNNINGSTATUS = ['R', 'B', 'a', 'i', 'l', 'L', 'u', 'w']
+JOBQUEUEDSTATUS = ['C', 'F', 'S', 'd', 't', 'p', 'q']
 JOBTERMINATESTATUS = ['T', 'I']
 JOBERRORSTATUS = ['E', 'f', 'A']
 JOBDONESTATUS = JOBTERMINATESTATUS + JOBERRORSTATUS
@@ -26,7 +26,7 @@ JOBALLSTATUS = JOBDONESTATUS + JOBSEXECSTATUS
 
 def getJobsrunningnr(request):
     if not hasattr(request, "ibadminjobsrunningnr"):
-        userjobs = getUserJobsnames(request)
+        userjobs = getUserJobsNames(request)
         val = Job.objects.filter(jobstatus__in=JOBRUNNINGSTATUS, name__in=userjobs)
         request.ibadminjobsrunningnr = val.count()
     return request.ibadminjobsrunningnr
@@ -39,7 +39,7 @@ def updateJobsrunningnr(request, context):
 
 def getJobsqueuednr(request):
     if not hasattr(request, "ibadminjobsqueuednr"):
-        userjobs = getUserJobsnames(request)
+        userjobs = getUserJobsNames(request)
         val = Job.objects.filter(jobstatus__in=JOBQUEUEDSTATUS, name__in=userjobs)
         request.ibadminjobsqueuednr = val.count()
     return request.ibadminjobsqueuednr
@@ -52,7 +52,7 @@ def updateJobsqueuednr(request, context):
 
 def getJobssuccessnr(request):
     if not hasattr(request, "ibadminjobssuccessnr"):
-        userjobs = getUserJobsnames(request)
+        userjobs = getUserJobsNames(request)
         val = Job.objects.filter(jobstatus__in=JOBTERMINATESTATUS, joberrors=0, name__in=userjobs)
         request.ibadminjobssuccessnr = val.count()
     return request.ibadminjobssuccessnr
@@ -65,7 +65,7 @@ def updateJobssuccessnr(request, context):
 
 def getJobserrornr(request):
     if not hasattr(request, "ibadminjobserrornr"):
-        userjobs = getUserJobsnames(request)
+        userjobs = getUserJobsNames(request)
         val = Job.objects.filter(jobstatus__in=JOBERRORSTATUS, name__in=userjobs)
         request.ibadminjobserrornr = val.count()
     return request.ibadminjobserrornr
@@ -78,7 +78,7 @@ def updateJobserrornr(request, context):
 
 def getJobswarningnr(request):
     if not hasattr(request, "ibadminjobswarningnr"):
-        userjobs = getUserJobsnames(request)
+        userjobs = getUserJobsNames(request)
         val = Job.objects.filter(jobstatus__in=JOBTERMINATESTATUS, name__in=userjobs).exclude(joberrors=0)
         request.ibadminjobswarningnr = val.count()
     return request.ibadminjobswarningnr
@@ -136,7 +136,7 @@ def getJobInfo(job=None):
 
 
 def getJobidinfo(request, jobid):
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     try:
         j = Job.objects.select_related('clientid').get(jobid=jobid, name__in=userjobs)
     except ObjectDoesNotExist:
@@ -320,7 +320,7 @@ def getJobsfiltered(request, dircompid=None, jobstatus=(), joberrors=None, cols=
     # List of the all jobs in job table
     if dircompid is None:
         dircompid = getDIRcompid(request)
-    userjobs = getUserJobsnames(request, dircompid)
+    userjobs = getUserJobsNames(request, dircompid)
     offset = int(request.GET['start'])
     limit = int(request.GET['length'])
     search = request.GET['search[value]']

@@ -822,7 +822,7 @@ def editalias(request, name):
                             # updateStorageAliasAddress(storname=name, address=form.cleaned_data['storageip'])
                         if 'departments' in form.changed_data:
                             # update departments
-                            print (departs)
+                            # print (departs)
                             updateDIRStorageDepartments(request, name=name, departments=departs)
                     directorreload()
                 return redirect('storageinfo', name)

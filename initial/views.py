@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 from config.models import *
 from config.conf import initialize
-from config.confinfo import getDIRname
+from config.conflib import getDIRname
 from libs.init import *
 from tasks.models import Tasks
 from django.db import transaction

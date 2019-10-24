@@ -11,5 +11,9 @@
     {% if apppath.1 == 'Status' %}<li class="active">{% else %}<li>{% endif %}
       <a href="{% url 'clientsstatus' Client.Name %}"><i class="fa fa-external-link"></i> <span>Status</span></a></li>
 {% endif %}
+    {% if apppath.1 == 'Advanced' %}
+    <li class="active">
+      <a href="{% url 'clientsadvanced' Client.Name %}"><i class="fa fa-cogs"></i> <span>Advanced</span></a></li>
+    {% endif %}
   </ul>
 </li>

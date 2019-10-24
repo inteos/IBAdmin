@@ -6,7 +6,7 @@
 
 from __future__ import unicode_literals
 from libs.conf import *
-from .conflib import *
+from .confinfo import *
 from libs.user import *
 
 
@@ -40,7 +40,8 @@ def createDIRMessages(dircompid, name, email=None, log='bacula.log', descr='', f
     # add parameters
     if email is not None:
         addparameterstr(resid, 'MailCommand',
-                        '/opt/bacula/bin/bsmtp -h localhost -f \\"(Inteos Backup) <%r>\\" -s \\"ibad: %t %e of %n %l\\" %r')
+                        '/opt/bacula/bin/bsmtp -h localhost -f \\"(Inteos Backup) '
+                        '<%r>\\" -s \\"ibad: %t %e of %n %l\\" %r')
         # addparameterstr(resid,'OperatorCommand','/opt/bacula/bin/bsmtp -h localhost -f \"(Bacula) <%r>\" -s \"IBackup:
         # Intervention needed for %j\" %r')
         if fatal:
@@ -80,31 +81,31 @@ def createDIRClient(dircompid=None, dirname=None, name='ibadmin', password='ibad
     # create resource
     resid = createDIRresClient(dircompid=dircompid, name=name, descr=descr)
     # add parameters
-    addparameterstr(resid, 'Address', address)
-    addparameterstr(resid, 'Catalog', catalog)
+    addparameterstr(resid, ParamType.Address, address)
+    addparameterstr(resid, ParamType.Catalog, catalog)
     if os == 'win32' or os == 'win64':
         maxjobs = 1
     else:
         maxjobs = 10
     addparameter(resid, 'MaximumConcurrentJobs', maxjobs)
-    addparameterstr(resid, '.OS', os)
+    addparameterstr(resid, ParamType.ibadOS, os)
     addparameterstr(resid, 'AutoPrune', 'No')
-    addparameterstr(resid, 'Enabled', 'Yes')
+    addparameterstr(resid, ParamType.Enabled, 'Yes')
     if encpass is None:
         encpass = getencpass(dirname, password)
     addparameterenc(resid, 'Password', encpass)
     if internal:
         addparameterstr(resid, '.InternalClient', 'Yes')
     if cluster is not None:
-        addparameterstr(resid, '.ClusterName', cluster)
+        addparameterstr(resid, ParamType.ibadClusterName, cluster)
     if alias is not None:
-        addparameterstr(resid, '.Alias', alias)
+        addparameterstr(resid, ParamType.ibadAlias, alias)
     if service is not None:
-        addparameterstr(resid, '.ClusterService', service)
+        addparameterstr(resid, ParamType.ibadClusterService, service)
     if vcenter is not None:
-        addparameter(resid, '.vCenterName', vcenter)
+        addparameter(resid, ParamType.ibadvCenterName, vcenter)
     if department is not None and department not in ('', ' ', '#'):
-        addparameterstr(resid, '.Department', department)
+        addparameterstr(resid, ParamType.ibadDepartment, department)
 
 
 def createDIRPool(dircompid=None, name='Default', disktype=False, retention=None, useduration=None, nextpool=None,
@@ -172,14 +173,14 @@ def updateDIRdefaultStorage(dircompid=None, storname=None):
         dircompid = getDIRcompid()
     # get storage which is internal right now
     curintstorres = ConfResource.objects.filter(confparameter__name='.InternalStorage')
-    curmediatype = ConfParameter.objects.get(resid=curintstorres, name='MediaType').value
+    curmediatype = ConfParameter.objects.get(resid=curintstorres, name=ParamType.MediaType).value
     # delete current InternalStorage parameter
-    query = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type__name='Storage', name='.InternalStorage')
+    query = ConfParameter.objects.get(resid__compid_id=dircompid, resid__type=ResType.Storage, name='.InternalStorage')
     query.delete()
-    res = ConfResource.objects.get(compid_id=dircompid, type__name='Storage', name=storname)
-    newmediatype = ConfParameter.objects.get(resid=res, name='MediaType').value
-    addparameter(res.resid, '.InternalStorage', 'Yes')
-    updateparameter(dircompid, 'SYS-Backup-Catalog', 'Job', 'Storage', storname)
+    res = ConfResource.objects.get(compid_id=dircompid, type=ResType.Storage, name=storname)
+    newmediatype = ConfParameter.objects.get(resid=res, name=ParamType.MediaType).value
+    addparameter(res.resid, '.InternalStorage', ParamValue.Yes)
+    updateparameter(dircompid, 'SYS-Backup-Catalog', ResType.Job, ParamType.Storage, storname)
     cm = curmediatype[:4]
     if cm == 'Dedu':
         cm = 'File'
@@ -188,7 +189,7 @@ def updateDIRdefaultStorage(dircompid=None, storname=None):
         nm = 'File'
     if cm != nm:
         # media type has changed, update Default Pool
-        dpresid = getresourceid(dircompid, 'Default', 'Pool')
+        dpresid = getresourceid(dircompid, name='Default', restype=ResType.Pool)
         if nm == 'Tape':
             deleteparameter(dpresid, 'LabelFormat')
             deleteparameter(dpresid, 'ActionOnPurge')
@@ -419,7 +420,7 @@ def deleteDIRClient(dircompid=None, name=None, client=None):
     if client is not None:
         resid = client.resid
     else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Client')
+        resid = getresourceid(compid=dircompid, name=name, restype=ResType.Client)
     # delete Client resource and parameters
     deleteresource(resid)
 
@@ -430,9 +431,9 @@ def deleteDIRFileSet(dircompid=None, fsname=None):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
+    resid = getresourceid(compid=dircompid, name=fsname, restype=ResType.Fileset)
     # delete options subresource of include subresource
-    includeid = getsubresourceid(resid=resid, typename='Include')
+    includeid = getsubresourceid(resid=resid, restype=ResType.Include)
     deletesubresource(includeid, 'Options')
     deletesubresource(resid, 'Include')
     # delete exclude subresource
@@ -451,7 +452,7 @@ def deleteDIRJob(dircompid=None, name=None, job=None):
         name = job.name
         resid = job.resid
     else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Job')
+        resid = getresourceid(compid=dircompid, name=name, restype=ResType.Job)
     # delete FileSet
     fsname = 'fs-' + name
     deleteDIRFileSet(dircompid=dircompid, fsname=fsname)
@@ -468,7 +469,7 @@ def deleteDIRSchedule(dircompid=None, schname=None):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    resid = getresourceid(compid=dircompid, name=schname, typename='Schedule')
+    resid = getresourceid(compid=dircompid, name=schname, restype=ResType.Schedule)
     deleteresource(resid)
 
 
@@ -481,10 +482,27 @@ def disableDIRJob(dircompid=None, name=None, job=None):
     if job is not None:
         resid = job.resid
     else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Job')
+        resid = getresourceid(compid=dircompid, name=name, restype=ResType.Job)
     # change Enabed parameter to No
     updateparameterresid(resid=resid, name='Enabled', value='No')
     addparameter(resid=resid, name='.Disabledfordelete', value='Yes')
+
+
+def updateDIREnabledClient(dircompid=None, name=None, client=None, enabled=ParamValue.Yes):
+    if name is None and client is None:
+        return None
+    # get and prepare required data
+    if dircompid is None:
+        dircompid = getDIRcompid()
+    if client is not None:
+        resid = client.resid
+    else:
+        resid = getresourceid(compid=dircompid, name=name, restype=ResType.Client)
+    if getparameter(resid=resid, name=ParamType.Enabled) is not None:
+        # update existing
+        updateparameterresid(resid=resid, name=ParamType.Enabled, value=enabled)
+    else:
+        addparameter(resid=resid, name=ParamType.Enabled, value=enabled)
 
 
 def disableDIRClient(dircompid=None, name=None, client=None):
@@ -496,9 +514,9 @@ def disableDIRClient(dircompid=None, name=None, client=None):
     if client is not None:
         resid = client.resid
     else:
-        resid = getresourceid(compid=dircompid, name=name, typename='Client')
-    addparameter(resid=resid, name='.Disabledfordelete', value='Yes')
-    addparameter(resid=resid, name='Enabled', value='No')
+        resid = getresourceid(compid=dircompid, name=name, restype=ResType.Client)
+    addparameter(resid=resid, name='.Disabledfordelete', value=ParamValue.Yes)
+    updateDIREnabledClient(dircompid=dircompid, name=name, client=client, enabled=ParamValue.No)
 
 
 def updateDIRadminemail(dircompid=None, dirname=None, email=''):
@@ -508,9 +526,9 @@ def updateDIRadminemail(dircompid=None, dirname=None, email=''):
     if dirname is None:
         dirname = getDIRname()
     emailstr = email + ' = All, !Debug, !Skipped, !Restored'
-    updateparameter(dircompid, 'Standard', 'Messages', 'Mail', emailstr)
+    updateparameter(dircompid, 'Standard', ResType.Messages, ParamType.Mail, emailstr)
     emailstr = email + ' = All, !Fatal, !Debug, !Skipped, !Restored'
-    updateparameter(dircompid, 'Daemon', 'Messages', 'Mail', emailstr)
+    updateparameter(dircompid, 'Daemon', ResType.Messages, ParamType.Mail, emailstr)
 
 
 def updateDIRClientAddress(dircompid=None, name=None, address='localhost'):
@@ -519,7 +537,7 @@ def updateDIRClientAddress(dircompid=None, name=None, address='localhost'):
     # get required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(dircompid, name, 'Client', 'Address', address)
+    updateparameter(dircompid, name, ResType.Client, ParamType.Address, address)
 
 
 def updateDIRJobDescr(dircompid=None, name=None, descr=''):
@@ -589,39 +607,50 @@ def updateDirClientVMware(dircompid=None, client=None, clientres=None, vcenter=N
         param.delete()
 
 
-def getDIRClientinfo(request, dircompid=None, name=None):
+def getDIRUserClient(request, dircompid=None, name=None):
     if name is None:
         return None
     if dircompid is None:
         dircompid = getDIRcompid(request)
-    userclients = getUserClientsnames(request, dircompid=dircompid)
-    clientres = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Client'], name__in=userclients,
+    userclients = getUserClientsNames(request, dircompid=dircompid)
+    clientres = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Client, name__in=userclients,
                                             name=name)
-    if len(clientres) > 0:
-        return getDIRClientparams(clientres[0])
+    return clientres[0] if len(clientres) > 0 else None
+
+
+def getDIRUserClientinfo(request, dircompid=None, name=None):
+    clientres = getDIRUserClient(request, dircompid, name)
+    if clientres is not None:
+        return getDIRClientparams(clientres)
     return None
+
+
+def getDIRClientPasswordParam(request, dircompid=None, name=None, resid=None):
+    if name is None and resid is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    if resid is None:
+        resid = getresourceid(compid=dircompid, name=name, restype=ResType.Client)
+    passparam = ConfParameter.objects.filter(resid_id=resid, name=ParamType.Password)
+    return passparam[0] if len(passparam) > 0 else None
 
 
 def getDIRJobinfo(request, dircompid=None, name=None):
     if name is None:
         return None
-    if dircompid is None:
-        dircompid = getDIRcompid()
     jobs = getUserJobs(request, dircompid)
-    try:
-        jobres = ConfResource.objects.get(compid_id=dircompid, type=RESTYPE['Job'], resid__in=jobs, name=name)
-    except ObjectDoesNotExist:
-        return None
-    return getDIRJobparams(request, dircompid=dircompid, jobres=jobres)
+    jobres = jobs.filter(name=name)
+    return getDIRJobparams(request, dircompid=dircompid, jobres=jobres[0]) if len(jobres) > 0 else None
 
 
-def getDIRClients(request, dircompid=None, os=None):
+def getDIRUserClients(request, dircompid=None, os=None):
     if dircompid is None:
         dircompid = getDIRcompid(request)
     # List of the all Clients resources available
     userclients = getUserClients(request, dircompid=dircompid)
     if os is not None:
-        userclients = userclients.filter(confparameter__name='.OS', confparameter__value=os)
+        userclients = userclients.filter(confparameter__name=ParamType.ibadOS, confparameter__value=os)
     return userclients
 
 
@@ -634,39 +663,40 @@ def extractclientsnames(clientsres):
 
 
 def getDIRClientsNames(request, dircompid=None, os=None):
-    userclients = getDIRClients(request, dircompid=dircompid, os=os)
+    userclients = getDIRUserClients(request, dircompid=dircompid, os=os)
     clientsres = userclients.order_by('name')
     return extractclientsnames(clientsres)
 
 
 def getDIRClientsNamesesx(request, dircompid=None):
-    userclients = getDIRClients(request, dircompid=dircompid, os='vmware')
-    clientsres = userclients.exclude(confparameter__name='.vCenterName').order_by('name')
+    userclients = getDIRUserClients(request, dircompid=dircompid, os='vmware')
+    clientsres = userclients.exclude(confparameter__name=ParamType.ibadvCenterName).order_by('name')
     return extractclientsnames(clientsres)
 
 
 def getDIRClientsNamesnAlias(request, dircompid=None):
-    userclients = getDIRClients(request, dircompid=dircompid)
-    clientsres = userclients.exclude(confparameter__name='.Alias').exclude(confparameter__name='.ClusterService')\
-        .order_by('name')
+    userclients = getDIRUserClients(request, dircompid=dircompid)
+    clientsres = userclients.exclude(confparameter__name=ParamType.ibadAlias)\
+        .exclude(confparameter__name=ParamType.ibadClusterService).order_by('name')
     return extractclientsnames(clientsres)
 
 
-def getDIRClientsClusters(request, dircompid=None):
+def getDIRUserClusters(request, dircompid=None):
     userclients = getUserClients(request, dircompid=dircompid)
-    clientsres = ConfParameter.objects.filter(resid__in=userclients, name='.ClusterName').distinct('value')
+    clientsres = ConfParameter.objects.filter(resid__in=userclients, name=ParamType.ibadClusterName).distinct('value')
     clusters = ()
     for cr in clientsres:
         clusters += (cr.value,)
     return clusters
 
 
-def getDIRClientAliases(request, dircompid=None, name=None):
-    if name is None:
+def getDIRClientAliases(request, dircompid=None, clientname=None):
+    if clientname is None:
         return None
     # get required data
     userclients = getUserClients(request, dircompid=dircompid)
-    clientsres = userclients.filter(confparameter__name='.Alias', confparameter__value=name).order_by('name')
+    clientsres = userclients.filter(confparameter__name=ParamType.ibadAlias,
+                                    confparameter__value=clientname).order_by('name')
     return extractclientsnames(clientsres)
 
 
@@ -675,9 +705,50 @@ def updateDIRStorageDepartments(request, dircompid=None, name=None, departments=
         return None
     if dircompid is None:
         dircompid = getDIRcompid(request)
-    resid = getresourceid(dircompid, name, 'Storage')
-    stparams = ConfParameter.objects.filter(resid=resid, name='.Department')
+    resid = getresourceid(dircompid, name, restype=ResType.Storage)
+    stparams = ConfParameter.objects.filter(resid=resid, name=ParamType.ibadDepartment)
     stparams.delete()
     for dept in departments:
         if dept not in ('', ' ', '#'):
             addparameter(resid, '.Department', dept)
+
+
+def getDIRClusterName(request,  dircompid=None, clientname=None):
+    if clientname is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    clustername = ConfParameter.objects.filter(name=ParamType.ibadClusterName, resid__compid=dircompid,
+                                               resid__type=ResType.Client, resid__name=clientname)
+    if len(clustername) > 0:
+        return clustername[0].value
+    else:
+        return None
+
+
+def getDIRClusterNodes(request, dircompid=None, clustername=None, clientname=None):
+    if clustername is None and clientname is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    if clustername is None:
+        clustername = getDIRClusterName(request, dircompid, clientname)
+        if clustername is None:
+            return None
+    clientsres = ConfResource.objects.filter(confparameter__name=ParamType.ibadClusterName,
+                                             confparameter__value=clustername).order_by('name')
+    return extractclientsnames(clientsres)
+
+
+def getDIRClusterServices(request, dircompid=None, clustername=None, clientname=None):
+    if clustername is None and clientname is None:
+        return None
+    if dircompid is None:
+        dircompid = getDIRcompid(request)
+    if clustername is None:
+        clustername = getDIRClusterName(request, dircompid, clientname)
+        if clustername is None:
+            return None
+    clientsres = ConfResource.objects.filter(confparameter__name=ParamType.ibadClusterService,
+                                             confparameter__value=clustername).order_by('name')
+    return extractclientsnames(clientsres)

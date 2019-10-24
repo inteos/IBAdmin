@@ -9,7 +9,7 @@ from subprocess import call
 from django.contrib.auth.models import Group, Permission
 from .system import *
 from .tapelib import detectlibs
-from config.confinfo import getDIRcompid
+from config.conflib import getDIRcompid
 
 
 def disableall(form):

@@ -721,7 +721,7 @@ def createClientAlias(request, dircompid=None, dirname=None, name='ibadmin', cli
         dircompid = getDIRcompid(request)
     if dirname is None:
         dirname = getDIRname(request)
-    clientinfo = getDIRClientinfo(request, name=client)
+    clientinfo = getDIRUserClientinfo(request, name=client)
     if clientinfo is None:
         raise Http404
     clientparams = extractclientparams(clientinfo)
@@ -742,7 +742,7 @@ def createVMwareAlias(request, dircompid=None, dirname=None, vcenter='vcenter', 
         dircompid = getDIRcompid(request)
     if dirname is None:
         dirname = getDIRname(request)
-    clientinfo = getDIRClientinfo(request, name=client)
+    clientinfo = getDIRUserClientinfo(request, name=client)
     if clientinfo is None:
         raise Http404
     clientparams = extractclientparams(clientinfo)
@@ -752,19 +752,6 @@ def createVMwareAlias(request, dircompid=None, dirname=None, vcenter='vcenter', 
     # insert new Client {} resource into Dir conf
     createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=clientos,
                     descr=descr, alias=client, vcenter=vcenter, department=department)
-
-
-def updateClientAlias(request, dircompid=None, name='ibadmin', alias='ibadmin'):
-    # get required data
-    if dircompid is None:
-        dircompid = getDIRcompid(request)
-    address = getDIRClientAddress(dircompid=dircompid, name=alias)
-    updateparameter(dircompid, name, 'Client', 'Address', address)
-    updateparameter(dircompid, name, 'Client', '.Alias', alias)
-    encpass = getDIRClientEncpass(dircompid=dircompid, name=alias)
-    updateparameter(dircompid, name, 'Client', 'Password', encpass)
-    clientos = getDIRClientOS(request, dircompid=dircompid, name=alias)
-    updateparameter(dircompid, name, 'Client', '.OS', clientos)
 
 
 def createClientService(request, dircompid=None, dirname=None, name='ibadmin', address='127.0.0.1', cluster=None, descr='',
@@ -777,83 +764,15 @@ def createClientService(request, dircompid=None, dirname=None, name='ibadmin', a
     if dirname is None:
         dirname = getDIRname(request)
     client = getDIRClusterClientname(dircompid=dircompid, name=cluster)
-    clientinfo = getDIRClientinfo(request, name=client)
+    clientinfo = getDIRUserClientinfo(request, name=client)
     if clientinfo is None:
         raise Http404
     clientparams = extractclientparams(clientinfo)
     encpass = clientparams['Password']
-    os = clientparams['OS']
+    clientos = clientparams['OS']
     # insert new Client {} resource into Dir conf
-    createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=os,
+    createDIRClient(dircompid=dircompid, dirname=dirname, name=name, encpass=encpass, address=address, os=clientos,
                     descr=descr, service=cluster, department=department)
-
-
-def updateClientDescr(request, dircompid=None, name=None, descr=''):
-    # get required data
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid(request)
-    updateresdescription(dircompid, name, 'Client', descr)
-    fdcompid = getFDcompid(name)
-    updateresdescription(fdcompid, name, 'FileDaemon', descr)
-
-
-def updateClientDepartment(request, dircompid=None, name=None, department=None):
-    # get required data
-    if name is None:
-        return None
-    if department is not None and department in ['', ' ', '#']:
-        department = None
-    if dircompid is None:
-        dircompid = getDIRcompid(request)
-    # TODO: change to common functions
-    param = ConfParameter.objects.filter(resid__compid=dircompid, resid__name=name, resid__type=RESTYPE['Client'],
-                                         name='.Department')
-    if param.count() > 0:
-        # Client-Department already exist
-        depart = param[0]
-        if department is not None:
-            # update parameter
-            depart.value = department
-            depart.save()
-        else:
-            # remove parameter
-            depart.delete()
-    else:
-        if department is not None:
-            # add new Client parameter
-            clientres = ConfResource.objects.get(name=name, type__name='Client')
-            addparameter(clientres.resid, '.Department', department)
-
-
-def updateClientCluster(request, dircompid=None, name=None, cluster=''):
-    # get required data
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid(request)
-    updateparameter(dircompid, name, 'Client', '.ClusterService', cluster)
-    # get cluster node info
-    client = getDIRClusterClientname(dircompid=dircompid, name=cluster)
-    clientinfo = getDIRClientinfo(request, name=client)
-    clientparams = extractclientparams(clientinfo)
-    encpass = clientparams['Password']
-    updateparameter(dircompid, name, 'Client', 'Password', encpass)
-
-
-def updateClientAddress(request, dircompid=None, name=None, address='localhost'):
-    # get required data
-    if name is None:
-        return None
-    if dircompid is None:
-        dircompid = getDIRcompid(request)
-    clients = getDIRClientAliases(name=name)
-    clients += (name,)
-    for cl in clients:
-        updateDIRClientAddress(dircompid=dircompid, name=cl, address=address)
-    fdcompid = getFDcompid(name)
-    updateparameter(fdcompid, name, 'FileDaemon', 'FDAddress', address)
 
 
 def updateJobStorage(dircompid=None, name=None, storage='ibadmin'):
@@ -862,11 +781,11 @@ def updateJobStorage(dircompid=None, name=None, storage='ibadmin'):
         return
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(dircompid, name, 'Job', 'Storage', storage)
+    updateparameter(dircompid, name, ResType.Job, ParamType.Storage, storage)
     dedup = getStorageisDedup(storage)
     fsname = 'fs-' + name
     updateFSOptionsDedup(dircompid=dircompid, fsname=fsname, dedup=dedup)
-    jobresid = getresourceid(dircompid, name, 'Job')
+    jobresid = getresourceid(dircompid, name=name, restype=ResType.Job)
     cpool = getparameter(jobresid, 'Pool')
     if cpool == 'Default':
         retention = "2 weeks"
@@ -874,7 +793,7 @@ def updateJobStorage(dircompid=None, name=None, storage='ibadmin'):
         cpooldata = cpool.split('-')
         retention = cpooldata[1] + ' ' + cpooldata[2]
     poolname = check_or_createPool(dircompid=dircompid, storage=storage, retention=retention)
-    updateparameter(dircompid, name, 'Job', 'Pool', poolname)
+    updateparameter(dircompid, name, ResType.Job, ParamType.Pool, poolname)
 
 
 def updateJobClient(dircompid=None, name=None, client='ibadmin'):
@@ -884,7 +803,7 @@ def updateJobClient(dircompid=None, name=None, client='ibadmin'):
     if dircompid is None:
         dircompid = getDIRcompid()
     # print dircompid, name, client
-    updateparameter(dircompid, name, 'Job', 'Client', client)
+    updateparameter(dircompid, name, ResType.Job, ParamType.Client, client)
 
 
 def updateFSOptionsDedup(dircompid=None, fsname=None, includeid=None, dedup=False):
@@ -894,9 +813,9 @@ def updateFSOptionsDedup(dircompid=None, fsname=None, includeid=None, dedup=Fals
     if dircompid is None:
         dircompid = getDIRcompid()
     if includeid is None:
-        resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
-        includeid = getsubresourceid(resid=resid, typename='Include')
-    optionid = getsubresourceid(resid=includeid, typename='Options')
+        resid = getresourceid(compid=dircompid, name=fsname, restype=ResType.Fileset)
+        includeid = getsubresourceid(resid=resid, restype=ResType.Include)
+    optionid = getsubresourceid(resid=includeid, restype=ResType.Options)
     dedupparam = ConfParameter.objects.filter(resid=optionid, name='Dedup').count() > 0
     if dedup is True and dedupparam is False:
         addparameter(optionid, 'Dedup', 'BothSides')
@@ -911,9 +830,9 @@ def updateFSOptionsCompression(dircompid=None, fsname=None, includeid=None, comp
     if dircompid is None:
         dircompid = getDIRcompid()
     if includeid is None:
-        resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
-        includeid = getsubresourceid(resid=resid, typename='Include')
-    optionid = getsubresourceid(resid=includeid, typename='Options')
+        resid = getresourceid(compid=dircompid, name=fsname, restype=ResType.Fileset)
+        includeid = getsubresourceid(resid=resid, restype=ResType.Include)
+    optionid = getsubresourceid(resid=includeid, restype=ResType.Options)
     comprparam = ConfParameter.objects.filter(resid=optionid, name='Compression').count() > 0
     if compression == 'no' or compression is None or compression == '':
         if comprparam is True:
@@ -933,8 +852,8 @@ def updateFSIncludeFile(request, dircompid=None, fsname=None, include=''):
     if dircompid is None:
         dircompid = getDIRcompid(request)
     includelist = include.splitlines()
-    resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
-    includeid = getsubresourceid(resid=resid, typename='Include')
+    resid = getresourceid(compid=dircompid, name=fsname, restype=ResType.Fileset)
+    includeid = getsubresourceid(resid=resid, restype=ResType.Include)
     query = ConfParameter.objects.filter(resid=includeid)
     query.delete()
     createFSIncludeFile(resid=includeid, include=includelist)
@@ -949,8 +868,8 @@ def updateFSExclude(request, dircompid=None, fsname=None, exclude='', client=Non
     excludelist = exclude.splitlines()
     clientos = getDIRClientOS(request, dircompid=dircompid, name=client)
     updateFSdefaultexclude(exclude=excludelist, clientos=clientos)
-    resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
-    excludeid = getsubresourceid(resid=resid, typename='Exclude')
+    resid = getresourceid(compid=dircompid, name=fsname, restype=ResType.Fileset)
+    excludeid = getsubresourceid(resid=resid, restype=ResType.Exclude)
     query = ConfParameter.objects.filter(resid=excludeid)
     query.delete()
     createFSExclude(resid=excludeid, exclude=excludelist)
@@ -962,8 +881,8 @@ def updateFSIncludePlugin(dircompid=None, fsname=None, include=()):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    resid = getresourceid(compid=dircompid, name=fsname, typename='Fileset')
-    includeid = getsubresourceid(resid=resid, typename='Include')
+    resid = getresourceid(compid=dircompid, name=fsname, restype=ResType.Fileset)
+    includeid = getsubresourceid(resid=resid, restype=ResType.Include)
     query = ConfParameter.objects.filter(resid=includeid)
     query.delete()
     createFSIncludePlugin(resid=includeid, include=include)
@@ -978,7 +897,7 @@ def updateFSProxmoxPlugin(dircompid=None, job=None, fsname=None, abortonerror=No
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    updateparameter(dircompid, jobname, ResType.Job, '.AbortOnError', abortonerror)
     data = {
         'include': job['Objsinclude'],
         'exclude': job['Objsexclude'],
@@ -997,7 +916,7 @@ def updateFSXenServerPlugin(dircompid=None, job=None, fsname=None, abortonerror=
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    updateparameter(dircompid, jobname, ResType.Job, '.AbortOnError', abortonerror)
     data = {
         'include': job['Objsinclude'],
         'exclude': job['Objsexclude'],
@@ -1016,7 +935,7 @@ def updateFSVMwarePlugin(dircompid=None, job=None, fsname=None, abortonerror=Non
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    updateparameter(dircompid, jobname, ResType.Job, '.AbortOnError', abortonerror)
     data = {
         'include': job['Objsinclude'],
         'exclude': job['Objsexclude'],
@@ -1035,7 +954,7 @@ def updateFSKVMPlugin(dircompid=None, job=None, fsname=None, abortonerror=None):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(dircompid, jobname, 'Job', '.AbortOnError', abortonerror)
+    updateparameter(dircompid, jobname, ResType.Job, '.AbortOnError', abortonerror)
     data = {
         'include': job['Objsinclude'],
         'exclude': job['Objsexclude'],
@@ -1054,7 +973,7 @@ def updateJobEnabled(dircompid=None, name=None, enabled=True):
     ena = 'No'
     if enabled:
         ena = 'Yes'
-    resid = getresourceid(compid=dircompid, name=name, typename='Job')
+    resid = getresourceid(compid=dircompid, name=name, restype=ResType.Job)
     updateparameterresid(resid=resid, name='Enabled', value=ena)
 
 
@@ -1064,9 +983,9 @@ def updateJobAllobjs(dircompid=None, name=None, allobjs=None, objsinclude=None, 
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    updateparameter(compid=dircompid, resname=name, restype='Job', name='.Allobjs', value=allobjs)
-    updateparameter(compid=dircompid, resname=name, restype='Job', name='.Objsinclude', value=objsinclude)
-    updateparameter(compid=dircompid, resname=name, restype='Job', name='.Objsexclude', value=objsexclude)
+    updateparameter(dircompid, name, ResType.Job, name='.Allobjs', value=allobjs)
+    updateparameter(dircompid, name, ResType.Job, name='.Objsinclude', value=objsinclude)
+    updateparameter(dircompid, name, ResType.Job, name='.Objsexclude', value=objsexclude)
 
 
 def updateJobRunBefore(dircompid=None, name=None, runbefore=''):
@@ -1081,7 +1000,7 @@ def updateJobRunBefore(dircompid=None, name=None, runbefore=''):
         # add or change runbefore
         if param is None:
             # require param to add
-            resid = getresourceid(compid=dircompid, name=name, typename='Job')
+            resid = getresourceid(compid=dircompid, name=name, restype=ResType.Job)
             param = ConfParameter(resid_id=resid, name='ClientRunBeforeJob', value=runbefore, str=True)
         else:
             param.value = runbefore
@@ -1100,13 +1019,13 @@ def updateJobRunAfter(dircompid=None, name=None, runafter=''):
     # get and prepare required data
     if dircompid is None:
         dircompid = getDIRcompid()
-    param = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__name=name, resid__type__name='Job',
+    param = ConfParameter.objects.filter(resid__compid_id=dircompid, resid__name=name, resid__type=ResType.Job,
                                          name='ClientRunAfterJob').first()
     if runafter is not None and len(runafter):
         # add or change runbefore
         if param is None:
             # require param to add
-            resid = getresourceid(compid=dircompid, name=name, typename='Job')
+            resid = getresourceid(compid=dircompid, name=name, restype=ResType.Job)
             param = ConfParameter(resid_id=resid, name='ClientRunAfterJob', value=runafter, str=True)
         else:
             param.value = runafter
@@ -1128,11 +1047,11 @@ def updateJobRetention(dircompid=None, name=None, retention=None):
     # create Pool
     storname = getDIRJobStorage(dircompid, name)
     poolname = check_or_createPool(dircompid=dircompid, storage=storname, retention=retention)
-    updateparameter(compid=dircompid, resname=name, restype='Job', name='Pool', value=poolname)
+    updateparameter(dircompid, name, ResType.Job, ParamType.Pool, poolname)
 
 
 def updateJobSchedule(dircompid=None, jobname=None, data=None, backupsch='', starttime='', scheduleweek='',
-                   schedulemonth='', backuprepeat='', backuplevel='', forcelevel=None):
+                      schedulemonth='', backuprepeat='', backuplevel='', forcelevel=None):
     """
 
     :param dircompid:
@@ -1144,6 +1063,7 @@ def updateJobSchedule(dircompid=None, jobname=None, data=None, backupsch='', sta
     :param schedulemonth:
     :param backuprepeat:
     :param backuplevel:
+    :param forcelevel:
     :return:
     """
     if jobname is None and data is None:
@@ -1161,7 +1081,7 @@ def updateJobSchedule(dircompid=None, jobname=None, data=None, backupsch='', sta
     if dircompid is None:
         dircompid = getDIRcompid()
     schname = 'sch-' + jobname
-    resid = getresourceid(compid=dircompid, name=schname, typename='Schedule')
+    resid = getresourceid(compid=dircompid, name=schname, restype=ResType.Schedule)
     query = ConfParameter.objects.filter(resid=resid)
     query.delete()
     schtime = str(starttime)[:-3]
@@ -1193,7 +1113,7 @@ def updateJobSchedule(dircompid=None, jobname=None, data=None, backupsch='', sta
             backuplevel = lvl
         else:
             backuplevel = 'incr'
-    jresid = getresourceid(compid=dircompid, name=jobname, typename='Job')
+    jresid = getresourceid(compid=dircompid, name=jobname, restype=ResType.Job)
     updateparameterresid(resid=jresid, name='Level', value=getlevelname(backuplevel))
     schparam = data['backupsch'] + ':' + data['backuprepeat']
     updateparameterresid(resid=jresid, name='.Scheduleparam', value=schparam)
@@ -1210,9 +1130,9 @@ def updateScheduletime(dircompid=None, name=None, jobname=None, level='', startt
         dircompid = getDIRcompid()
     schtime = str(starttime)[:-3]
     schparam = level + ' at ' + schtime
-    resid = getresourceid(compid=dircompid, name=name, typename='Schedule')
+    resid = getresourceid(compid=dircompid, name=name, restype=ResType.Schedule)
     updateparameterresid(resid=resid, name='Run', value=schparam)
-    jresid = getresourceid(compid=dircompid, name=jobname, typename='Job')
+    jresid = getresourceid(compid=dircompid, name=jobname, restype=ResType.Job)
     updateparameterresid(resid=jresid, name='.Scheduletime', value=schtime)
 
 

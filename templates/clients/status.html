@@ -46,17 +46,28 @@
     <div class="row">
       <div class="col-sm-10 center-block">
         <a class="btn btn-app" href="{% url 'clientsinfo' Client.Name %}"><i class="fa fa-info-circle"></i>Info</a>
+{% if perms.jobs.add_jobs %}
         {% if clientvmhost %}
-        <a class="btn btn-app" href="{% url 'jobsaddre' Client.OS %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>GuestVM Backup</a>
+        <a class="btn btn-app" href="{% url 'jobsaddre' Client.OS %}?c={{ Client.Name }}&b={% url 'clientsstatus' Client.Name %}"><i class="fa fa-plus"></i>GuestVM Backup</a>
         {% else %}
-        <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
+        <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?b={% url 'clientsstatus' Client.Name %}&c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
         {% endif %}
+{% endif %}
+{% if perms.clients.restore_clients %}
         <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
+{% endif %}
+{% if perms.clients.change_clients %}
+        <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-wrench"></i>Edit</a>
+{% endif %}
+{% if perms.clients.delete_clients %}
         {% if not Client.InternalClient %}
-        <a class="btn btn-app" href="{% url 'clientsedit' Client.Name %}"><i class="fa fa-edit"></i>Edit</a>
         <a class="btn btn-app" data-toggle="modal" data-target="#deleteclientconfirm" data-name="{{ Client.Name }}" data-url="{% url 'clientsdelete_rel' %}"><i class="fa fa-trash"></i>Delete</a>
         {% endif %}
-        <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+{% endif %}
+        <!-- <a class="btn btn-app"><i class="fa fa-bar-chart"></i>Statistics</a>-->
+{% if perms.clients.advanced_clients %}
+        <a href="{% url 'clientsadvanced' Client.Name %}?b={% url 'clientsstatus' Client.Name %}" class="btn btn-app"><i class="fa fa-cogs"></i>Advanced</a>
+{% endif %}
       </div>
     </div>
     <div class="box-group" id="statusrunningbox">

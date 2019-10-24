@@ -9,13 +9,14 @@ from .system import detectvsphere
 from django.db.models import Count
 from libs.bconsole import get_lsplugin
 from libs.user import *
+from libs.clientsos import *
 
 
 VMHOSTSOSTYPES = (
-    "proxmox",
-    "xen",
-    "kvm",
-    "vmware",
+    IBADClientsOS.Proxmox,
+    IBADClientsOS.XenServer,
+    IBADClientsOS.KVM,
+    IBADClientsOS.VMware,
 )
 
 
@@ -23,7 +24,7 @@ def updateVMhostsdetectvsphere(request, context):
     context.update({'vmhostsdetectvsphere': detectvsphere()})
 
 
-def getClientsVMnrlist(request):
+def getUserClientsVMNRList(request):
     if not hasattr(request, "ibadminclientsvmnrlist"):
         userclients = getUserClients(request)
         query = ConfParameter.objects.filter(resid__in=userclients, name='.OS', value__in=VMHOSTSOSTYPES) \
@@ -57,8 +58,8 @@ def getClientsVMnrlist(request):
     return request.ibadminclientsvmnrlist['clientslist'], request.ibadminclientsvmnrlist['vmnrcontext']
 
 
-def updateClientsVMnrlist(request, context):
-    vmlist, hostnr = getClientsVMnrlist(request)
+def updateUserClientsVMnrlist(request, context):
+    vmlist, hostnr = getUserClientsVMNRList(request)
     context.update({'VMstatuslist': vmlist})
     context.update(hostnr)
     departs = getUserDepartmentsval(request)

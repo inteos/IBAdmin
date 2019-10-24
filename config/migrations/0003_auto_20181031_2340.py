@@ -3,12 +3,12 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from config.restype import RESTYPE
+from config.restype import ResType
 
 
 def updatesdstorageaddress(apps, schema_editor):
     ConfResource = apps.get_model('config', 'ConfResource')
-    applied = ConfResource.objects.filter(type_id=RESTYPE['SDAddresses']).count()
+    applied = ConfResource.objects.filter(type_id=ResType.SDAddresses).count()
     if applied == 0:
         ConfComponent = apps.get_model('config', 'ConfComponent')
         ConfParameter = apps.get_model('config', 'ConfParameter')
@@ -21,9 +21,9 @@ def updatesdstorageaddress(apps, schema_editor):
                 address = addrquery[0].value
                 addrquery.delete()
                 portquery.delete()
-                sdaddrsid = ConfResource(compid=sd, name='', sub=sdid.resid, type_id=RESTYPE['SDAddresses'], description='')
+                sdaddrsid = ConfResource(compid=sd, name='', sub=sdid.resid, type_id=ResType.SDAddresses, description='')
                 sdaddrsid.save()
-                ipsid = ConfResource(compid=sd, name='', sub=sdaddrsid.resid, type_id=RESTYPE['IP'], description='')
+                ipsid = ConfResource(compid=sd, name='', sub=sdaddrsid.resid, type_id=ResType.IP, description='')
                 ipsid.save()
                 a = ConfParameter(resid=ipsid, name='Addr', value=address)
                 a.save()

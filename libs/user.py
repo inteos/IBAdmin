@@ -6,8 +6,7 @@
 
 from __future__ import unicode_literals
 from django.contrib.auth.models import Permission, ContentType
-from config.confinfo import *
-from config.restype import RESTYPE
+from config.conflib import *
 from .department import *
 from virtual.models import *
 
@@ -122,24 +121,24 @@ def getUserClients(request, dircompid=None):
         if dircompid is None:
             dircompid = getDIRcompid(request)
         if request.user.is_superuser and request.user.is_staff:
-            query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Client'])\
+            query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Client)\
                 .exclude(confparameter__name='.Disabledfordelete').order_by('name')
         else:
             departs = getUserDepartmentsval(request)
             if departs.count() > 0:
-                query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Client'],
+                query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Client,
                                                     confparameter__name='.Department',
                                                     confparameter__value__in=departs)\
                     .exclude(confparameter__name='.Disabledfordelete').order_by('name')
             else:
-                query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Client'])\
+                query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Client)\
                     .exclude(confparameter__name='.Department')\
                     .exclude(confparameter__name='.Disabledfordelete').order_by('name')
         request.ibadminclientsqueryuser = query
     return request.ibadminclientsqueryuser
 
 
-def getUserClientsnames(request, dircompid=None):
+def getUserClientsNames(request, dircompid=None):
     """
     Return a value queryset for clients which user should has access to.
     :param request: a Django request class
@@ -164,24 +163,24 @@ def getUserStorages(request, dircompid=None):
         if dircompid is None:
             dircompid = getDIRcompid(request)
         if request.user.is_superuser and request.user.is_staff:
-            query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Storage'])\
+            query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Storage)\
                 .exclude(confparameter__name='.Disabledfordelete').distinct().order_by('name')
         else:
             departs = getUserDepartmentsval(request)
             if departs.count() > 0:
-                query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Storage'],
+                query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Storage,
                                                     confparameter__name='.Department',
                                                     confparameter__value__in=departs)\
                     .exclude(confparameter__name='.Disabledfordelete').distinct().order_by('name')
             else:
-                query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Storage'])\
+                query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Storage)\
                     .exclude(confparameter__name='.Department')\
                     .exclude(confparameter__name='.Disabledfordelete').order_by('name')
         request.ibadminstoragesqueryuser = query
     return request.ibadminstoragesqueryuser
 
 
-def getUserStoragesnames(request, dircompid=None):
+def getUserStoragesNames(request, dircompid=None):
     """
     Return a value queryset for storages which user should has access to.
     :param request: a Django request class
@@ -206,18 +205,18 @@ def getUserJobs(request, dircompid=None):
         if dircompid is None:
             dircompid = getDIRcompid(request)
         if request.user.is_superuser and request.user.is_staff:
-            query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Job'])\
+            query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Job)\
                 .exclude(confparameter__name='.Disabledfordelete')
         else:
-            departclients = getUserClientsnames(request, dircompid)
-            query = ConfResource.objects.filter(compid_id=dircompid, type=RESTYPE['Job'], confparameter__name='Client',
+            departclients = getUserClientsNames(request, dircompid)
+            query = ConfResource.objects.filter(compid_id=dircompid, type=ResType.Job, confparameter__name='Client',
                                                 confparameter__value__in=departclients)\
                 .exclude(confparameter__name='.Disabledfordelete')
         request.ibadminjobsqueryuser = query
     return request.ibadminjobsqueryuser
 
 
-def getUserJobsnames(request, dircompid=None):
+def getUserJobsNames(request, dircompid=None):
     """
     Return a value queryset for jobs which user should has access to.
     :param request: a Django request class

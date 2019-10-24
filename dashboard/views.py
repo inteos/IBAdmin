@@ -61,7 +61,7 @@ def nodbavailable(request):
 
 def lastjobswidget(request):
     """ Last Jobs widget """
-    userjobs = getUserJobsnames(request)
+    userjobs = getUserJobsNames(request)
     lastjobs = Job.objects.filter(name__in=userjobs, jobstatus__in=JOBDONESTATUS).order_by('-jobid').values()[:4]
     elines = ''
     if len(lastjobs) < 4:

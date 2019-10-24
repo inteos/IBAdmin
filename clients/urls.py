@@ -26,11 +26,17 @@ urlpatterns = [
     url(r'^addnode/$', views.addnode, name='clientsaddnode'),
     url(r'^addservice/$', views.addservice, name='clientsaddservice'),
     url(r'^addalias/$', views.addalias, name='clientsaddalias'),
-    url(r'^edit/$', views.edit, name='clientsedit_rel'),
-    url(r'^edit/(?P<name>.*)/$', views.edit, name='clientsedit'),
-    url(r'^editstd/(?P<name>.*)/$', views.editstd, name='clientseditstd'),
-    url(r'^editservice/(?P<name>.*)/$', views.editservice, name='clientseditservice'),
-    url(r'^editalias/(?P<name>.*)/$', views.editalias, name='clientseditalias'),
+
+    url(r'^editre/$', views.edit, name='clientsedit_rel'),
+    url(r'^editre/(?P<name>.*)/$', views.edit, name='clientsedit'),
+    url(r'^edit/std/(?P<name>.*)/$', views.editstd, name='clientseditstd'),
+    url(r'^edit/service/(?P<name>.*)/$', views.editservice, name='clientseditservice'),
+    url(r'^edit/alias/(?P<name>.*)/$', views.editalias, name='clientseditalias'),
+
+    url(r'^advancedre/(?P<name>.*)/$', views.advanced, name='clientsadvanced'),
+    url(r'^advanced/std/(?P<name>.*)/$', views.stdadvanced, name='clientsstdadvanced'),
+    url(r'^advanced/alias/(?P<name>.*)/$', views.aliasadvanced, name='clientsaliasadvanced'),
+
     url(r'^name/$', views.clientsname, name='clientsname'),
     url(r'^clustername/$', views.clustername, name='clientsclustername'),
     url(r'^clusterparam/(?P<clustername>.*)/$', views.clusterparam, name='clientsclusterparam'),

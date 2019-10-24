@@ -4,10 +4,10 @@ After=network.target
 Requires=postgresql.service
 
 [Service]
-Type=forking
+Type=simple
 User=bacula
 Group=bacula
-ExecStart=/opt/ibadmin/utils/ibadstatd.py start
+ExecStart=/opt/ibadmin/utils/ibadstatd.py -f start
 ExecStop=/opt/ibadmin/utils/ibadstatd.py stop
 PIDFile=/tmp/ibadstatd.pid
 

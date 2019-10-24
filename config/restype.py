@@ -26,4 +26,27 @@ RESTYPE = {
     'Options': 16,
     'SDAddresses': 17,
     'IP': 18,
+    'Console': 19,
 }
+
+
+class ResType(object):
+    Director = RESTYPE['Director']
+    Storage = RESTYPE['Storage']
+    FileDaemon = RESTYPE['FileDaemon']
+    Client = RESTYPE['Client']
+    Messages = RESTYPE['Messages']
+    Catalog = RESTYPE['Catalog']
+    Schedule = RESTYPE['Schedule']
+    Job = RESTYPE['Job']
+    JobDefs = RESTYPE['JobDefs']
+    Fileset = RESTYPE['Fileset']
+    Pool = RESTYPE['Pool']
+    Device = RESTYPE['Device']
+    Autochanger = RESTYPE['Autochanger']
+    Include = RESTYPE['Include']
+    Exclude = RESTYPE['Exclude']
+    Options = RESTYPE['Options']
+    SDAddresses = RESTYPE['SDAddresses']
+    IP = RESTYPE['IP']
+    Console = RESTYPE['Console']

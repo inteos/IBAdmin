@@ -5,8 +5,8 @@
 #
 
 from __future__ import unicode_literals
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, Http404
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
 from libs.client import *
 from libs.system import *
 from libs.job import *
@@ -17,6 +17,7 @@ from django.db import transaction
 from .forms import *
 from jobs.models import Job
 from config.conf import *
+from config.client import *
 from config.models import ConfResource
 from operator import itemgetter
 from tasks.models import *
@@ -40,7 +41,7 @@ def defineddata(request):
     """ JSON for warning jobs datatable """
     cols = [clientparamsnamekey, clientparamsaddresskey, clientparamsdescrkey, clientparamsdepartkey, clientparamsoskey,
             clientparamsclusterkey, jobparamsstatuskey]
-    (clientslist, total, filtered) = getDIRClientsListfiltered(request, cols=cols)
+    (clientslist, total, filtered) = getUserDIRClientsList_filtered(request, cols=cols)
     data = []
     for clientres in clientslist:
         clientparams = extractclientparams(clientres)
@@ -50,7 +51,7 @@ def defineddata(request):
                      clientparams.get('Descr'), [dcolor, dname],
                      ibadmin_render_os(clientparams.get('OS')),
                      [clientparams.get('ClusterName'), clientparams.get('ClusterService')],
-                     clientparams.get('Status'),
+                     [clientparams.get('Status'), clientparams.get('Enabled') == 'Yes'],
                      [clientparams['Name'], clientparams.get('InternalClient')],
                      ])
     draw = request.GET['draw']
@@ -61,7 +62,7 @@ def defineddata(request):
 @perm_required('clients.view_clients')
 def info(request, name):
     """ Client info """
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     updateClientres(clientres)
@@ -116,7 +117,7 @@ def infodefineddata(request, name):
 @perm_required('clients.status_clients')
 def status(request, name):
     """ Client online status """
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     client = extractclientparams(clientres)
@@ -260,7 +261,7 @@ def clustername(request):
     """
     cluster = request.GET.get('cluster', '')  # .encode('ascii', 'ignore')
     check = True
-    if ConfParameter.objects.filter(resid__compid__type='D', resid__type__name='Client', name='.ClusterName',
+    if ConfParameter.objects.filter(resid__compid__type='D', resid__type=ResType.Client, name=ParamType.ibadClusterName,
                                     value=cluster).count() > 0:
         check = False
     return JsonResponse(check, safe=False)
@@ -286,7 +287,7 @@ def addstd(request):
                 name = form.cleaned_data['name'].encode('ascii', 'ignore')
                 descr = form.cleaned_data['descr']
                 address = form.cleaned_data['address']
-                os = form.cleaned_data['os']
+                clientos = form.cleaned_data['os']
                 defjob = form.cleaned_data['defjob']
                 depart = form.cleaned_data['departments']
                 # check if default department selected = No department in config
@@ -294,9 +295,9 @@ def addstd(request):
                     depart = None
                 # create a Client resource and a Client component and all required resources
                 with transaction.atomic():
-                    createClient(name=name, address=address, os=os, department=depart, descr=descr)
+                    createClient(name=name, address=address, os=clientos, department=depart, descr=descr)
                     if defjob:
-                        createDefaultClientJob(request, name=name, clientos=os)
+                        createDefaultClientJob(request, name=name, clientos=clientos)
                 directorreload()
                 return redirect('clientsinfo', name)
             else:
@@ -321,7 +322,7 @@ def clusterparam(request, clustername):
 @perm_required('clients.add_node_clients')
 def addnode(request):
     departments = getUserDepartmentsList(request)
-    cl = getDIRClientsClusters(request)
+    cl = getDIRUserClusters(request)
     clusters = (('', ''),)
     for c in cl:
         clusters += ((c, c),)
@@ -373,7 +374,7 @@ def addnode(request):
 @perm_required('clients.add_service_clients')
 def addservice(request):
     departments = getUserDepartmentsList(request)
-    cl = getDIRClientsClusters(request)
+    cl = getDIRUserClusters(request)
     if not len(cl):
         messages.info(request, "No clusters defined, so cannot add a cluster service. Add cluster node first.",
                       extra_tags="Info!")
@@ -456,24 +457,10 @@ def addalias(request):
     return redirect('clientsdefined')
 
 
-def makeinitialdata(name, client, backurl):
-    data = {
-        'name': name,
-        'descr': client['Descr'],
-        'address': client['Address'],
-        'os': client['OS'],
-        'client': client.get('Alias'),
-        'cluster': client.get('ClusterService'),
-        'departments': client.get('Department'),
-        'backurl': backurl,
-    }
-    return data
-
-
 @module_perms_required('clients')
 def edit(request, name):
     backurl = request.GET.get('b', None)
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     client = extractclientparams(clientres)
@@ -493,9 +480,25 @@ def edit(request, name):
     return response
 
 
+@perm_required('clients.advanced_clients')
+def advanced(request, name):
+    backurl = request.GET.get('b', None)
+    clientres = getDIRUserClientinfo(request, name=name)
+    if clientres is None:
+        raise Http404()
+    client = extractclientparams(clientres)
+    if client.get('Alias') is not None or client.get('ClusterService') is not None:
+        response = redirect('clientsaliasadvanced', name)
+    else:
+        response = redirect('clientsstdadvanced', name)
+    if backurl is not None:
+        response['Location'] += '?b=%s' % backurl
+    return response
+
+
 @perm_required('clients.change_clients')
 def editstd(request, name):
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     departments = getUserDepartmentsList(request)
@@ -558,12 +561,12 @@ def editstd(request, name):
 
 @perm_required('clients.change_clients')
 def editservice(request, name):
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     client = extractclientparams(clientres)
     departments = getUserDepartmentsList(request)
-    cl = getDIRClientsClusters(request)
+    cl = getDIRUserClusters(request)
     if not len(cl):
         messages.error(request, "No clusters defined! Report it to service!", extra_tags="Error!")
         return redirect('clientsaddnode')
@@ -617,7 +620,7 @@ def editservice(request, name):
 
 @perm_required('clients.change_clients')
 def editalias(request, name):
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     client = extractclientparams(clientres)
@@ -721,3 +724,92 @@ def makedelete(request, name):
         st = 1
     context = {'status': st, 'taskid': taskid}
     return JsonResponse(context, safe=False)
+
+
+@perm_required('clients.advanced_clients')
+def stdadvanced(request, name):
+    dircompid = getDIRcompid(request)
+    clientres = getDIRUserClientinfo(request, dircompid=dircompid, name=name)
+    if clientres is None:
+        raise Http404()
+    client = extractclientparams(clientres)
+    if request.method == 'GET':
+        backurl = request.GET.get('b', None)
+        data = makestdadvanceddata(name, client, backurl)
+        form = ClientStdAdvancedForm(initial=data)
+        context = {'contentheader': 'Advanced properities', 'apppath': ['Clients', 'Advanced', name], 'form': form,
+                   'clientstatusdisplay': 1, 'Client': client}
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
+        return render(request, 'clients/stdadvanced.html', context)
+    else:
+        # print request.POST
+        backurl = request.POST.get('backurl')
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            data = makestdadvanceddata(name, client, backurl)
+            form = ClientStdAdvancedForm(initial=data, data=request.POST)
+            if form.is_valid():
+                if form.has_changed():
+                    with transaction.atomic():
+                        if 'enabled' in form.changed_data:
+                            # update client enabled
+                            updateClientEnabled(request, dircompid=dircompid, name=name,
+                                                enabled=form.cleaned_data['enabled'])
+                        if 'genpass' in form.changed_data:
+                            # update job deduplication
+                            updateClientPassword(request, dircompid=dircompid, name=name)
+                            if client.get('InternalClient') is not None:
+                                messages.info(request, "You decided to generate a new Client access key for "
+                                                       "Internal client. The new key was generated successfully. "
+                                                       "You should Restart local File Daemon ASAP!",
+                                              extra_tags='Important Info!')
+                            else:
+                                messages.info(request, "You decided to generate a new Client access key. "
+                                                       "The new key was generated successfully. "
+                                                       "Now you should download and apply a Client's Config file.",
+                                              extra_tags='Important Info!')
+                    directorreload()
+            else:
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    if backurl is not None and backurl != '':
+        return redirect(backurl)
+    return redirect('clientsinfo', name)
+
+
+@perm_required('clients.advanced_clients')
+def aliasadvanced(request, name):
+    dircompid = getDIRcompid(request)
+    clientres = getDIRUserClientinfo(request, dircompid=dircompid, name=name)
+    if clientres is None:
+        raise Http404()
+    client = extractclientparams(clientres)
+    if request.method == 'GET':
+        backurl = request.GET.get('b', None)
+        data = makeadvanceddata(name, client, backurl)
+        form = ClientAdvancedForm(initial=data)
+        context = {'contentheader': 'Advanced properities', 'apppath': ['Clients', 'Advanced', name], 'form': form,
+                   'clientstatusdisplay': 1, 'Client': client}
+        updateMenuNumbers(request, context)
+        updateClientsOSnrlist(request, context)
+        return render(request, 'clients/aliasadvanced.html', context)
+    else:
+        # print request.POST
+        backurl = request.POST.get('backurl')
+        cancel = request.POST.get('cancel', 0)
+        if not cancel:
+            data = makeadvanceddata(name, client, backurl)
+            form = ClientAdvancedForm(initial=data, data=request.POST)
+            if form.is_valid():
+                if form.has_changed():
+                    with transaction.atomic():
+                        if 'enabled' in form.changed_data:
+                            # update client enabled
+                            updateClientEnabled(request, dircompid=dircompid, name=name,
+                                                enabled=form.cleaned_data['enabled'])
+                    directorreload()
+            else:
+                messages.error(request, "Cannot validate a form: %s" % form.errors, extra_tags='Error')
+    if backurl is not None and backurl != '':
+        return redirect(backurl)
+    return redirect('clientsinfo', name)

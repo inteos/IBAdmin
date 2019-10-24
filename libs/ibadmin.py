@@ -5,25 +5,26 @@
 #
 
 from __future__ import unicode_literals
+from libs.clientsos import *
 
 # App Version
-IBADVERSION = 'Community.2019.01'
+IBADVERSION = 'Community.2019.02'
 
 IBADMINOSINFO = {
     # ostext, fgcolor, bgcolor, icon
-    'rhel':     ["RHEL/Centos", "#dd4b39", "bg-red", "fa-linux"],
-    'xen':      ["XenServer", "#dd4b39", "bg-red", "fa-cloud"],
-    'deb':      ["Debian/Ubuntu", "#ff851b", "bg-orange", "fa-linux"],
-    'proxmox':  ["Proxmox", "#ff851b", "bg-orange", "fa-cloud"],
-    'win32':    ["Windows 32bit", "#39cccc", "bg-teal", "fa-windows"],
-    'win64':    ["Windows 64bit", "#39cccc", "bg-teal", "fa-windows"],
-    'osx':      ["MacOS", "#d2d6de", "bg-gray", "fa-apple"],
-    'solsparc': ["Solaris SPARC", "#00c0ef", "bg-aqua", None],
-    'solintel': ["Solaris x86", "#00c0ef", "bg-aqua", None],
-    'aix':      ["AIX", "#00a65a", "bg-green", None],
-    'hpux':     ["HP-UX", "#ff851b", "bg-orange", None],
-    'vmware':   ["VMware ESXi", "#00a65a", "bg-green", "fa-cloud"],
-    'kvm':      ["KVM Hypervisor", "#357ca5", "bg-light-blue", "fa-cloud"],
+    IBADClientsOS.RHEL:             ["RHEL/Centos", "#dd4b39", "bg-red", "fa-linux"],
+    IBADClientsOS.XenServer:        ["XenServer", "#dd4b39", "bg-red", "fa-cloud"],
+    IBADClientsOS.Debian:           ["Debian/Ubuntu", "#ff851b", "bg-orange", "fa-linux"],
+    IBADClientsOS.Proxmox:          ["Proxmox", "#ff851b", "bg-orange", "fa-cloud"],
+    IBADClientsOS.Windows32:        ["Windows 32bit", "#39cccc", "bg-teal", "fa-windows"],
+    IBADClientsOS.Windows64:        ["Windows 64bit", "#39cccc", "bg-teal", "fa-windows"],
+    IBADClientsOS.macOS:            ["macOS", "#d2d6de", "bg-gray", "fa-apple"],
+    IBADClientsOS.Solaris_SPARC:    ["Solaris SPARC", "#00c0ef", "bg-aqua", None],
+    IBADClientsOS.Solaris_Intel:    ["Solaris x86", "#00c0ef", "bg-aqua", None],
+    IBADClientsOS.AIX:              ["AIX", "#00a65a", "bg-green", None],
+    IBADClientsOS.HPUX:             ["HP-UX", "#ff851b", "bg-orange", None],
+    IBADClientsOS.VMware:           ["VMware ESXi", "#00a65a", "bg-green", "fa-cloud"],
+    IBADClientsOS.KVM:              ["KVM Hypervisor", "#357ca5", "bg-light-blue", "fa-cloud"],
 }
 
 BACULAJOBTYPES = {

@@ -151,7 +151,7 @@ def init(conn, fg):
     setparam(cur, "bacula.volumes.error", 'N', "Number of Error volumes", "Volume", "select count(1) as data from media where volstatus='Error';", 1, 1, '#3c8dbc', 'box-primary')
     setparam(cur, "bacula.volumes.full", 'N', "Number of Full volumes", "Volume", "select count(1) as data from media where volstatus='Full';", 1, 1, '#3c8dbc', 'box-primary')
     setparam(cur, "bacula.volumes.used", 'N', "Number of Used volumes", "Volume", "select count(1) as data from media where volstatus='Used';", 1, 1, '#3c8dbc', 'box-primary')
-    if fg:
+    if fg > 1:
         print (PARAMS)
         print (SQL)
     cur.close()

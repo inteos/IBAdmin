@@ -28,7 +28,7 @@ import re
 def client(request, name=None):
     if name is None:
         return redirect('clientsdefined')
-    clientres = getDIRClientinfo(request, name=name)
+    clientres = getDIRUserClientinfo(request, name=name)
     if clientres is None:
         raise Http404()
     updateClientres(clientres)

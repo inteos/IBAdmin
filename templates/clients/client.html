@@ -44,7 +44,13 @@
           <td>{% autoescape off %}{{ Client.Uname }}{% endautoescape %}</td>
           {% if Client.ClusterName %}<td class="text-center"><i class="fa fa-cubes" data-toggle="tooltip" data-original-title="Cluster Node"></i> {{ Client.ClusterName }}</td>
           {% elif Client.ClusterService %}<td class="text-center"><i class="fa fa-cube" data-toggle="tooltip" data-original-title="Cluster Service"></i> {{ Client.ClusterService }}</td>{% endif %}
-          <td class="text-center" style="width: 100px"><span class="label {{ Client.Status|statusbgcolor }}">{{ Client.Status|statustext }}</span></td>
+          <td class="text-center" style="width: 100px">
+            {% if Client.Enabled == "Yes" %}
+              <span class="label {{ Client.Status|statusbgcolor }}">{{ Client.Status|statustext }}</span>
+            {% else %}
+              <span class="badge bg-red">Disabled</span>
+            {% endif %}
+          </td>
         </tr>
         </tbody>
       </table>
@@ -62,7 +68,6 @@
         <a class="btn btn-app" href="{% url 'jobsaddfiles' %}?b={% url 'clientsinfo' Client.Name %}&c={{ Client.Name }}"><i class="fa fa-plus"></i>Files Backup</a>
         {% endif %}
 {% endif %}
-
 {% if perms.clients.restore_clients %}
         <a class="btn btn-app" href="{% url 'restoreclient' Client.Name %}"><i class="fa fa-cloud-upload"></i>Restore</a>
 {% endif %}
@@ -82,7 +87,9 @@
           {% else %}<a href="{% url 'confvsphereconfig' Client.Name %}" class="btn btn-app"><i class="glyphicon glyphicon-save-file"></i>vSphere.conf</a>{% endif %}
         {% endif %}
 {% endif %}
-        <a class="btn btn-app disabled"><i class="fa fa-cogs"></i>Advanced</a>
+{% if perms.clients.advanced_clients %}
+        <a href="{% url 'clientsadvanced' Client.Name %}?b={% url 'clientsinfo' Client.Name %}" class="btn btn-app"><i class="fa fa-cogs"></i>Advanced</a>
+{% endif %}
       </div>
     </div>
 {% if perms.jobs.view_jobs %}

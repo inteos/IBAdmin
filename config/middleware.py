@@ -5,7 +5,7 @@
 #
 
 from django.utils.deprecation import MiddlewareMixin
-from .confinfo import getDIRcompid
+from .conflib import getDIRcompid
 from django.shortcuts import redirect
 from django.urls import reverse
 

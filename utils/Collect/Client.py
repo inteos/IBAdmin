@@ -30,12 +30,13 @@ def clientlist(conn, fg):
         name = client['name']
         if name not in CLIENTS:
             CLIENTS.append(name)
-        setparam(curparam, "bacula.client."+name+".status", 'N', "Status of bacula-fd agent service at "+name, "Status", 1, 6, '#001F3F', 'box-primary')
+        setparam(curparam, "bacula.client."+name+".status", 'N', "Status of bacula-fd agent service at "+name, "Status",
+                 1, 6, '#001F3F', 'box-primary')
     global NR
     NR = cur.rowcount
     param = PARAMS["bacula.client.number"]
     lib.update_stat_n(cur, param, NR)
-    if fg:
+    if fg > 1:
         print(PARAMS)
         print(CLIENTS)
     cur.close()
@@ -64,7 +65,7 @@ def init(conn, fg):
     # 6 - binary status display [online/offline]
     #                                                                               unit, chart, display, color, box
     setparam(cur, "bacula.client.number", 'N', "Number of bacula-fd clients", 'Number', 1, 1, '#3c8dbc', 'box-info')
-    if fg:
+    if fg > 1:
         print (PARAMS)
     cur.close()
 
@@ -75,20 +76,20 @@ def collect(conn, fg):
     for client in CLIENTS:
         if STAT.get(client, 0) == 0:
             # last check was ok or never checked
-            if fg:
+            if fg > 1:
                 print ("cheking ", client)
             out = checkclient(client)
             param = PARAMS["bacula.client."+client+".status"]
             lib.update_stat_n(cur, param, out)
             if out == 0:
-                if fg:
+                if fg > 1:
                     print ("Timeout in checking client "+client+" !")
                 # TODO zastanowić się jak rozwiązać problem przerywania testu dla działających klientów
                 # CLIENTS.append(CLIENTS.pop(CLIENTS.index(client)))
                 break
         else:
             STAT[client] -= 1
-    if fg:
+    if fg > 1:
         print (STAT)
     cur.close()
 

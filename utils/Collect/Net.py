@@ -86,7 +86,7 @@ def init(conn, fg):
         setparam(cur, 'system.net.'+name+'.txps', 'F', 'Network interface '+device+' transfer bytes/s', 'Bytes/s', 1, 1, '#3c8dbc', 'box-danger')
         PREV[device] = {}
         NETIFS.append(device)
-    if fg:
+    if fg > 1:
         print (PARAMS)
         print (NETIFS)
     cur.close()
@@ -96,7 +96,7 @@ def collect(conn, fg):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for dev in NETIFS:
         (ready, rxps, txps) = netifstat(dev)
-        if fg:
+        if fg > 1:
             print(dev, ready, rxps, txps)
         if ready:
             param = PARAMS['system.net.'+dev+'.rxps']

@@ -38,7 +38,7 @@ def diskstat(device, fg=0):
     writeps = 0
     for line in stat:
         disk = line.split()
-        if fg:
+        if fg > 1:
             print (device, disk)
         # rioreq + wioreq
         ioreq = int(disk[0]) + int(disk[4])
@@ -55,7 +55,7 @@ def diskstat(device, fg=0):
             diff_ioreq = ioreq - PREV.get(device).get('ioreq', 0)
             diff_reads = reads - PREV.get(device).get('reads', 0)
             diff_writes = writes - PREV.get(device).get('writes', 0)
-            if fg:
+            if fg > 1:
                 print (diff_time, diff_ioreq, diff_reads, diff_writes)
             iops = diff_ioreq * 1.0 / diff_time
             readps = diff_reads * 1.0 / diff_time
@@ -66,7 +66,7 @@ def diskstat(device, fg=0):
         PREV[device]['ioreq'] = ioreq
         PREV[device]['reads'] = reads
         PREV[device]['writes'] = writes
-        if fg:
+        if fg > 1:
             print(PREV)
         break
     stat.close()
@@ -110,7 +110,7 @@ def init(conn, fg):
         PREV[device] = {}
         DISKS.append(device)
         NAMES[device] = name
-    if fg:
+    if fg > 1:
         print (PARAMS)
         print (DISKS)
         print (NAMES)
@@ -121,7 +121,7 @@ def collect(conn, fg):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for dev in DISKS:
         (ready, iops, readps, writeps) = diskstat(dev, fg)
-        if fg:
+        if fg > 1:
             print(ready, iops, readps, writeps)
         if ready:
             param = PARAMS['system.disk.'+NAMES[dev]+'.iops']

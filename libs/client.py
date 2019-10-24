@@ -30,18 +30,17 @@ def extractclientparams(clientres):
     clientparams = {'Name': clientres['Name'], 'Descr': clientres['Descr'], 'Uname': uname, 'Status': status}
     for param in clientres['Params']:
         clientparams[param['name'].replace('.', '')] = param['value']
-    # print clientparams
     return clientparams
 
 
-def getClientsDefinednr(request):
+def getUserClientsDefinedNR(request):
     if not hasattr(request, "ibadminclientsdefinednr"):
         request.ibadminclientsdefinednr = getUserClients(request).count()
     return request.ibadminclientsdefinednr
 
 
 def updateClientsDefinednr(request, context):
-    val = getClientsDefinednr(request)
+    val = getUserClientsDefinedNR(request)
     context.update({'clientsnr': val})
 
 
@@ -55,7 +54,7 @@ def updateClientres(clientres):
     clientres.update({'Status': getClientStatus_a(name)})
 
 
-def getClientsOSnrlist(request, dircompid=None, allclients=None):
+def getUserClientsOSNRList(request, dircompid=None, allclients=None):
     if allclients is None or allclients == 0:
         allclients = 1
     if dircompid is None:
@@ -79,7 +78,7 @@ def getClientsOSnrlist(request, dircompid=None, allclients=None):
 
 
 def updateClientsOSnrlist(request, context):
-    clientlist = getClientsOSnrlist(request, allclients=context.get('clientsnr'))
+    clientlist = getUserClientsOSNRList(request, allclients=context.get('clientsnr'))
     context.update({'OSstatuslist': clientlist})
 
 
@@ -93,10 +92,10 @@ def checkClienthasaliases(name=None):
 def checkClientlastcluster(name=None):
     if name is None:
         return None
-    cluster = ConfParameter.objects.filter(name='.ClusterName', resid__name=name, resid__type__name='Client')
+    cluster = ConfParameter.objects.filter(name='.ibadClusterName', resid__name=name, resid__type__name='Client')
     if cluster.count() == 1:
         cluster = cluster[0]
-        clients = ConfParameter.objects.filter(name='.ClusterName', value=cluster.value).count()
+        clients = ConfParameter.objects.filter(name='.ibadClusterName', value=cluster.value).count()
         if clients > 1:
             return False
         services = ConfParameter.objects.filter(name='.ClusterService', value=cluster.value).count()
@@ -141,7 +140,7 @@ def jobparamsstatuskey(clientparams):
     return clientparams['Status']
 
 
-def getDIRClientsListfiltered(request, dircompid=None, cols=(), os=None):
+def getUserDIRClientsList_filtered(request, dircompid=None, cols=(), os=None):
     if dircompid is None:
         dircompid = getDIRcompid(request)
     # List of the all Clients resources available
@@ -176,7 +175,7 @@ def getDIRClientJobsList(request, dircompid=None, client=None):
     if dircompid is None:
         dircompid = getDIRcompid(request)
     # List of the all jobs resources for a client
-    userjobs = getUserJobs(request).filter(confparameter__name='Client', confparameter__value=client)
+    userjobs = getUserJobs(request).filter(confparameter__name=ParamType.Client, confparameter__value=client)
     jobslist = []
     for jr in userjobs:
         jobparams = getDIRJobparams(request, dircompid=dircompid, jobres=jr)
@@ -185,19 +184,39 @@ def getDIRClientJobsList(request, dircompid=None, client=None):
 
 
 def removedepartclient(depart):
-    departs = ConfParameter.objects.filter(name='.Department', value=depart)
+    departs = ConfParameter.objects.filter(name=ParamType.ibadDepartment, value=depart)
     departs.delete()
 
 
 def changedepartclient(olddepart, newdepart):
-    departs = ConfParameter.objects.filter(name='.Department', value=olddepart)
+    departs = ConfParameter.objects.filter(name=ParamType.ibadDepartment, value=olddepart)
     departs.update(value=newdepart)
 
 
-def makestdadvanceddata(name, client):
+def makeinitialdata(name, client, backurl=None):
     data = {
         'name': name,
-        'enabled': client.get('Enabled', 'Yes') == 'Yes',
-        'genpass': False,
+        'descr': client['Descr'],
+        'address': client['Address'],
+        'os': client['OS'],
+        'client': client.get('Alias'),
+        'cluster': client.get('ClusterService'),
+        'departments': client.get('Department'),
+        'backurl': backurl,
     }
+    return data
+
+
+def makeadvanceddata(name, client, backurl=None):
+    data = {
+        'name': name,
+        'enabled': client.get(ParamType.Enabled, 'Yes') == 'Yes',
+        'backurl': backurl,
+    }
+    return data
+
+
+def makestdadvanceddata(name, client, backurl=None):
+    data = makeadvanceddata(name, client, backurl)
+    data.update({'genpass': False})
     return data

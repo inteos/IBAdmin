@@ -9,6 +9,7 @@ import string
 import random
 import base64
 from Crypto.Cipher import AES
+import sys
 
 
 def randomstr(size=64, chars=tuple(string.ascii_letters) + tuple(string.digits)):
@@ -110,3 +111,17 @@ def getretentiontext(pool):
     if pool == 'Default' or pool == 'Scratch':
         return pool
     return getretentionform(pool)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 3:
+        comp = sys.argv[2]
+        encpass = sys.argv[3]
+        if sys.argv[1] == '-d':
+            # decode
+            print(getdecpass(comp, encpass))
+        elif sys.argv[1] == '-e':
+            # encode
+            print(getencpass(comp, encpass))
+    else:
+        print ("Usage: " + sys.argv[0] + " -d | -e compname passwordstring")

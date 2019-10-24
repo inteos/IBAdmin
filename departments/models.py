@@ -30,6 +30,6 @@ class Permissions(models.Model):
             ('add_departments', 'Can add departments'),
             ('change_departments', 'Can change departments'),
             ('delete_departments', 'Can delete departments'),
-            ('add_members', 'Can add memebers'),
+            ('add_members', 'Can add members'),
             ('delete_members', 'Can delete members'),
         )
