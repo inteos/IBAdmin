@@ -27,6 +27,9 @@ from libs.vmhosts import VMHOSTSOSTYPES
 import os
 
 
+ILLEGAL_DESCR_MESSAGE = "Some illegal characters in the description have been replaced with an underscore."
+
+
 @perm_required('clients.view_clients')
 def defined(request):
     """ Defined Clients table - list """
@@ -537,7 +540,11 @@ def editstd(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
+                            descr = form.cleaned_data['descr']
+                            if is_client_descr_legal(descr):
+                                descr = sanitize_client_descr(descr)
+                                messages.warning(request, ILLEGAL_DESCR_MESSAGE, extra_tags="Warning")
+                            updateClientDescr(request, name=name, descr=descr)
                         if 'address' in form.changed_data:
                             # print "Update address"
                             updateClientAddress(request, name=name, address=form.cleaned_data['address'])
@@ -601,7 +608,11 @@ def editservice(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
+                            descr = form.cleaned_data['descr']
+                            if is_client_descr_legal(descr):
+                                descr = sanitize_client_descr(descr)
+                                messages.warning(request, ILLEGAL_DESCR_MESSAGE, extra_tags="Warning")
+                            updateClientDescr(request, name=name, descr=descr)
                         if 'address' in form.changed_data:
                             # print "Update address"
                             updateClientAddress(request, name=name, address=form.cleaned_data['address'])
@@ -659,7 +670,11 @@ def editalias(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
+                            descr = form.cleaned_data['descr']
+                            if is_client_descr_legal(descr):
+                                descr = sanitize_client_descr(descr)
+                                messages.warning(request, ILLEGAL_DESCR_MESSAGE, extra_tags="Warning")
+                            updateClientDescr(request, name=name, descr=descr)
                         if 'client' in form.changed_data:
                             # print "Update alias"
                             updateClientAlias(request, name=name, alias=form.cleaned_data['client'])
