@@ -32,6 +32,7 @@ def get_parameters(conn, resid, level, component):
             else:
                 out = row['value']
             if row['str']:
+                out = sanitize_conf_string(out)
                 cyt = 1
             if cyt or len(out) == 0:
                 print(indent + name + " = \"" + out + "\"")
@@ -49,6 +50,12 @@ def printhelp():
     print(" -r <restype>    Lists <restype> names in Director.")
     print(" -h              Print this help.")
     print()
+
+
+def sanitize_conf_string(confstr):
+    confstr = confstr.replace('\\', "\\\\") # \ -> \\
+    confstr = confstr.replace('\"', "\\\"") # " -> \"
+    return confstr
 
 
 if __name__ == "__main__":

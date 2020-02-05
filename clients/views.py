@@ -538,8 +538,7 @@ def editstd(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            descr = sanitize_conf_string(form.cleaned_data['descr'])
-                            updateClientDescr(request, name=name, descr=descr)
+                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
                         if 'address' in form.changed_data:
                             # print "Update address"
                             updateClientAddress(request, name=name, address=form.cleaned_data['address'])
@@ -603,8 +602,7 @@ def editservice(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            descr = sanitize_conf_string(form.cleaned_data['descr'])
-                            updateClientDescr(request, name=name, descr=descr)
+                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
                         if 'address' in form.changed_data:
                             # print "Update address"
                             updateClientAddress(request, name=name, address=form.cleaned_data['address'])
@@ -662,8 +660,7 @@ def editalias(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            descr = sanitize_conf_string(form.cleaned_data['descr'])
-                            updateClientDescr(request, name=name, descr=descr)
+                            updateClientDescr(request, name=name, descr=form.cleaned_data['descr'])
                         if 'client' in form.changed_data:
                             # print "Update alias"
                             updateClientAlias(request, name=name, alias=form.cleaned_data['client'])
