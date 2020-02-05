@@ -104,3 +104,4 @@ def getssltumbprint(addr, port=443):
 def sanitize_conf_string(confstr):
     confstr = confstr.replace('\\', "\\\\") # \ -> \\
     confstr = confstr.replace('\"', "\\\"") # " -> \"
+    return confstr
