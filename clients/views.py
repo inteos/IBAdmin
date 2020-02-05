@@ -24,10 +24,8 @@ from tasks.models import *
 from users.decorators import *
 from libs.ibadmin import *
 from libs.vmhosts import VMHOSTSOSTYPES
+from libs.utils import sanitize_conf_string
 import os
-
-
-ILLEGAL_DESCR_MESSAGE = "Some illegal characters in the description have been replaced with an underscore."
 
 
 @perm_required('clients.view_clients')
@@ -540,10 +538,7 @@ def editstd(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            descr = form.cleaned_data['descr']
-                            if is_client_descr_legal(descr):
-                                descr = sanitize_client_descr(descr)
-                                messages.warning(request, ILLEGAL_DESCR_MESSAGE, extra_tags="Warning")
+                            descr = sanitize_conf_string(form.cleaned_data['descr'])
                             updateClientDescr(request, name=name, descr=descr)
                         if 'address' in form.changed_data:
                             # print "Update address"
@@ -608,10 +603,7 @@ def editservice(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            descr = form.cleaned_data['descr']
-                            if is_client_descr_legal(descr):
-                                descr = sanitize_client_descr(descr)
-                                messages.warning(request, ILLEGAL_DESCR_MESSAGE, extra_tags="Warning")
+                            descr = sanitize_conf_string(form.cleaned_data['descr'])
                             updateClientDescr(request, name=name, descr=descr)
                         if 'address' in form.changed_data:
                             # print "Update address"
@@ -670,10 +662,7 @@ def editalias(request, name):
                     with transaction.atomic():
                         if 'descr' in form.changed_data:
                             # print "Update description"
-                            descr = form.cleaned_data['descr']
-                            if is_client_descr_legal(descr):
-                                descr = sanitize_client_descr(descr)
-                                messages.warning(request, ILLEGAL_DESCR_MESSAGE, extra_tags="Warning")
+                            descr = sanitize_conf_string(form.cleaned_data['descr'])
                             updateClientDescr(request, name=name, descr=descr)
                         if 'client' in form.changed_data:
                             # print "Update alias"

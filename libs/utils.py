@@ -99,3 +99,8 @@ def getssltumbprint(addr, port=443):
         out = ':'.join([thumb_sha1[i:i+2] for i in range(0, len(thumb_sha1), 2)])
     wrappedSocket.close()
     return out
+
+
+def sanitize_conf_string(confstr):
+    confstr = confstr.replace('\\', "\\\\") # \ -> \\
+    confstr = confstr.replace('\"', "\\\"") # " -> \"

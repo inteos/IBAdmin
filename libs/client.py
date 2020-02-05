@@ -220,12 +220,3 @@ def makestdadvanceddata(name, client, backurl=None):
     data = makeadvanceddata(name, client, backurl)
     data.update({'genpass': False})
     return data
-
-
-def is_client_descr_legal(descr):
-    return '"' in descr
-
-
-def sanitize_client_descr(descr):
-    return descr.replace('"', '_')
-        
