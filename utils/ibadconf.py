@@ -32,7 +32,6 @@ def get_parameters(conn, resid, level, component):
             else:
                 out = row['value']
             if row['str']:
-                out = sanitize_conf_string(out)
                 cyt = 1
             if cyt or len(out) == 0:
                 print(indent + name + " = \"" + out + "\"")
@@ -246,7 +245,7 @@ if __name__ == "__main__":
         print (row['resource'] + " {")
         print ("  Name = \"" + row['name'] + "\"")
         if row['description'] is not None and len(row['description']) > 0:
-            print ("  Description = \"" + row['description'] + "\"")
+            print ("  Description = \"" + sanitize_conf_string(row['description']) + "\"")
         get_parameters(conn, resid, 1, component)
         # Now find any subresource
         cur2.execute(
