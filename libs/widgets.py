@@ -19,7 +19,7 @@ class ibadInputWidget(forms.widgets.TextInput):
         label = self.attrs.get('label', '')
         valuetag = ''
         if value is not None:
-            valuetag = 'value="' + value + '"'
+            valuetag = 'value="' + escape(value) + '"'
         disabled = attrs.get('disabled', None)
         disabletag = ''
         if disabled is not None:
