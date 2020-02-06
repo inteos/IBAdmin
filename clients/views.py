@@ -24,7 +24,6 @@ from tasks.models import *
 from users.decorators import *
 from libs.ibadmin import *
 from libs.vmhosts import VMHOSTSOSTYPES
-from libs.utils import sanitize_conf_string
 import os
 
 
