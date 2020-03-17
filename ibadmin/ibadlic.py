@@ -14,7 +14,7 @@ def saveLicenseKey(key=None):
         return
     dircompid = getDIRcompid()
     dirname = getDIRname()
-    resid = getresourceid(dircompid, dirname, 'Director')
+    resid = getresourceid(dircompid, dirname, restype=ResType.Director)
     license = getparameter(resid, '.IBADLicenseKey')
     if license is None:
         if key == '':
@@ -29,5 +29,5 @@ def saveLicenseKey(key=None):
 def getLicenseKey():
     dircompid = getDIRcompid()
     dirname = getDIRname()
-    resid = getresourceid(dircompid, dirname, 'Director')
+    resid = getresourceid(dircompid, dirname, restype=ResType.Director)
     return getparameter(resid, '.IBADLicenseKey')
